@@ -538,10 +538,12 @@ mkdir -p .opencode/agents workshop
 Copy your crew and cards into this worktree (worktrees don't share untracked files):
 
 ```bash
-cp ../../panic-pantry/.opencode/agents/*.md .opencode/agents/
+cp ../../panic-pantry/.opencode/agents/*.md .opencode/agents/ 2>/dev/null || true
 cp ../../panic-pantry/workshop/cards/*.md workshop/ 2>/dev/null || true
 opencode
 ```
+
+If the first copy found nothing, you skipped Exercise 2 — build the crew there first (or ask the instructor for the recovery agents).
 
 **Matched conditions (non-negotiable):** same starter commit ✓ (worktrees), same ticket `tickets/TICKET-001.md` ✓ (in the repo), same acceptance tests ✓ (`tests/test_importer_contract.py`), **same model/effort as your Exercise 0 run** (set it now via `/models`), **15-minute implementation timebox** (instructor calls start/stop; stop even if unfinished).
 

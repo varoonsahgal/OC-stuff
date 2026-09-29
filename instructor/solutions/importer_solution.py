@@ -1,4 +1,4 @@
-"""Reference implementation of TICKET-001 (instructor key — NOT part of the starter repo).
+"""INSTRUCTOR ONLY — do not distribute. Reference implementation of TICKET-001 (not part of the starter repo).
 
 Drop into src/panic_pantry/importer.py to satisfy tests/test_importer_contract.py.
 All promotion creation goes through PromotionService.create_promotion so the
