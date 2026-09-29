@@ -1,7 +1,7 @@
 # INSTRUCTOR ONLY — do not distribute
 
 Do not commit, print, screen-share, or copy any file under `instructor/` into a
-student-visible location. Students get `STUDENT_HANDOUT.md` and the sandbox only.
+student-visible location. Students get the `student/` folder and the sandbox only.
 
 ---
 
@@ -16,7 +16,12 @@ config differ across major versions.
 
 | File | Purpose |
 |---|---|
-| [solutions/exercise-solutions.md](solutions/exercise-solutions.md) | Complete answer key for Ex0–Ex4 and capstone (incl. injection steps) |
+| [solutions/ex0-vague-ticket.md](solutions/ex0-vague-ticket.md) | Answer key: Ex0 expected discoveries, baseline scorecard, common near-misses |
+| [solutions/ex1-task-surgery.md](solutions/ex1-task-surgery.md) | Answer key: model plan.md and both task cards, grading criteria |
+| [solutions/ex2-agent-crew.md](solutions/ex2-agent-crew.md) | Answer key: implementer agent, expected denial behavior, model reviewer report |
+| [solutions/ex3-model-routing.md](solutions/ex3-model-routing.md) | Answer key: recorded comparison example, Task A scoring keys |
+| [solutions/ex4-orchestrated-run.md](solutions/ex4-orchestrated-run.md) | Answer key: integration checklist, expected worktree states, honest comparison |
+| [solutions/capstone-injections.md](solutions/capstone-injections.md) | The four capstone injection steps, diagnoses, and model release note |
 | [solutions/reviewer-agent.md](solutions/reviewer-agent.md) | Known-good `.opencode/agents/reviewer.md` learners build in Ex2 |
 | [solutions/importer_solution.py](solutions/importer_solution.py) | Known-good importer; drop into `src/panic_pantry/importer.py` to make the full suite pass |
 | [solutions/fallback-traces.md](solutions/fallback-traces.md) | Recorded transcripts: Ex0 "bad plan," Ex3 model comparison, background-delegation demo |
@@ -131,7 +136,7 @@ config differ across major versions.
 
 ### Capstone (27 min: inject ≈3, work ≈20, notes ≈4)
 - Inject **one** issue per pair from the four in
-  [solutions/exercise-solutions.md § Capstone](solutions/exercise-solutions.md)
+  [solutions/capstone-injections.md](solutions/capstone-injections.md)
   — vary them across the room. Inject while learners are at the ML5 debrief or
   stretching; do not narrate which issue they got.
 - If a pair finished Ex4 with no working importer: first drop in the known-good
