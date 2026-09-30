@@ -25,14 +25,37 @@ flowchart LR
     R4 --> H{"Receipt 5:<br/>human decision —<br/>GO / NO-GO"}
 ```
 
-*Figure 7 — Integration receipts: an agent's "done" passes through four evidence gates before a human makes the call.*
-Text alternative: an agent's "done, all tests pass" claim flows left to right through four receipts — child summary with changed paths, tests run by the human with captured output, the diff read directly, and independent reviewer findings — ending at the human GO/NO-GO decision.
+*Figure 7 — Integration receipts: an agent's "done" passes four evidence receipts before the fifth, a human GO/NO-GO decision.*
+Text alternative: an agent's "done, all tests pass" claim flows left to right through four evidence receipts — child summary with changed paths, tests run by the human with captured output, the diff read directly, and independent reviewer findings — ending at receipt five, the human GO/NO-GO decision.
+
+Why five receipts and not just "the tests pass"? Safety engineers call it the **Swiss cheese model**:
+
+![Four slices of Swiss cheese in a row; a red arrow labelled Hazards passes through holes that happen to line up in every slice and exits as Losses](images/swiss-cheese-model.png)
+
+*The Swiss cheese model: every layer of defense has holes; harm gets through only when the holes line up. Diagram: Davidmack, [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Swiss_cheese_model_of_accident_causation.png), CC BY-SA 3.0.*
+
+Each receipt is one slice. The test suite has a hole wherever no test exists; the diff read has a hole wherever your attention slipped; the reviewer has a hole wherever its checklist is silent. `FREE-ALL` reaches a customer only if it slips through *every* slice at once. Adding slices with *different* holes is what makes the stack safe. That's why the receipts check different things instead of re-running the same check harder.
+
+> 🔑 **Key takeaway:** No single check is complete. Stack checks whose blind spots differ, and harm has to get lucky five times.
 
 > 🔑 **Key takeaway:** A green check is evidence, not a handoff — and only of what it covers.
 
 The failure mode this prevents is quiet: an importer that passes every *existing* test while creating `FREE-ALL` as active — because nobody wrote the test and nobody read the diff. Exactly 20% sails through legitimately; 21% must not. A green suite that doesn't cover the policy is a green light painted on a wall.
 
 When something is wrong, resist the urge to re-roll the whole task. Classify first — task/context gap, dependency error, boundary conflict, or implementation defect — then assign the **smallest corrective task** to the right agent and model. Recovery is routing, and you just spent an afternoon learning to route.
+
+> 📘 **Concept — the four failure classes**
+>
+> Each class points to a different fix, so naming it correctly *is* half the repair.
+>
+> | Class | What went wrong | Panic Pantry example | Smallest corrective task |
+> |---|---|---|---|
+> | **Task/context gap** | The agent worked from missing or wrong information — something the packet never said, or an outdated assumption it was given | The card said "report malformed rows" but never quoted the exact reason string, so blank rows come back as `"blank line"` instead of `"empty row"` | Fix the **card/packet**, then re-delegate just that behavior |
+> | **Dependency error** | Right pieces, wrong order: a step ran before the thing it needed was ready | `@reviewer` was launched while the implementer was still mid-edit, reviewed a half-written file, and reported "no findings" | Re-run the dependent step **after** its input is final |
+> | **Boundary conflict** | Work landed outside its owner's scope, or two owners touched the same file | The test author also "helpfully" added `fixtures/promos_extra.csv` — a frozen directory no card owns | Revert the out-of-scope file; tighten scope or permissions |
+> | **Implementation defect** | The spec was clear and complete; the code just gets it wrong | Line numbers are off by one: the first data row is reported as line 1 instead of line 2 | A targeted fix citing the **one failing check** |
+>
+> Diagnostic order: check the **packet** before the **code**. Did the agent have the right information (else: gap), at the right time (else: dependency), within the right files (else: boundary)? Only when all three are yes is it an implementation defect.
 
 The capstone injects a real integration issue. Your finish line is not a fix; it's a fix **with evidence** and an honest five-line release note. That note is the artifact your future teammates (and future you, at 11:58 PM) actually read.
 

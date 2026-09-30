@@ -31,7 +31,14 @@ Text alternative: a single starter commit branches into two Git worktrees — si
 
 > 🔑 **Key takeaway:** A file list in a prompt is coordination; a permission rule is control.
 
-One more honest note: in this classroom's pinned setup, delegations run in the **foreground** — background child sessions are experimental in the V1 line; your instructor has a recorded demo. Here, "keep the primary free" means *sequencing independent deliverables*, not simultaneous execution. The orchestration win is in the decomposition and clean integration, not a stopwatch race. (Anthropic reports the same: multi-agent shines on parallelizable exploration; coding has fewer truly parallelizable tasks — [multi-agent research system](https://www.anthropic.com/engineering/multi-agent-research-system), Jun 2025.)
+> 📘 **Concept — foreground vs. background delegation**
+>
+> - **Foreground:** the primary sends a packet, then *waits*. Nothing else happens in the parent session until the child reports back. It's like handing a ticket to one station and standing at the pass until the plate arrives.
+> - **Background:** the primary sends the packet and *keeps working*: it drafts notes, launches another child, answers you. Results arrive when they're ready. That's the pass calling three tickets at once while plating a fourth.
+>
+> "**Keeping the primary free**" is the goal background delegation serves: the primary (and you) stay available for coordination and judgment instead of blocking on one worker.
+
+One more honest note: in this classroom's pinned setup, delegations run in the **foreground** — background child sessions are experimental in the V1 line; your instructor has a recorded demo. Here, keeping the primary free means *sequencing independent deliverables* and using the gaps between them for your own work (integration notes, diff reading), not simultaneous execution. The orchestration win is in the decomposition and clean integration, not a stopwatch race. (Anthropic reports the same: multi-agent shines on parallelizable exploration; coding has fewer truly parallelizable tasks — [multi-agent research system](https://www.anthropic.com/engineering/multi-agent-research-system), Jun 2025.)
 
 Track ownership in one line per deliverable: *file → owner → card → check.* If two rows share a file, you don't have parallel tasks; you have a fight scheduled for later.
 
@@ -51,7 +58,7 @@ python3 -m unittest discover -s tests -v     # ends OK (skipped=9)
 mkdir -p .opencode/agents workshop/cards
 ```
 
-Copy your crew and cards into this worktree (worktrees don't share untracked files):
+Copy your crew and cards into this worktree. Your agent files and cards were never committed, so they're **untracked**, and untracked files exist only in the folder where you created them (see the [Git primer](README.md#one-time-setup-instructor-runs-this-before-class-you-verify)). This worktree has never seen them:
 
 ```bash
 cp ../../panic-pantry/.opencode/agents/*.md .opencode/agents/ 2>/dev/null || true
@@ -73,10 +80,12 @@ If the first copy found nothing, you skipped Exercise 2 — build the crew there
 | Owner | Deliverable | Writable scope |
 |---|---|---|
 | `@implementer` | importer per card | `src/panic_pantry/importer.py` only |
-| primary-selected subagent (Task tool) | tests per card | `tests/test_promo_import.py` only |
-| You + primary | integration notes | `workshop/integration-notes.md` only |
+| test author: a subagent the **primary** chooses (Task tool) | tests per card | `tests/test_promo_import.py` only |
+| **You**, typing yourself or directing the primary agent | integration notes | `workshop/integration-notes.md` only |
 
-3. Set the implementer's model explicitly: add a `model:` line to `.opencode/agents/implementer.md` frontmatter with the exact catalog ID from `/models` — the model your Exercise 3 routing decision assigns to contract-backed implementation work. For the matched comparison this must be the same model/effort as your Exercise 0 run. Note the ID in your run record.
+**Who will the primary pick as test author?** It reads each subagent's `description` and chooses. Your crew has a reviewer (can't edit) and an implementer (scoped to `importer.py`), so the likeliest pick is the built-in **general** subagent. That's fine, as long as the packet states the scope. If it picks `@implementer`, it has handed a test task to an agent whose standing instructions say "importer only." Stop and note it as a routing finding, then re-delegate with a clearer instruction.
+
+3. Set the implementer's model explicitly: add a `model:` line to `.opencode/agents/implementer.md` frontmatter with the exact catalog ID from `/models` — the model your Exercise 3 routing decision assigns to contract-backed implementation work. For the matched comparison this must be the same model/effort as your Exercise 0 run: the model ID *and* the variant you recorded on the Exercise 0 scorecard. Set the session's variant with `ctrl+t` to match. Note the ID and variant in your run record. If you can't confirm a child ran with that exact variant, say so in the record.
 
 ### The 15-minute window
 
@@ -98,7 +107,7 @@ Scope: tests/test_promo_import.py only; tests/test_importer_contract.py is froze
 Return: changed paths, commands run, pass/fail.
 ```
 
-This goes through the **Task tool** (governed by `permission.task`): the primary picks the subagent and spawns the child session itself — watch the session tree to see how this differs from an @-mention. The new tests express the same contract in the test author's own words. Between delegations, the primary (you) drafts `workshop/integration-notes.md`: what arrived, what was checked, what's still open. Delegations run in the foreground — sequence them; independence of deliverables is what makes the order not matter.
+This goes through the **Task tool** (governed by `permission.task`): the primary picks the subagent and spawns the child session itself. Afterwards, walk the session tree (`<Leader>+Down`, Left/Right) and open both children. The implementer's first message is *your* text, word for word. The test author's first message is a packet *the primary wrote*, so check whether it kept your scope line and the contract. The new tests express the same contract in the test author's own words. Between delegations, you draft `workshop/integration-notes.md` yourself or have the primary draft it: what arrived, what was checked, what's still open. Delegations run in the foreground — sequence them; independence of deliverables is what makes the order not matter.
 
 > 🔑 **Key takeaway:** Three chefs, one cutting board is not parallelism — disjoint files are what make the order not matter.
 
@@ -130,7 +139,7 @@ Elapsed time, contract tests passing, whole suite, policy handled, interventions
 - [ ] Every changed file maps to exactly one task card; no two writers shared a file (`git status` is the referee).
 - [ ] The child session for the test task was created by the primary (Task tool), not by an @-mention — check the session tree.
 - [ ] Full suite run after integration; output captured.
-- [ ] Reviewer findings collected and each one dispositioned (fix / accept / defer with reason).
+- [ ] Reviewer findings collected and each one dispositioned: **fix** (changed now), **accept** (you judge it's not a problem, with the reason written down), or **defer** (real, not tonight: with a reason and a named owner).
 - [ ] Comparison scorecard includes integration/rework time and interprets modestly — one classroom run is a demonstration, not a benchmark.
 
 **Hints (use in order):**
@@ -140,7 +149,7 @@ Elapsed time, contract tests passing, whole suite, policy handled, interventions
 
 **Troubleshooting:**
 - Agents missing in the worktree → the `cp` step; agents live per-project in `.opencode/agents/`.
-- Weird import errors → stray `__pycache__`; run `bash scripts/reset.sh` **only if** you accept losing the run, or delete `__pycache__` dirs manually.
+- Weird import errors → stray `__pycache__` (Python caches compiled copies of modules there; a cache left over from a deleted or renamed file can make Python load code that no longer exists); run `bash scripts/reset.sh` **only if** you accept losing the run, or delete `__pycache__` dirs manually.
 - Both agents edited the same file → classify it: coordination failure. Serialize, split the contract finer, or isolate — then note it in integration-notes; this is a first-class finding, not an embarrassment.
 
 **Debrief:** Where did orchestration actually pay — coverage, findings, wall-clock, confidence? Where did it cost — tokens, integration time, your attention? On what kind of task in your codebase would the single agent have won?

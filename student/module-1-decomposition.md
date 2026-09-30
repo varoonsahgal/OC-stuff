@@ -10,6 +10,14 @@
 
 "Add a CSV importer" is a wish. `tickets/TICKET-001.md` is a ticket: exact function signature, exact report fields, exact edge cases (blank rows are errors; a missing header reports `(1, reason)` and imports nothing; re-runs are idempotent), and an executable acceptance gate. The difference is who does the deciding — you, or an agent guessing at midnight.
 
+> 📘 **Concept — contract, freeze, idempotent**
+>
+> - A **contract** is the agreement every task builds against. For the importer it's the function signature `import_promotions(csv_path, service) -> ImportReport`, the four fields of `ImportReport`, the behavior of every edge case, and the policy the code must respect. In TICKET-001 it's the numbered "Acceptance criteria (the frozen contract)" list.
+> - To **freeze** a contract is to declare it final *before* work starts. Once frozen, no agent changes it on its own initiative. If you discover it's wrong mid-run, you stop, fix it, re-freeze, and re-brief every task that depends on it. Freezing is what lets two agents work at once: each can trust the other side of the interface won't move.
+> - **Idempotent** means *safe to run twice*: running the importer a second time on the same file creates nothing new. Every row that was created the first time comes back as `skipped_duplicate`. It matters because at midnight someone *will* click import twice.
+>
+> **Contract tests** are the tests that check the contract — here, `tests/test_importer_contract.py`. They're frozen too: if an agent "fixes" a failing contract test by editing it, it has moved the finish line.
+
 See the difference side by side. The bad task is the one you already watched in Exercise 0 Part A:
 
 > **Bad:** "Build the importer."
@@ -40,8 +48,8 @@ Dependencies matter as much as outputs: the parser and the tests only become par
 flowchart TD
     T[TICKET-001] --> C{{"Contract FROZEN:<br/>import_promotions(csv_path, service) -> ImportReport"}}
     C --> P["Implement importer<br/>(src/panic_pantry/importer.py)"]
-    C --> Q["Write contract tests<br/>(tests/test_promo_import.py)"]
-    C --> R["Integration notes / docs<br/>(workshop/integration-notes.md)"]
+    C --> Q["Write importer tests<br/>(tests/test_promo_import.py)"]
+    C --> R["Integration notes — kept by you<br/>(workshop/integration-notes.md)"]
     P --> I[Integrate & review diff]
     Q --> I
     R --> I
@@ -49,7 +57,28 @@ flowchart TD
 ```
 
 *Figure 2 — The importer feature as a dependency graph. Nothing below the gate starts until the contract freezes.*
-Text alternative: TICKET-001 flows into a frozen-contract gate; only after the gate do three parallel tracks begin — importer implementation, contract tests, and integration notes — and all three merge into integration, diff review, and the full test command.
+Text alternative: TICKET-001 flows into a frozen-contract gate; only after the gate do three parallel tracks begin — importer implementation, new importer tests, and integration notes (kept by you) — and all three merge into integration, diff review, and the full test command.
+
+> 📘 **Concept — two test files, two jobs**
+>
+> | File | Who writes it | Job | Can it change? |
+> |---|---|---|---|
+> | `tests/test_importer_contract.py` | Already in the repo | The **acceptance gate** — the referee that decides "done" | **Never.** Frozen. |
+> | `tests/test_promo_import.py` | A test-author agent (Exercise 4) | A **second, independent expression** of the same contract, written from the ticket without reading the importer | Yes — it's a deliverable |
+>
+> Why write more tests when a gate already exists? Because the gate was written by one author, from one reading of the ticket. A second author working only from the contract catches what the first reading missed — and if the two disagree, you've found an ambiguity in the contract before midnight instead of after. Figure 2's third track, the integration notes, has no card because it stays with you: it's your running log of what arrived, what you checked, and what's still open.
+
+### Which task sets the launch time? The critical path
+
+![A dependency graph of five tasks A to E with durations on the arrows; the longest chain A→B→E→C is highlighted in red](images/critical-path.png)
+
+*The critical path (red) is the longest chain of dependent tasks — it sets the earliest possible finish. A→B→E→C takes 3+1+3 = 7; every other route is shorter, so a delay anywhere off the red path costs nothing until it becomes longer than 7. Diagram: Illes, [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:5n_PERT_graph_with_critical_path.svg), public domain.*
+
+> 📘 **Concept — critical path**
+>
+> Draw your tasks as a dependency graph (like Figure 2). The **critical path** is the chain of tasks where each one waits for the one before, and whose total length decides the earliest you can finish. Speeding up a task *on* the path brings launch forward; speeding up a task *off* it changes nothing. For the importer, the question to ask is: *which single task, if it slips, delays everything below it?* (Hint: it's the one both other tracks read but never write.)
+
+> 🔑 **Key takeaway:** Spend your attention on the critical path — a faster agent on a side branch doesn't move midnight.
 
 Every card you write in this exercise answers five questions. If a part is missing, a specific failure gets in:
 
@@ -68,6 +97,18 @@ flowchart TB
 
 *Figure 3 — Anatomy of a task card: the five core parts; the full template adds inputs, dependencies, why-separate, and permissions/model.*
 Text alternative: a vertical chain of the five task-card parts — outcome, scope, contract, acceptance checks, return format — each linked to the question it answers: what "done" produces, what it could collide with, what it must not decide alone, how to verify without trust, and what the parent needs to integrate.
+
+> 📘 **Concept — card, packet, delegation message**
+>
+> Three terms you'll hear all afternoon, from most reusable to most specific:
+>
+> | Term | What it is | Analogy |
+> |---|---|---|
+> | **Task card** | The written spec for one task, saved as a file (`workshop/cards/*.md`) | The recipe |
+> | **Task packet** | Everything the helper agent needs to work alone: the card *plus* the contract text, source paths, and checks, pasted in full | The recipe, ingredients, and plating photo handed to the cook |
+> | **Delegation message** | The actual message you send (`@reviewer …`) that carries the packet | Handing it across the pass |
+>
+> The distinction matters because the helper can't open your card file by magic or remember your earlier chat. Only what's *in the message* reaches it — so the packet must stand on its own.
 
 ---
 
@@ -99,6 +140,10 @@ command; (5) anything in AGENTS.md that constrains an importer. Cite file paths
 for every claim. Do not propose an implementation.
 ```
 
+> 📘 **Concept — your first subagent (quick version)**
+>
+> A **subagent** is a helper that gets one task and works on it in its own **child session**: a separate conversation that starts empty. It sees only what you send plus the repo's `AGENTS.md`. Typing `@explore …` is an **@-mention**: *you* pick the helper and send it a message directly. **explore** is built in, fast, and read-only — ideal for "go find out" work. (OpenCode's other built-in subagent is **general**, for multi-step tasks.) When it finishes, its report appears back in your conversation. Module 2 explains child sessions and how to step inside them.
+
 2. **Verify before you trust.** Spot-check at least two of its citations against the actual files. An investigation you didn't verify is a rumor with a table of contents.
 
 3. **Write `workshop/plan.md`** containing:
@@ -108,6 +153,15 @@ for every claim. Do not propose an implementation.
    - which task stays with the primary agent, and **why**;
    - which tasks can run in parallel **after** the interface is frozen;
    - what context each child needs — and what it does *not* need.
+
+   **Who can be an "owner"?** You don't have a crew yet, so write owners by role. You'll build the agents in Exercise 2 and assign them in Exercise 4:
+
+   | Owner | Who it will be | Typical work |
+   |---|---|---|
+   | **You + the primary agent** | You, working through Build or Plan in the main conversation | Freezing the contract, integration, final decision |
+   | **Implementer** | `@implementer`, which you create in Exercise 2 | Writing `importer.py` from a card |
+   | **Test author** | A subagent the primary picks itself in Exercise 4 | Writing `tests/test_promo_import.py` from the contract |
+   | **Reviewer** | `@reviewer`, which you create in Exercise 2 | Read-only review against a checklist |
 
 4. **Fill the task card template twice**: `workshop/cards/csv_parser.md` (the parsing/validation logic inside `src/panic_pantry/importer.py`) and `workshop/cards/import_tests.md` (`tests/test_promo_import.py` written against the frozen contract). Use this template **verbatim**:
 
@@ -125,6 +179,13 @@ Permissions/model: authority required and selected model/effort
 Return format: summary, changed paths, checks run, findings, uncertainties
 ```
 
+   Two notes before you fill it in:
+
+   - **`csv_parser` is a task name, not a file name.** That card covers *all* of `src/panic_pantry/importer.py`: parsing, validation, and the calls to `PromotionService`. There is no separate `csv_parser.py`.
+   - **Write `Permissions/model: TBD` for now.** You'll learn permissions in Module 2 and model routing in Module 3, then come back and fill in this line before Exercise 4. An honest TBD beats a guess.
+
+   **Remember seeded collisions when you copy the contract.** Criterion 5 treats a code as a duplicate if it's "already present in the store." The store isn't empty: it starts with the seed data (`WELCOME10`, `STAFF-PICK`, `MIDNIGHT-VIP`, `BIGSPENDER`). A card that only mentions "duplicates within the file" has dropped half the rule.
+
 > 💡 **Field note:** A good task card is a good PR description written *before* the work: outcome, scope, checks, and what reviewers should look at. Teams that adopt the card format usually discover their human tickets improve too.
 
 **Required artifact:** `workshop/plan.md` + two completed cards.
@@ -133,7 +194,7 @@ Return format: summary, changed paths, checks run, findings, uncertainties
 - [ ] Plan states the policy as: discounts **above 20%** require approval; exactly 20% is active.
 - [ ] Every task has an owner, a deliverable, and an *executable* acceptance check (a command or concrete review question — "looks good" doesn't count).
 - [ ] The two cards' "In scope" file lists do not overlap.
-- [ ] Each card's "Out of scope" names at least the frozen files: `tests/test_importer_contract.py`, `fixtures/`, `data/promotions.json.seed`, `scripts/`.
+- [ ] Each card's "Out of scope" names at least the frozen files: `tests/test_importer_contract.py`, `fixtures/`, `data/promotions.json.seed`, `scripts/`. (Why these? Each is part of how "done" gets measured: the gate, its test inputs, the starting store, and the reset/check tooling. An agent that edits any of them can make a broken importer look finished.)
 - [ ] The plan names the critical path and explains why one task stays with the primary agent.
 
 **Hints (use in order):**

@@ -43,6 +43,27 @@ Escalation is part of the routing: when the cheap route fails its acceptance che
 
 Mechanics in OpenCode 1.18.33 (verified 2026-09-28): `/models` in the TUI opens the live catalog; config sets `"model": "provider/model_id"`; each agent file can override `model`; `opencode models` lists IDs from the CLI; `opencode stats` shows token/cost data ([docs: models](https://opencode.ai/docs/models), [docs: CLI](https://opencode.ai/docs/cli)).
 
+> 📘 **Concept — providers, model IDs, and where the setting lives**
+>
+> - A **provider** is the service a model comes from: Anthropic, OpenAI, a local server, or **OpenCode Zen**. You add one with `/connect` in the TUI; your instructor has already connected this classroom's.
+> - Every model has a two-part ID, **`provider_id/model_id`**, e.g. `opencode/gpt-5.1-codex`. The first part says where to send the request; the second says which model. Always record the full ID; the display name alone is ambiguous across providers.
+> - The model setting can live in three places. Later ones override earlier ones:
+>   1. **Global config** `~/.config/opencode/opencode.json`: your personal default.
+>   2. **Project config** `opencode.json` in the repo root: the team default for this project.
+>   3. **An agent's frontmatter** `model:` line: this agent only, always.
+>
+>   Picking a model with `/models` changes the *current session*. A `model:` line in an agent file wins for that agent regardless. That's why Exercise 4 pins the implementer's model in its file.
+
+> 📘 **Concept — variants: the effort dial**
+>
+> A **variant** is a preset for the *same* model with different settings, usually how hard it thinks. Anthropic models ship variants with higher thinking budgets (e.g., *high*, *max*); OpenAI reasoning models ship reasoning-effort levels (from *none* up to *xhigh*). More effort usually means better answers on hard problems, and always means more time and tokens. Press **`ctrl+t`** to cycle variants; the status bar shows the current one. For today's comparisons, "model/effort" means **model ID + variant**: record both, keep both fixed when a run must be matched.
+
+> 🔑 **Key takeaway:** The unit you compare is `provider_id/model_id` + variant. A display name in your notes is a vibe, not an experiment log.
+
+> 📘 **Concept — OpenCode Zen**
+>
+> **Zen** is OpenCode's own provider: "a list of tested and verified models provided by the OpenCode team," behind a single account and API key. It carries both paid pay-per-request models and a rotating set of free-labeled ones.
+
 On free models: OpenCode Zen currently lists free-labeled models (as of 2026-09-28), but they are **limited-time, may train on your data (varies per model — check the Zen model list; some are zero-retention), and require an account with billing details** — distinct from paid Zen pay-per-request models ([docs: Zen](https://opencode.ai/docs/zen)). Rule for life: **never hardcode a model name as "best."** Pick from the live `/models` catalog, in your environment, today.
 
 ---
@@ -60,9 +81,17 @@ opencode
 
 In the TUI run `/models` and note what's available. Pick **two** configurations that are actually enabled in this classroom (e.g., one free-labeled model and one stronger model; if only one model is available, compare two effort/reasoning settings if supported, or use the instructor's recorded comparison trace). Record the exact IDs as OpenCode shows them. You may edit only `workshop/model-comparison.md` (plus scratch-branch files) this exercise.
 
+> 📘 **Concept — scratch branch**
+>
+> A **scratch branch** is a throwaway branch for experiments you never intend to keep. Today's tasks produce tables, not code, so you probably won't need one. If you want to try something in code, run `git switch -c scratch/ex3`, experiment, then `git switch main && git branch -D scratch/ex3` to leave the main checkout exactly as it was.
+
+> 📘 **Concept — fresh session**
+>
+> A **fresh session** is a new, empty conversation: `/new` or `<Leader>+n`. The model starts with no memory of your previous runs. That's what makes a paired comparison fair: run 2 can't benefit from anything run 1 said.
+
 ### The paired run — keep task, starting state, and checks constant
 
-**Task A (small, deterministic):** predict the disposition of every data row of the messy fixture. Run it once per model configuration, in a fresh session each time. Paste exactly:
+**Task A (small, deterministic):** predict the **disposition** of every data row of the messy fixture: the one outcome bucket each row lands in (created-active, created-pending_approval, skipped_duplicate, or error). Run it once per model configuration, in a fresh session each time. Paste exactly:
 
 ```text
 Read tickets/TICKET-001.md and src/panic_pantry/models.py, then read
@@ -104,7 +133,7 @@ For each of the 4 runs: model/provider ID exactly as OpenCode displayed it; wall
 
 **Hints (use in order):**
 1. Both models ace Task A? Good — that's a finding: the cheap model suffices for bounded work with checks. The interesting comparison is Task B.
-2. Score strictly row-by-row against the expected file — models most often miss duplicate and seeded-collision rows.
+2. Score strictly row-by-row against the expected file — models most often miss duplicate and **seeded-collision** rows. (A seeded collision is a CSV code that already exists in the seed data, like `WELCOME10`. It's a duplicate even though it appears only once in the file.)
 3. Judge Task B by the produced artifact — evidence, feasibility, catches — not by how confident the model sounded. (And never ask a model to reveal hidden chain-of-thought; judge outputs.)
 
 **Troubleshooting:**
