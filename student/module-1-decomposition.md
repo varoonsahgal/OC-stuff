@@ -1,6 +1,6 @@
 # Module 1 — Micro-lecture 1 + Exercise 1: task surgery
 
-**Where you are:** you have a baseline scorecard and a saved diff from a single agent given the full ticket. You also have Part A's notes: where the vague prompt's plan got its rules, and what it decided on its own. This module turns that experience into a repeatable decomposition method — the plan and task cards you write here drive everything in Exercises 2 and 4.
+**Where you are:** you have a baseline scorecard and a saved diff from a single agent given the full ticket. You also have your Step 1 warm-up notes: where the vague prompt's plan got its rules, and what it decided on its own. This module turns that experience into a repeatable decomposition method — the plan and task cards you write here drive everything in Exercises 2 and 4.
 
 ---
 
@@ -18,7 +18,7 @@
 >
 > **Contract tests** are the tests that check the contract — here, `tests/test_importer_contract.py`. They're frozen too: if an agent "fixes" a failing contract test by editing it, it has moved the finish line.
 
-Recall Exercise 0 Part A. If your agent's plan was good, it's because it found TICKET-001 — someone had already turned the wish into a ticket. Today that someone is you: most real repos have no ticket waiting, and the agent falls back to guessing. See the difference side by side:
+Recall the Exercise 0 warm-up. If your agent's plan was good, it's because it found TICKET-001 — someone had already turned the wish into a ticket. Today that someone is you: most real repos have no ticket waiting, and the agent falls back to guessing. See the difference side by side:
 
 > **Bad:** "Build the importer."
 > The agent now decides the columns, the duplicate policy, the error behavior, the file it writes, and whether the approval rule even exists. Every one of those is a silent decision you'll discover at midnight.

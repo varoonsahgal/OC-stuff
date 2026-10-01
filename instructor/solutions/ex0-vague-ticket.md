@@ -1,6 +1,6 @@
 # INSTRUCTOR ONLY — do not distribute
 
-Answer key for **Exercise 0 — The vague ticket**. Verified against the sandbox
+Answer key for **Exercise 0 — The single-agent baseline**. Verified against the sandbox
 contract and OpenCode 1.18.33 conventions (2026-09-28). The known-good importer
 is [importer_solution.py](importer_solution.py) — reference it; do not retype it.
 
@@ -12,9 +12,9 @@ is allowed and becomes `active`.** Enforced in
 
 ---
 
-## Exercise 0 — The vague ticket
+## Exercise 0 — The single-agent baseline
 
-### Part A — expected discoveries from the vague-prompt plan
+### Step 1 (warm-up) — expected discoveries from the vague-prompt plan
 
 A typical plan for "Add a CSV importer for promo codes" silently decides most of
 these. Learners should list at least three:
@@ -34,7 +34,7 @@ these. Learners should list at least three:
 The teaching beat survives a "good" plan: use the recorded bad plan in
 [fallback-traces.md](fallback-traces.md).
 
-### Part B — expected answer
+### Step 1 (warm-up) — expected enforcement answer
 
 Policy enforced in `src/panic_pantry/promotions.py`,
 `PromotionService.create_promotion` (strictly-greater-than-20 check sets
@@ -42,7 +42,7 @@ Policy enforced in `src/panic_pantry/promotions.py`,
 "Boundaries." Checkout enforcement: `store.apply_promotion` raises
 `PromotionNotActiveError` for non-active codes.
 
-### Part C — sample baseline outcome (typical, not guaranteed)
+### Step 2 — sample baseline outcome (typical, not guaranteed)
 
 With the full ticket, a competent model usually produces a near-correct importer
 in one to three iterations. Typical scorecard from rehearsal runs:

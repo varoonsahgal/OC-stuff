@@ -41,7 +41,7 @@ Two consequences worth knowing now:
 | Time | Min | Type | Segment |
 |---|---:|---|---|
 | 0:00–0:07 | 7 | Lecture | Opening — more agents ≠ more progress |
-| 0:07–0:32 | 25 | **Hands-on** | Exercise 0 — the vague ticket + single-agent baseline |
+| 0:07–0:32 | 25 | **Hands-on** | Exercise 0 — warm-up + single-agent baseline |
 | 0:32–0:38 | 6 | Lecture | Micro-lecture 1 — turn a wish into a ticket |
 | 0:38–1:08 | 30 | **Hands-on** | Exercise 1 — task surgery |
 | 1:08–1:18 | 10 | Break | |
@@ -120,7 +120,7 @@ Work through the modules in order. Each module is a short lecture summary follow
 
 | Module | File | Segments covered |
 |---|---|---|
-| 0 | [module-0-baseline.md](module-0-baseline.md) | Opening lecture + Exercise 0 — the vague ticket + single-agent baseline |
+| 0 | [module-0-baseline.md](module-0-baseline.md) | Opening lecture + Exercise 0 — warm-up + single-agent baseline |
 | 1 | [module-1-decomposition.md](module-1-decomposition.md) | Micro-lecture 1 + Exercise 1 — task surgery + the task-card template |
 | 2 | [module-2-agent-crew.md](module-2-agent-crew.md) | Micro-lecture 2 + Exercise 2 — build a small agent crew |
 | 3 | [module-3-model-routing.md](module-3-model-routing.md) | Micro-lecture 3 + Exercise 3 — model routing |

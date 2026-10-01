@@ -52,10 +52,10 @@ config differ across major versions.
 
 ## Room-running rules
 
-- You call the 15-minute implementation timeboxes in Ex0 Part C and Ex4 —
+- You call the 15-minute implementation timeboxes in Ex0 Step 2 and Ex4 —
   a visible countdown, hard stop, "unfinished" is valid data.
 - The matched comparison is only fair if model/effort is identical across Ex0
-  and Ex4. Announce the pinned model before Ex0 Part C and again before Ex4.
+  and Ex4. Announce the pinned model before Ex0 Step 2 and again before Ex4.
 - Never let learners put credentials in the repo. Provider auth was done at
   seat setup, not during class.
 - Keep interpretation modest at debriefs: one classroom run is a demonstration,
@@ -63,10 +63,11 @@ config differ across major versions.
 
 ## Per-exercise timing cues and recovery
 
-### Exercise 0 — vague ticket (25 min: A ≈6, B ≈4, C =15 hard timebox; scorecard fill-in happens during the transition into ML1)
+### Exercise 0 — single-agent baseline (25 min: Step 1 warm-up ≈8, Step 2 =15 hard timebox; scorecard fill-in happens during the transition into ML1)
 - **Cue @ 6 min:** anyone still chatting with the Plan agent should stop and
-  write down assumptions; the plan doesn't need to be good, the *list* does.
-- **Cue @ 10 min:** everyone should have found `PromotionService.create_promotion`
+  write down source / decisions / one claim; the plan doesn't need to be bad,
+  the *notes* need to exist.
+- **Cue @ 8 min:** everyone should have found `PromotionService.create_promotion`
   and can state ">20% pending, exactly 20 active." If not, point at the
   `promotions.py` docstring directly — don't burn baseline time.
 - **Recovery:** model finds the rule on its own and proposes a *correct* plan?
@@ -75,11 +76,11 @@ config differ across major versions.
   plausible plan looked like in another session; what would it have cost?"
 - **Recovery:** baseline run rabbit-holes (rewriting the service, editing frozen
   tests) — let it, within the timebox; it's comparison gold. Stop at 15:00 sharp.
-- **Reset if needed:** worktree contaminated before Part C → `bash sandbox/setup.sh`
+- **Reset if needed:** worktree contaminated before Step 2 → `bash sandbox/setup.sh`
   rebuilds both worktrees (announce that it wipes them).
 
 ### Exercise 1 — task surgery (30 min)
-- **Cue @ 10 min:** plan.md should exist with the contract pasted (not
+- **Cue @ 8 min:** plan.md should exist with the contract pasted (not
   paraphrased). If people are re-deriving the contract, point them at the
   ticket: freezing means *copying* it.
 - **Cue @ 20 min:** first task card done; second is faster.

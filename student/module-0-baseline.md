@@ -1,4 +1,4 @@
-# Module 0 — Opening + Exercise 0: the vague ticket and the single-agent baseline
+# Module 0 — Opening + Exercise 0: the single-agent baseline
 
 **Where you are:** you have a verified sandbox (`OK (skipped=9)` — 23 tests, 9 skipped) and the Panic Pantry story from the [course index](README.md). This module sets the incident, shows the loop you will run all afternoon, and produces the single-agent baseline that Exercise 4 will be measured against.
 
@@ -38,13 +38,18 @@ Text alternative: a cycle — request, inspect the repo, plan and decompose, fre
 > - **Delegate** — hand one task to a helper agent (a **subagent**) that works in its own separate conversation. (Full treatment: [Module 2](module-2-agent-crew.md).)
 > - **Child results** — what a subagent hands back when it finishes: its summary, the files it changed, the checks it ran. A claim to verify, not a fact. (Full treatment: [Module 5](module-5-capstone.md).)
 
-> 🔑 **Key takeaway:** The next 25 minutes measure your plan, not the model — a baseline is only useful if you keep the conditions honest.
+> 🔑 **Key takeaway:** Agents multiply whatever plan you give them — so before you add agents, measure what one agent does with a good plan.
 
 ---
 
-## Exercise 0 — The vague ticket (25 min) 🔨
+## Exercise 0 — The single-agent baseline (25 min) 🔨
 
-**Goal:** feel the gap between "ask for a feature" and "commission a task," then produce a single-agent baseline you will compare against in Exercise 4.
+**Goal:** give one agent the full ticket, measure what it does in 15 minutes, and save the result. In Exercise 4 you'll run the *same* ticket with a crew of agents — this baseline is what they have to beat. A short warm-up first shows you where an agent's rules come from.
+
+| Step | Time | You do | Why |
+|---|---|---|---|
+| 1 — Warm-up | ~8 min | Vague prompt in Plan mode; trace where its plan came from | See what a prompt alone gives an agent — and what the repo gives it |
+| 2 — Baseline run | 15 min, hard stop | Full ticket in Build mode; fill the scorecard | Create the measured result Exercise 4 is compared against |
 
 **Starting checkpoint:**
 
@@ -54,6 +59,8 @@ git status                                   # clean, branch single-agent
 python3 -m unittest discover -s tests -v     # ends OK (skipped=9)
 opencode                                     # start OpenCode in this directory
 ```
+
+*Why a separate worktree:* the baseline gets its own clean copy of the repo, so nothing you do later in the main checkout can leak into it.
 
 ### Your cockpit — a 60-second tour of the OpenCode TUI
 
@@ -72,60 +79,48 @@ Read the bottom of the screen like a dashboard — it answers "who am I talking 
 | `ctrl+p commands` | Command palette — every action, searchable | **ctrl+p** |
 | `esc interrupt` | Stop the agent mid-run | **esc** |
 
-> 📘 **Concept — primary agents: Build vs. Plan (quick version)**
+> 📘 **Concept — Build vs. Plan, and the leader key (quick version)**
 >
-> A **primary agent** is the one you talk to directly in the main conversation. OpenCode 1.18.33 ships two:
+> A **primary agent** is the one you talk to directly. OpenCode ships two: **Build** (the default — reads, edits files, runs commands) and **Plan** (for analysis — it must ask your approval before every edit or command). Later you'll meet **subagents**, helpers a primary hands a single task to ([Module 2](module-2-agent-crew.md)); today uses none.
 >
-> - **Build** — the default. All tools enabled: it reads, edits files, and runs shell commands.
-> - **Plan** — for analysis. File edits and shell commands are set to **ask**: the agent must stop and get your approval before each one. Use it when you want thinking without touching the repo.
->
-> Later you'll meet **subagents** — helpers a primary hands a single task to, working in their own separate conversation. Today's baseline uses none of them. ([Module 2](module-2-agent-crew.md) covers subagents in depth.)
-
-> 📘 **Concept — the leader key**
->
-> Many OpenCode shortcuts start with a **leader key**, `ctrl+x` by default. Written as `<Leader>+n`, it means: press `ctrl+x`, release, then press `n`. Two you'll need all day: **`<Leader>+n`** (or `/new`) starts a fresh session; **`<Leader>+m`** (or `/models`) opens the model picker.
+> Many shortcuts start with the **leader key**, `ctrl+x`. `<Leader>+n` means press `ctrl+x`, release, then `n`. You'll use two all day: **`<Leader>+n`** (or `/new`) for a fresh session and **`<Leader>+m`** (or `/models`) for the model picker.
 
 > 🔑 **Key takeaway:** Before every run, read the status bar — which agent, which model, which variant. If you can't name all three, you can't compare the result.
 
-### Part A — Ask for a plan, not a patch (~6 min)
+### Step 1 — Warm-up: a vague prompt (~8 min)
 
-In OpenCode, press **Tab** to switch to the **Plan** primary agent (Tab toggles Build/Plan; in Plan, edits require approval (ask) — verified 2026-09-28 on OpenCode 1.18.33, [docs: agents](https://opencode.ai/docs/agents)). Paste exactly:
+**Why:** your real requests at work often look like this one-liner. You're finding out what the agent does with it — and whether its rules came from *you* or from the repo.
 
-```text
-Add a CSV importer for promo codes. Show me your plan first. Do not edit any files.
-```
+1. Press **Tab** to switch to **Plan**, then paste exactly:
 
-**Don't answer its questions.** If it asks you anything (e.g., "Should I add my own tests?"), press **Esc** and reply: `Don't resolve these — list them as open questions in the plan.` Every answer you give is context the agent didn't find itself.
+   ```text
+   Add a CSV importer for promo codes. Show me your plan first. Do not edit any files.
+   ```
 
-Then write down three things:
+2. **Don't answer its questions.** If it asks anything (e.g., "Should I add my own tests?"), press **Esc** and reply: `Don't resolve these — list them as open questions in the plan.` *Why:* every answer you give is context the agent didn't find itself, and that's what you're measuring.
 
-1. **Source** — where did its rules come from: your prompt, `AGENTS.md`, or the ticket? Did it find `tickets/TICKET-001.md` without being told?
-2. **Decisions** — what did it decide that no file told it to? List ≥3 (open questions it raised count).
-3. **Claims** — pick one thing it says it "verified" or "confirmed." You'll check it in Part B.
+3. In your notes, record three things:
+   - **Source** — where did its rules come from: your prompt, `AGENTS.md`, or `tickets/TICKET-001.md`? Did it find the ticket without being told?
+   - **Decisions** — ≥3 things it decided that no file told it to (open questions it raised count).
+   - **One claim, checked** — pick something it says it "verified" and confirm it in the code. While you're there, find where the approval rule is **enforced**: `cat AGENTS.md`, then `sed -n '1,30p' src/panic_pantry/promotions.py`. *Why:* an agent's summary is a claim; the code that raises the error is the fact.
 
-*If the plan looks good, that's the lesson, not a failed exercise: your repo supplied the context your prompt didn't. Most real repos don't have a TICKET-001 waiting.*
+The rule you should find: **above 20% requires approval; exactly 20% is active.**
 
-> 🔑 **Key takeaway:** A vague prompt only works when the repo carries the context — the ticket and `AGENTS.md` did the deciding, not your prompt. You'll write that context yourself in [Module 1](module-1-decomposition.md).
+*If the plan looks good, that's the lesson, not a failed exercise: the repo supplied the context your prompt didn't. Most real repos don't have a TICKET-001 waiting. (Your instructor may show a recorded plan from a session that didn't find it.)*
 
-### Part B — Find the real rules (~4 min)
+> 🔑 **Key takeaway:** A vague prompt only works when the repo carries the context — here the ticket and `AGENTS.md` did the deciding, not your prompt. In [Module 1](module-1-decomposition.md) you'll learn to write that context yourself.
 
-Inspect the repo yourself — the authoritative sources, not the agent's summary — and check the claim you picked in Part A:
+### Step 2 — The baseline run (15 min, hard stop — the instructor calls start/stop)
 
-```bash
-cat AGENTS.md
-cat tickets/TICKET-001.md
-sed -n '1,30p' src/panic_pantry/promotions.py
-```
+**Why:** this is the number Exercise 4 is measured against. A comparison is only honest if both runs get identical conditions — so you'll record those conditions as carefully as the result.
 
-Find the policy: **above 20% requires approval; exactly 20% is active.** Note where it is *enforced* (not just documented).
+**Before you paste:**
+- [ ] `/new` — a fresh session, so nothing from Step 1 leaks in.
+- [ ] **Tab** back to **Build**.
+- [ ] Write down the exact **model and variant** from the status bar. Exercise 4 must use the same one.
+- [ ] One agent only: don't @-mention anyone or ask it to delegate. (If it delegates on its own, let it and note it — that's data too.)
 
-> 🔑 **Key takeaway:** The house rules live in the repo's enforcement code, not in the agent's summary — read the source that raises the error, not the prose that describes it.
-
-### Part C — The baseline run (15-minute timebox — the instructor calls start/stop)
-
-Start a fresh session first (`/new` or `<Leader>+n`) so nothing from Part A leaks into the baseline. Then switch back to the **Build** agent (Tab). One primary agent, **no subagents** — you don't @-mention anyone, and you don't ask it to delegate. (If Build delegates on its own, let it run and note it on the scorecard; that's data too.)
-
-**Before you paste:** write down the exact model and variant shown in the status bar. Exercise 4 must use the same one, or the comparison isn't matched. Then paste exactly:
+Then paste exactly:
 
 ```text
 Implement tickets/TICKET-001.md exactly as written. Create src/panic_pantry/importer.py
@@ -134,13 +129,12 @@ python3 -m unittest discover -s tests -v
 and show me the output.
 ```
 
-Intervene when you need to (count each intervention). At the 15-minute mark, stop regardless of state. Fill in the scorecard during the transition into Micro-lecture 1 — the timebox is for the run, not the paperwork.
+**During the run:**
+- Step in when you need to, and **count every intervention** — a correction, an answer to its question, a "keep going" nudge, a hand edit. Don't count the starting prompt or a plain permission approval. *Why:* interventions are the hidden cost of a run; Exercise 4 counts them the same way.
+- If it asks whether to write its own tests, answer `No — contract test only.` (That counts as an intervention.) *Why:* `tests/test_promo_import.py` is reserved for Exercise 4's test author, and extra scope here would unbalance the comparison.
+- At 15:00, stop — finished or not. "Unfinished" is valid data.
 
-> 📘 **Concept — what counts as an intervention**
->
-> Count one each time you step in to steer: a correction ("no, the header is `code,discount_pct`"), a clarification it asked for, a "keep going" nudge after it stalled, or a file you edited by hand. **Don't count** pasting the starting prompt, or approving a permission prompt without changing course. Use the same rule in Exercise 4, or the counts can't be compared.
-
-> ⚠️ **If Build asks whether to write its own tests**, answer: `No — contract test only.` (Count it as an intervention.) In particular, don't let it create `tests/test_promo_import.py` — that filename is reserved for Exercise 4's test author (see [WRITABLE_FILES.md](../sandbox/panic-pantry/workshop/WRITABLE_FILES.md)), and keeping the baseline to `importer.py` keeps the comparison matched.
+**After the stop**, fill in the scorecard (you can finish it during the transition into Micro-lecture 1) and save the diff:
 
 | Metric | Your value |
 |---|---|
@@ -153,31 +147,31 @@ Intervene when you need to (count each intervention). At the 15-minute mark, sto
 | Files changed (`git status`) | |
 | Token/cost data (`opencode stats`, if visible) | |
 
-Save the diff for the comparison: `git diff > /tmp/baseline.diff`
+```bash
+git diff > /tmp/baseline.diff    # keep notes and the diff outside the worktree
+```
 
 > 💡 **Field note:** This scorecard is how you should evaluate *any* AI-tooling claim at work: timeboxed run, matched conditions, counted interventions, saved artifacts. "It felt faster" is not a metric; a filled scorecard is.
 
-**Required artifact:** the filled scorecard + saved diff. Keep notes outside the worktree (the worktree stays pristine except for ticket-scoped files — see [WRITABLE_FILES.md](../sandbox/panic-pantry/workshop/WRITABLE_FILES.md)).
+### Done when
 
-**Acceptance checks:**
+- [ ] You have a filled scorecard and `/tmp/baseline.diff` from a run stopped at 15 minutes.
+- [ ] Your Step 1 notes say where the plan's rules came from, list ≥3 decisions it made on its own, and record one claim you checked.
 - [ ] You can name where the approval policy is enforced (file + function).
-- [ ] You recorded where the plan's rules came from, ≥3 decisions it made on its own, and one claim you checked.
-- [ ] You have a scorecard and saved diff from a stopped-at-15-minutes run.
 
-**Hints (use in order):**
-1. Your prompt never mentioned approval. If the plan did, it read something; if it didn't, it missed something. Either way, where would a new hire look for the house rules?
-2. `AGENTS.md` names the file that enforces promotion policy. Read that file's docstring.
-3. The full contract — including the exact `ImportReport` fields (the four result lists; see [the shop's code in 60 seconds](README.md#the-shops-code-in-60-seconds)) and 1-based line numbers — is in `tickets/TICKET-001.md`. Part C should hand the agent that ticket, not your memory of it.
+**Hints:**
+1. Can't find the approval rule? `AGENTS.md` names the file that enforces it — read that file's docstring.
+2. Baseline agent guessing at fields or line numbers? It needs the ticket, not your memory of it — the Step 2 prompt points at `tickets/TICKET-001.md` for exactly that reason.
 
 **Troubleshooting:**
 - Tests won't run → you must be in the worktree root (`sandbox/worktrees/single-agent`), not `tests/`.
 - OpenCode opens the wrong project → quit, `cd` into the worktree, relaunch.
 - Worktree dirty before starting → ask the instructor before resetting; `bash sandbox/setup.sh` rebuilds worktrees but **discards all worktree work**.
 
-**Debrief:** What did the vague plan silently decide for you? What would that cost in your real codebase? Which of your recorded interventions was really a missing piece of context you could have supplied up front? Did the Part A agent find the ticket without being told — and what does that tell you about where house rules should live?
+**Debrief:** Which of your interventions was really a missing piece of context you could have supplied up front? In your real codebase, where do the house rules live — and would an agent find them?
 
 > 🔑 **Key takeaway:** Every intervention you counted was a piece of context you could have shipped up front.
 
 ---
 
-**Next:** [module-1-decomposition.md](module-1-decomposition.md) — turn the wish you just watched flounder into a ticket with a frozen contract.
+**Next:** [module-1-decomposition.md](module-1-decomposition.md) — learn to write the kind of ticket your agent found for you, with a frozen contract.
