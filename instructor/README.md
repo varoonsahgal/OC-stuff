@@ -79,18 +79,17 @@ config differ across major versions.
 - **Reset if needed:** worktree contaminated before Step 2 → `bash sandbox/setup.sh`
   rebuilds both worktrees (announce that it wipes them).
 
-### Exercise 1 — task surgery (30 min)
-- **Cue @ 8 min:** plan.md should exist with the contract pasted (not
-  paraphrased). If people are re-deriving the contract, point them at the
-  ticket: freezing means *copying* it.
-- **Cue @ 20 min:** first task card done; second is faster.
-- **Watch for:** cards whose "In scope" lists overlap — flag immediately; this
-  is the Ex4 collision seed. Also "acceptance check: code review" — demand a
-  command or a concrete question.
-- **Recovery:** Explore agent returns fluff → have learners re-send with the
-  numbered return format from the handout; if the model still flails, hand them
-  the expected investigation packet from the answer key and continue — the
-  learning is in the plan, not the fetch.
+### Exercise 1 — task surgery (10 min: plan ≈2, first card ≈1, second card ≈7)
+- **Cue @ 3 min:** `plan.md` and `cards/csv_parser.md` saved from the handout.
+  The critical-path blank should read T0 (the freeze): both build tasks wait on it.
+- **Cue @ 8 min:** `cards/import_tests.md` drafted. Check that Dependencies says
+  T0 only and that the test author is told not to read the importer.
+- **Watch for:** "In scope" lists that overlap between the two cards — flag
+  immediately; this is the Ex4 collision seed. Also "check: looks good" —
+  demand a command.
+- **Recovery:** anyone stuck past 8 min → hand them the model
+  `import_tests.md` from the answer key and move on; the learning is in the
+  debrief question (why the test author must not read the importer).
 
 ### Exercise 2 — agent crew (32 min)
 - **Cue @ 12 min:** reviewer.md exists and loads (no YAML errors).

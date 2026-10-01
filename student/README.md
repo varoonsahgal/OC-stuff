@@ -36,27 +36,28 @@ Two consequences worth knowing now:
 
 ---
 
-## Schedule (240 minutes total, 183 hands-on)
+## Schedule (240 minutes total, 163 hands-on)
 
 | Time | Min | Type | Segment |
 |---|---:|---|---|
 | 0:00–0:07 | 7 | Lecture | Opening — more agents ≠ more progress |
 | 0:07–0:32 | 25 | **Hands-on** | Exercise 0 — warm-up + single-agent baseline |
-| 0:32–0:38 | 6 | Lecture | Micro-lecture 1 — turn a wish into a ticket |
-| 0:38–1:08 | 30 | **Hands-on** | Exercise 1 — task surgery |
-| 1:08–1:18 | 10 | Break | |
-| 1:18–1:24 | 6 | Lecture | Micro-lecture 2 — a role is a boundary |
-| 1:24–1:56 | 32 | **Hands-on** | Exercise 2 — build a small agent crew |
-| 1:56–2:02 | 6 | Lecture | Micro-lecture 3 — model choice is a budget decision |
-| 2:02–2:34 | 32 | **Hands-on** | Exercise 3 — model routing |
-| 2:34–2:39 | 5 | Break | |
-| 2:39–2:45 | 6 | Lecture | Micro-lecture 4 — parallelism is a dependency claim |
-| 2:45–3:22 | 37 | **Hands-on** | Exercise 4 — orchestrated run + matched comparison |
+| 0:32–0:38 | 6 | Lecture | Micro-lecture 1 — the one rule: output + check |
+| 0:38–0:48 | 10 | **Hands-on** | Exercise 1 — task surgery |
+| 0:48–0:58 | 10 | Break | |
+| 0:58–1:04 | 6 | Lecture | Micro-lecture 2 — a role is a boundary |
+| 1:04–1:36 | 32 | **Hands-on** | Exercise 2 — build a small agent crew |
+| 1:36–1:42 | 6 | Lecture | Micro-lecture 3 — model choice is a budget decision |
+| 1:42–2:14 | 32 | **Hands-on** | Exercise 3 — model routing |
+| 2:14–2:19 | 5 | Break | |
+| 2:19–2:25 | 6 | Lecture | Micro-lecture 4 — parallelism is a dependency claim |
+| 2:25–3:02 | 37 | **Hands-on** | Exercise 4 — orchestrated run + matched comparison |
+| 3:02–3:22 | 20 | Buffer | Catch-up / overflow (not yet allocated) |
 | 3:22–3:28 | 6 | Lecture | Micro-lecture 5 — a green check is evidence, not a handoff |
 | 3:28–3:55 | 27 | **Hands-on** | Capstone — midnight launch |
 | 3:55–4:00 | 5 | Close | Exit ticket |
 
-**Arithmetic check:** hands-on = 25 + 30 + 32 + 32 + 37 + 27 = **183 min**. Lecture = 7 + 6 + 6 + 6 + 6 + 6 = 37. Breaks = 10 + 5 = 15. Close = 5. Total = 183 + 37 + 15 + 5 = **240 min**. ✔
+**Arithmetic check:** hands-on = 25 + 10 + 32 + 32 + 37 + 27 = **163 min**. Lecture = 7 + 6 + 6 + 6 + 6 + 6 = 37. Breaks = 10 + 5 = 15. Buffer = 20. Close = 5. Total = 163 + 37 + 15 + 20 + 5 = **240 min**. ✔
 
 ---
 
