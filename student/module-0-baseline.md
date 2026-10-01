@@ -95,18 +95,21 @@ In OpenCode, press **Tab** to switch to the **Plan** primary agent (Tab toggles 
 Add a CSV importer for promo codes. Show me your plan first. Do not edit any files.
 ```
 
-Read the plan skeptically. In your notes, record:
+**Don't answer its questions.** If it asks you anything (e.g., "Should I add my own tests?"), press **Esc** and reply: `Don't resolve these — list them as open questions in the plan.` Every answer you give is context the agent didn't find itself.
 
-- Every **assumption** the agent made (columns? duplicates? errors? file location?)
-- Every **policy** it did or did not mention
-- Every **interface** it guessed at
-- What "done" would even mean under this plan
+Then write down three things:
 
-> ⚠️ **If the agent asks you clarifying questions** (e.g., a multiple-choice prompt like "Should I add my own tests?"), **don't answer them.** Press **Esc** and reply: `Don't resolve these — list them as open questions in the plan.` Every answer you give is context the agent didn't find itself, and Part A measures what a vague prompt produces. Record each question as an assumption it *surfaced*. If the agent found `tickets/TICKET-001.md` on its own, note that too — it's data, not a failure.
+1. **Source** — where did its rules come from: your prompt, `AGENTS.md`, or the ticket? Did it find `tickets/TICKET-001.md` without being told?
+2. **Decisions** — what did it decide that no file told it to? List ≥3 (open questions it raised count).
+3. **Claims** — pick one thing it says it "verified" or "confirmed." You'll check it in Part B.
+
+*If the plan looks good, that's the lesson, not a failed exercise: your repo supplied the context your prompt didn't. Most real repos don't have a TICKET-001 waiting.*
+
+> 🔑 **Key takeaway:** A vague prompt only works when the repo carries the context — the ticket and `AGENTS.md` did the deciding, not your prompt. You'll write that context yourself in [Module 1](module-1-decomposition.md).
 
 ### Part B — Find the real rules (~4 min)
 
-Inspect the repo yourself — the authoritative sources, not the agent's summary:
+Inspect the repo yourself — the authoritative sources, not the agent's summary — and check the claim you picked in Part A:
 
 ```bash
 cat AGENTS.md
@@ -158,11 +161,11 @@ Save the diff for the comparison: `git diff > /tmp/baseline.diff`
 
 **Acceptance checks:**
 - [ ] You can name where the approval policy is enforced (file + function).
-- [ ] You listed ≥3 assumptions the vague-prompt plan made.
+- [ ] You recorded where the plan's rules came from, ≥3 decisions it made on its own, and one claim you checked.
 - [ ] You have a scorecard and saved diff from a stopped-at-15-minutes run.
 
 **Hints (use in order):**
-1. The agent's plan mentioned nothing about approval? Neither did your prompt. Where would a new hire look for the house rules?
+1. Your prompt never mentioned approval. If the plan did, it read something; if it didn't, it missed something. Either way, where would a new hire look for the house rules?
 2. `AGENTS.md` names the file that enforces promotion policy. Read that file's docstring.
 3. The full contract — including the exact `ImportReport` fields (the four result lists; see [the shop's code in 60 seconds](README.md#the-shops-code-in-60-seconds)) and 1-based line numbers — is in `tickets/TICKET-001.md`. Part C should hand the agent that ticket, not your memory of it.
 
