@@ -130,7 +130,7 @@ Return findings by severity with file:line citations.
 
 ### Record the matched comparison (same scorecard as Exercise 0)
 
-Elapsed time, contract tests passing, whole suite, policy handled, interventions, files changed, `opencode stats` token/cost where visible — **plus integration/rework time** (minutes you spent merging, fixing, re-running after delegations returned). A faster patch that needs more cleanup may not be a win.
+Elapsed time, contract tests passing, whole suite, policy handled, interventions, files changed, `opencode stats` token/cost where visible — **plus integration/rework time** (minutes you spent merging, fixing, re-running after delegations returned). A faster patch that needs more cleanup may not be a win. Measure each row the same way as Exercise 0 ([how to fill in each row](module-0-baseline.md#step-2--the-baseline-run-15-min-hard-stop--the-instructor-calls-startstop)) — but from `sandbox/worktrees/orchestrated`, where `git branch --show-current` must print `orchestrated`.
 
 **Required artifacts:** the diff, test output, reviewer findings, `workshop/integration-notes.md`, filled comparison scorecard.
 

@@ -153,8 +153,24 @@ and show me the output.
 | Files changed (`git status`) | |
 | Token/cost data (`opencode stats`, if visible) | |
 
+**How to fill in each row.** First make sure you're in the baseline worktree — every command below grades whatever folder you're in, so running them in the main checkout or the `orchestrated` worktree scores the wrong code:
+
 ```bash
-git diff > /tmp/baseline.diff    # keep notes and the diff outside the worktree
+cd sandbox/worktrees/single-agent     # from the course repo root, if you've moved
+git branch --show-current             # must print: single-agent
+```
+
+| Row | How to measure it |
+|---|---|
+| **Contract tests passing** | Run `python3 -m unittest tests.test_importer_contract -v`. Record passing out of 9 (e.g., `Ran 9 tests … FAILED (failures=2)` → **7/9**). ⚠️ `OK (skipped=9)` means **0/9**: the contract tests skip themselves when `import_promotions` can't be imported — a missing file or misnamed function looks green. |
+| **Whole suite** | Run `python3 -m unittest discover -s tests -v`. Record the last line, e.g., `23 run, OK` or `23 run, FAILED (failures=1, errors=1)`. Failures outside the 9 contract tests mean the agent broke something it shouldn't have touched. |
+| **Policy handled correctly?** | Two checks. **(1) Behavior:** in the contract output, both `test_boundary_exactly_20_is_created_active` and `test_above_20_is_pending_and_unusable_at_checkout` say `ok`. **(2) Source:** in `git diff`, the importer reads `promo.status` from what `create_promotion` returns — it does *not* compare against 20 itself or import `APPROVAL_THRESHOLD_PCT`. Record **Yes** (both), **Yes, but reimplemented** (tests pass, importer checks 20 itself — violates ticket criterion 7), or **No** (a test fails). |
+| **Files changed** | `git status --short`. Ideally one line: `?? src/panic_pantry/importer.py`. List anything else. |
+
+Then save the diff. `importer.py` is a new, untracked file, so plain `git diff` would miss it — stage everything first:
+
+```bash
+git add -A && git diff --cached > /tmp/baseline.diff    # keep notes and the diff outside the worktree
 ```
 
 > 💡 **Field note:** This scorecard is how you should evaluate *any* AI-tooling claim at work: timeboxed run, matched conditions, counted interventions, saved artifacts. "It felt faster" is not a metric; a filled scorecard is.
