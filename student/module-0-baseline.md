@@ -130,9 +130,15 @@ and show me the output.
 ```
 
 **During the run:**
-- Step in when you need to, and **count every intervention** — a correction, an answer to its question, a "keep going" nudge, a hand edit. Don't count the starting prompt or a plain permission approval. *Why:* interventions are the hidden cost of a run; Exercise 4 counts them the same way.
+- Step in when you need to, and **count every intervention** — a correction, an answer to its question, a "keep going" nudge, a hand edit. Don't count the starting prompt or a plain permission approval. *Why:* see the note below; Exercise 4 counts them the same way.
 - If it asks whether to write its own tests, answer `No — contract test only.` (That counts as an intervention.) *Why:* `tests/test_promo_import.py` is reserved for Exercise 4's test author, and extra scope here would unbalance the comparison.
 - At 15:00, stop — finished or not. "Unfinished" is valid data.
+
+> 📘 **Concept — why interventions are the hidden cost of a run**
+>
+> Tests passed, time taken and tokens used all leave out one thing: how much of *your* attention the run needed. A run that passes 9 of 9 tests in 12 minutes looks identical on paper whether you left it alone or stepped in six times to correct it — but each of those six meant someone watching, reading, diagnosing and typing. The intervention count is the only scorecard row that captures that human effort.
+>
+> It matters more as you add agents. One agent that needs babysitting is annoying; five that each need it are impossible, because you can't watch five screens. So the count is your best measure of *"could this run without me?"* — exactly what Exercise 4 tests.
 
 **After the stop**, fill in the scorecard (you can finish it during the transition into Micro-lecture 1) and save the diff:
 
