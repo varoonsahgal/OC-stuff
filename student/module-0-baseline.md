@@ -102,6 +102,8 @@ Read the plan skeptically. In your notes, record:
 - Every **interface** it guessed at
 - What "done" would even mean under this plan
 
+> ⚠️ **If the agent asks you clarifying questions** (e.g., a multiple-choice prompt like "Should I add my own tests?"), **don't answer them.** Press **Esc** and reply: `Don't resolve these — list them as open questions in the plan.` Every answer you give is context the agent didn't find itself, and Part A measures what a vague prompt produces. Record each question as an assumption it *surfaced*. If the agent found `tickets/TICKET-001.md` on its own, note that too — it's data, not a failure.
+
 ### Part B — Find the real rules (~4 min)
 
 Inspect the repo yourself — the authoritative sources, not the agent's summary:
@@ -118,7 +120,7 @@ Find the policy: **above 20% requires approval; exactly 20% is active.** Note wh
 
 ### Part C — The baseline run (15-minute timebox — the instructor calls start/stop)
 
-Switch back to the **Build** agent (Tab). One primary agent, **no subagents** — you don't @-mention anyone, and you don't ask it to delegate. (If Build delegates on its own, let it run and note it on the scorecard; that's data too.)
+Start a fresh session first (`/new` or `<Leader>+n`) so nothing from Part A leaks into the baseline. Then switch back to the **Build** agent (Tab). One primary agent, **no subagents** — you don't @-mention anyone, and you don't ask it to delegate. (If Build delegates on its own, let it run and note it on the scorecard; that's data too.)
 
 **Before you paste:** write down the exact model and variant shown in the status bar. Exercise 4 must use the same one, or the comparison isn't matched. Then paste exactly:
 
@@ -134,6 +136,8 @@ Intervene when you need to (count each intervention). At the 15-minute mark, sto
 > 📘 **Concept — what counts as an intervention**
 >
 > Count one each time you step in to steer: a correction ("no, the header is `code,discount_pct`"), a clarification it asked for, a "keep going" nudge after it stalled, or a file you edited by hand. **Don't count** pasting the starting prompt, or approving a permission prompt without changing course. Use the same rule in Exercise 4, or the counts can't be compared.
+
+> ⚠️ **If Build asks whether to write its own tests**, answer: `No — contract test only.` (Count it as an intervention.) In particular, don't let it create `tests/test_promo_import.py` — that filename is reserved for Exercise 4's test author (see [WRITABLE_FILES.md](../sandbox/panic-pantry/workshop/WRITABLE_FILES.md)), and keeping the baseline to `importer.py` keeps the comparison matched.
 
 | Metric | Your value |
 |---|---|
@@ -167,7 +171,7 @@ Save the diff for the comparison: `git diff > /tmp/baseline.diff`
 - OpenCode opens the wrong project → quit, `cd` into the worktree, relaunch.
 - Worktree dirty before starting → ask the instructor before resetting; `bash sandbox/setup.sh` rebuilds worktrees but **discards all worktree work**.
 
-**Debrief:** What did the vague plan silently decide for you? What would that cost in your real codebase? Which of your recorded interventions was really a missing piece of context you could have supplied up front?
+**Debrief:** What did the vague plan silently decide for you? What would that cost in your real codebase? Which of your recorded interventions was really a missing piece of context you could have supplied up front? Did the Part A agent find the ticket without being told — and what does that tell you about where house rules should live?
 
 > 🔑 **Key takeaway:** Every intervention you counted was a piece of context you could have shipped up front.
 
