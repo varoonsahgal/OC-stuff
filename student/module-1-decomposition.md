@@ -1,138 +1,253 @@
-# Module 1 — From ticket to task cards
+# Module 1 — Write the task cards
 
-> 🎯 **Goal:** Turn one feature request into clear, bounded work.
+> 🎯 **Goal:** write a **task card** (a short spec) for each piece of the importer, so an agent knows exactly **what to build, what it may touch, and how it will be checked**.
 >
-> **You'll leave with:** `workshop/plan.md` and two task cards. In Module 4, an implementer builds the importer, a helper writes tests, and your reviewer checks the result.
+> **You'll leave with:** `workshop/plan.md` + two cards. In Module 4, two agents each get one card and build the importer, and a third reviews the result.
 
-## Why plan before you delegate?
+---
 
-In Exercise 0, the ticket made most of the decisions for the agent. Real tickets often leave gaps. If you don't define what "done" means, the agent has to guess.
+## Why?
 
-Before handing off work, decide:
+In Exercise 0, the vague prompt worked **only because the ticket had already made the decisions**.
 
-1. What should be produced?
-2. Which files may the helper change?
-3. What check will show the work is done?
+- Most repos have no ticket like that
+- So the agent guesses which columns, how duplicates work, and which files to touch
+- You find out what it guessed at midnight
 
-## One ticket, two deliverables
+> **A task card writes those decisions down before the agent starts.**
 
-The ticket asks for an importer. **This course adds a separate test-writing task** so you can practice assigning independent work and checking requirements from a fresh perspective.
+---
 
-| Task | Deliverable | File |
+## Where this fits
+
+**Orchestration** = you split a job into pieces, hand each piece to an agent, then check and combine the results. The course goes through it one step at a time:
+
+| Module | You learn to… | Orchestration step |
 |---|---|---|
-| Implement the importer | CSV import code | `src/panic_pantry/importer.py` |
-| Add independent tests | New tests based on the ticket | `tests/test_promo_import.py` |
+| **0** | Watch one agent do the whole job alone | The baseline to beat |
+| **1 (here)** | Split the job and write down each piece | **Split** |
+| **2** | Build agents with hard limits on what they can touch | **Staff** |
+| **3** | Pick the right model for each piece | **Budget** |
+| **4** | Hand the cards to agents, run them, compare with Module 0 | **Run** |
+| **5** | Handle a launch-night failure | **Recover** |
 
-The existing `tests/test_importer_contract.py` suite is the fixed acceptance check. Leave it unchanged. The new test file adds another set of checks; it does not replace the existing suite.
+- **Module 0 showed the problem:** one agent with a vague prompt only did well because the ticket did the thinking
+- **This module is the fix:** *you* do the thinking, once, on paper
+- **Everything later depends on it.** Agents in Module 2 are built for these cards. Module 3 tests models on this plan. Module 4 pastes these cards into delegations
 
-The importer stays with one owner because two agents editing the same file can collide. The test writer can work from the ticket and fixtures without reading the importer, so its tests check the requirements rather than copying the code's behavior.
+> **Orchestration is mostly writing.** Bad cards in, bad agents out, no matter how good the model is.
 
-Both tasks use the same agreed requirements. **Independent means they can be assigned in either order; it doesn't promise that OpenCode will run them simultaneously.** Run the tests once both files are ready.
+---
 
-> **One feature, two deliverables: one helper builds it; another checks it.**
+## The one rule
 
-In Module 2, you'll create an implementer and a read-only reviewer. In Module 4, the primary agent will route the test card to a suitable helper; you do not need to create a third custom agent.
+**Before you hand off a task, write down what it must produce and how you'll check it's done.**
 
-## Agree on the rules first
-
-The **contract** is the ticket's acceptance criteria: what the importer must do. **Freeze the contract** means agree on those criteria before delegating. If a requirement is unclear, settle it first. If it changes later, update both cards before work continues.
-
-## What goes on a task card?
-
-A card gives one helper the information it needs to work on its own:
-
-| Card detail | Question it answers |
+| Bad | Good |
 |---|---|
-| **Outcome** | What should I produce? |
-| **Inputs and contract** | What should I read, and what rules must I follow? |
-| **File scope** | What may I change? What must I leave alone? |
-| **Acceptance check** | What command or review proves the task is done? |
+| "Build the importer." | **Outcome:** `src/panic_pantry/importer.py`, meeting TICKET-001 |
+| | **In scope:** that file only |
+| | **Check:** `python3 -m unittest tests.test_importer_contract -v` |
 
-The plan is for you: it shows the full job and what you keep or delegate. Each card goes to one helper and covers just that helper's task.
+> Three lines. The agent knows what to make, what it may touch, and how it's judged.
 
-## Exercise 1 — Make the split and write the cards (10 min) 🔨
+---
 
-From the pack root, open the main checkout:
+## Where do the two pieces come from?
+
+The ticket asks for **one** thing: `src/panic_pantry/importer.py`. So why two cards?
+
+**The rule: split where you get separate files that don't need each other.**
+
+- **Piece 1, the importer.** It's one small file. Two agents editing it at once would collide, so it stays one piece
+- **Piece 2, a second set of tests:** `tests/test_promo_import.py`. **The ticket doesn't ask for this. You add it.** It's written from the ticket alone, by an agent that never sees the importer
+
+**Why more tests?** `tests/test_importer_contract.py` already exists, but one person wrote it from one reading of the ticket.
+
+- A second writer reading only the ticket catches what the first one missed
+- If the two sets of tests disagree, the ticket has a gap. Better to find it now than at midnight
+- Same reason a teammate reviews your PR instead of you
+
+> **Piece 1 builds it. Piece 2 checks it, independently.** Different files, no shared work, so neither waits for the other.
+
+---
+
+## How the work splits
+
+```mermaid
+flowchart TD
+    C{{"1 · You freeze the contract"}} --> P["2a · Agent writes importer.py"]
+    C --> Q["2b · Agent writes test_promo_import.py"]
+    P --> I["3 · You merge + run all tests"]
+    Q --> I
+```
+
+*Figure 2 — You decide first, two agents build independently, you check at the end.*
+Text alternative: step 1, you freeze the contract. Step 2, two agents work independently, one writing the importer and one writing tests. Step 3, you merge and run all tests.
+
+- **Contract** = the rules both tasks build against: the 9 acceptance criteria in `tickets/TICKET-001.md`
+- **Freeze** = declare those rules final. Nobody changes them mid-run
+- **Why freeze first?** Both agents build against the contract. Change it halfway and both are wrong
+- **Why are 2a and 2b independent?** Each writes a different file, and neither needs the other's file. So the order doesn't matter
+
+---
+
+## What's on a card
+
+Each line answers one question an agent would otherwise guess at.
+
+| Line | Answers |
+|---|---|
+| **Outcome** | What does "done" produce? |
+| **Inputs** | What should it read first? |
+| **Contract** | What rules must it follow? |
+| **In scope** | Which files may it change? |
+| **Out of scope** | What must it never touch? |
+| **Dependencies** | What must finish before it starts? |
+| **Acceptance checks** | What command proves it's done? |
+
+The other lines (`Why separate`, `Permissions/model`, `Return format`) you just copy for now.
+
+> **The agent can't open your files or read your chat.** When you hand off a card, you paste the whole thing into the message. That message is called a **task packet**.
+
+---
+
+## What you're preparing for
+
+In **Module 4** you build the importer again, this time with a team of agents. Each one gets exactly one job:
+
+```mermaid
+flowchart LR
+    Y["You + main agent<br/>freeze · hand off · merge"] -->|"card 1"| I["Implementer<br/>writes importer.py"]
+    Y -->|"card 2"| T["Test author<br/>writes test_promo_import.py"]
+    I -->|report| Y
+    T -->|report| Y
+    Y -->|"the diff"| R["Reviewer<br/>reads only, reports problems"]
+    R -->|findings| Y
+```
+
+*Figure 3 — Who does what in Module 4. Every arrow out of "you" is a message that carries a card.*
+Text alternative: you and the main agent send card 1 to the implementer and card 2 to the test author. Both report back. You then send the combined diff to the reviewer, which reports problems back to you.
+
+| Agent | Gets | May change | Comes from |
+|---|---|---|---|
+| **You + main agent** | the plan | only the merge | already there |
+| **Implementer** | card 1 | `importer.py` only | you build it in Module 2 |
+| **Test author** | card 2 | `test_promo_import.py` only | the main agent picks one in Module 4 |
+| **Reviewer** | the finished diff | nothing (read-only) | you build it in Module 2 |
+
+- **Each helper starts with an empty memory.** It knows only what's in the card you paste. A gap in the card becomes a guess
+- **Then you compare.** Same ticket, same model, same 15 minutes as the single agent in Module 0. Did the team do better?
+
+> **Today you write the instructions. Module 2 builds the workers. Module 4 runs them.**
+
+---
+
+## Exercise 1 — Write the cards (10 min) 🔨
 
 ```bash
-cd sandbox/panic-pantry
+cd sandbox/panic-pantry      # main checkout, tag starter (NOT a worktree)
 mkdir -p workshop/cards
 ```
 
-Create files only in `workshop/`.
+You only create files in `workshop/`.
 
-### Step 1 — Choose the split (1 min)
+### Plan vs. cards
 
-Before reading the table below, think: **Would you give two agents the same file to edit? What separate work could one of them do?**
+| | `plan.md` | A card |
+|---|---|---|
+| **Read by** | You | One agent |
+| **Covers** | The whole job | One piece |
+| **Holds** | Your own jobs (freeze first, merge last), which pieces are independent | Only what that agent needs to work alone |
 
-Use this split for the exercise:
+> **The plan is for you: the whole picture. Cards are for agents: one task each, nothing extra.**
 
-| Task | Owner | File | Check |
-|---|---|---|---|
-| T1 — implement importer | Implementer | `src/panic_pantry/importer.py` | `python3 -m unittest tests.test_importer_contract -v` |
-| T2 — add tests | Test helper | `tests/test_promo_import.py` | `python3 -m unittest tests.test_promo_import -v` |
+### Step 1 — Save the plan (1 min)
 
-Copy this short template into `workshop/plan.md`. Fill in the split reason.
+Copy this into `workshop/plan.md` as is. It records the split above. Module 3 asks a model to find the risks in it.
 
 ```markdown
 # Plan — TICKET-001 importer
 
-Contract: tickets/TICKET-001.md, criteria 1–9. Freeze before delegation.
-My work: freeze the contract; integrate both files and run the full suite.
-Split reason: <Why can these tasks be assigned separately?>
+## Contract (frozen)
+tickets/TICKET-001.md, acceptance criteria 1–9. Nobody changes it.
+Policy: discounts above 20% need approval; exactly 20% is active.
 
-| Card | Owner | Output | Check |
+## Me
+- Before: freeze the contract (this file).
+- After: merge both files, then run python3 -m unittest discover -s tests -v
+
+## Handed off (independent: different files, either order)
+| Card | Who | Makes | Check |
 |---|---|---|---|
-| T1 csv_parser | Implementer | src/panic_pantry/importer.py | python3 -m unittest tests.test_importer_contract -v |
-| T2 import_tests | Test helper | tests/test_promo_import.py | python3 -m unittest tests.test_promo_import -v |
+| T1 csv_parser | implementer agent | src/panic_pantry/importer.py | python3 -m unittest tests.test_importer_contract -v |
+| T2 import_tests | test-author agent | tests/test_promo_import.py | python3 -m unittest tests.test_promo_import -v |
 ```
 
-### Step 2 — Save the importer card (1 min)
+(You build these agents in Module 2.)
 
-Copy this card into `workshop/cards/csv_parser.md`:
+### Step 2 — Save the first card (1 min)
+
+This one is done for you. Copy it into `workshop/cards/csv_parser.md`:
 
 ```markdown
 ## T1 — csv_parser: write the importer
-Outcome: Create src/panic_pantry/importer.py with import_promotions(csv_path, service) -> ImportReport, following all criteria in tickets/TICKET-001.md.
-Inputs: tickets/TICKET-001.md; src/panic_pantry/promotions.py; src/panic_pantry/models.py; fixtures/promos_clean.csv; fixtures/promos_messy.csv.
-Contract: Follow criteria 1–9. Duplicates include codes already in the store (WELCOME10, STAFF-PICK, MIDNIGHT-VIP, BIGSPENDER). Let the service decide approval; do not compare against 20 yourself.
+Outcome: src/panic_pantry/importer.py with import_promotions(csv_path, service) -> ImportReport, meeting every acceptance criterion in tickets/TICKET-001.md.
+Why this task is separate: one file, one check.
+Inputs and source paths: tickets/TICKET-001.md; src/panic_pantry/promotions.py; src/panic_pantry/models.py; fixtures/promos_clean.csv; fixtures/promos_messy.csv.
+Contract: TICKET-001 criteria 1–9, copied word for word. Duplicates include codes already in the store (WELCOME10, STAFF-PICK, MIDNIGHT-VIP, BIGSPENDER). Let the service decide approval; never compare against 20 yourself.
 In scope: src/panic_pantry/importer.py only.
-Out of scope: all files except src/panic_pantry/importer.py; do not edit tests/, fixtures/, data/promotions.json.seed, or scripts.
-Dependencies: Contract frozen.
-Acceptance check: python3 -m unittest tests.test_importer_contract -v
+Out of scope: tests/test_importer_contract.py, fixtures/, data/promotions.json.seed, scripts/, every other file.
+Dependencies: contract frozen.
+Acceptance checks: python3 -m unittest tests.test_importer_contract -v
 Permissions/model: TBD
-Return: summary, changed paths, checks run, findings, uncertainties
+Return format: summary, changed paths, checks run, findings, uncertainties
 ```
 
-### Step 3 — Create the test card (8 min)
+### Step 3 — Write the second card yourself (8 min)
 
-Copy T1 into `workshop/cards/import_tests.md`. Change these task-specific lines for T2:
+Copy the card above into `workshop/cards/import_tests.md`. Then change **only these five lines**:
 
-| Card detail | T2 value |
-|---|---|
-| **Title** | `T2 — import_tests: write independent tests` |
-| **Outcome** | Create `tests/test_promo_import.py` with tests for the ticket's acceptance criteria |
-| **Inputs** | The ticket and fixtures, including `fixtures/promos_messy.expected.md`; do not read `importer.py` |
-| **Contract** | Test the frozen ticket criteria, including the 20% approval boundary, duplicates, and row outcomes. Base expectations on the ticket and fixtures, not the importer. |
-| **In scope** | `tests/test_promo_import.py` only |
-| **Out of scope** | All files except `tests/test_promo_import.py`; do not edit the fixed contract tests, importer, fixtures, seed data, or scripts. |
-| **Acceptance check** | `python3 -m unittest tests.test_promo_import -v` |
+| Line | T1 (importer) says | Change it for T2 (tests) to… |
+|---|---|---|
+| **Title** | `T1 — csv_parser: write the importer` | `T2 — import_tests: …` |
+| **Outcome** | `importer.py` meeting TICKET-001 | the new test file, testing every criterion |
+| **Inputs** | the ticket, the source files, the fixtures | the ticket and fixtures only. **Not** `importer.py` |
+| **In scope** | `importer.py` only | ? |
+| **Acceptance checks** | the contract test command | ? (hint: it's in your plan) |
 
-Leave the other safety and return-format lines in place. The test command is run after the importer is ready.
+Leave every other line the same, including `Permissions/model: TBD`. You'll fill that in after Modules 2 and 3.
 
 ### Done when
 
-- [ ] `plan.md` names both tasks and explains why they can be assigned separately.
-- [ ] Each card has a different **In scope** file.
-- [ ] Neither card allows changes to the fixed contract tests, fixtures, seed data, or scripts.
-- [ ] Each card names a command that can check its work.
+- [ ] The two cards' **In scope** lines name **different** files
+- [ ] Neither card lets the agent edit `tests/test_importer_contract.py`, `fixtures/`, the seed data, or `scripts/`
+- [ ] Each **Acceptance checks** line is a command you could paste into a terminal
 
-## Quick check
+---
 
-- **Why only one importer card?** Two writers on one file can collide.
-- **Why write tests without seeing the importer?** So the tests reflect the ticket's requirements, not the implementation's choices.
-- **What if the ticket is unclear?** Clarify the contract before handing out the cards.
+## Debrief
 
-> 🔑 **Key takeaway:** Decide what done means before you hand off the work.
+<details>
+<summary><b>Why must the test author not read <code>importer.py</code>?</b></summary>
 
-**Next:** [Module 2 — Build the implementer and reviewer](module-2-agent-crew.md).
+Tests should check what the **ticket** says, not what the importer happens to do. If the test author copies the importer's behavior, its bugs become "expected."
+</details>
+
+<details>
+<summary><b>Why do the two cards need different "In scope" files?</b></summary>
+
+So the two agents never overwrite each other's work, whichever runs first. Same file = collision.
+</details>
+
+<details>
+<summary><b>Why lock the test, fixtures, seed data, and scripts?</b></summary>
+
+They're how "done" gets measured. An agent that edits them can make broken code look finished.
+</details>
+
+> **The card makes you decide at 2 PM, instead of finding out at midnight what the agent decided.**
+
+---
+
+**Next:** [module-2-agent-crew.md](module-2-agent-crew.md): build the implementer and the reviewer, with limits enforced by settings, not by asking nicely.
