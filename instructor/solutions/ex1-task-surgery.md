@@ -1,6 +1,6 @@
 # INSTRUCTOR ONLY — do not distribute
 
-Answer key for **Exercise 1 — Task surgery**: model plan and task cards.
+Answer key for **Exercise 1 — Write the task cards**: model plan and task cards.
 Verified against the sandbox contract and OpenCode 1.18.33 conventions
 (2026-09-28).
 
@@ -10,7 +10,7 @@ is allowed and becomes `active`.**
 
 ---
 
-## Exercise 1 — Task surgery: model artifacts
+## Exercise 1 — Write the task cards: model artifacts
 
 ### Model `workshop/plan.md`
 

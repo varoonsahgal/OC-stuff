@@ -43,7 +43,7 @@ Two consequences worth knowing now:
 | 0:00–0:07 | 7 | Lecture | Opening — more agents ≠ more progress |
 | 0:07–0:32 | 25 | **Hands-on** | Exercise 0 — warm-up + single-agent baseline |
 | 0:32–0:38 | 6 | Lecture | Micro-lecture 1 — the one rule: output + check |
-| 0:38–0:48 | 10 | **Hands-on** | Exercise 1 — task surgery |
+| 0:38–0:48 | 10 | **Hands-on** | Exercise 1 — write the task cards |
 | 0:48–0:58 | 10 | Break | |
 | 0:58–1:04 | 6 | Lecture | Micro-lecture 2 — a role is a boundary |
 | 1:04–1:36 | 32 | **Hands-on** | Exercise 2 — build a small agent crew |
@@ -122,7 +122,7 @@ Work through the modules in order. Each module is a short lecture summary follow
 | Module | File | Segments covered |
 |---|---|---|
 | 0 | [module-0-baseline.md](module-0-baseline.md) | Opening lecture + Exercise 0 — warm-up + single-agent baseline |
-| 1 | [module-1-decomposition.md](module-1-decomposition.md) | Micro-lecture 1 + Exercise 1 — task surgery + the task-card template |
+| 1 | [module-1-decomposition.md](module-1-decomposition.md) | Micro-lecture 1 + Exercise 1 — write the task cards |
 | 2 | [module-2-agent-crew.md](module-2-agent-crew.md) | Micro-lecture 2 + Exercise 2 — build a small agent crew |
 | 3 | [module-3-model-routing.md](module-3-model-routing.md) | Micro-lecture 3 + Exercise 3 — model routing |
 | 4 | [module-4-parallel-run.md](module-4-parallel-run.md) | Micro-lecture 4 + Exercise 4 — orchestrated run + matched comparison |
@@ -151,7 +151,6 @@ Skim this now; come back whenever a word stops making sense. Each term links to 
 | **Task card** | Your written spec for one delegated task: outcome, scope, contract, checks, return format | [Module 1](module-1-decomposition.md) |
 | **Task packet** | Everything you actually *send* in one delegation: the card, plus paths, the contract text, and the checks. The card is the recipe; the packet is the recipe handed to a cook | [Module 1](module-1-decomposition.md) |
 | **Acceptance check** | An executable way to decide "done" — a command or a concrete review question. "Looks good" isn't one | [Module 1](module-1-decomposition.md) |
-| **Critical path** | The chain of dependent tasks that sets the earliest possible finish. Delay anything on it and launch slips | [Module 1](module-1-decomposition.md) |
 | **Idempotent** | Safe to run twice: the second run changes nothing | [Module 1](module-1-decomposition.md) |
 | **Disposition** | The decided outcome for an item. For a CSV row: which `ImportReport` bucket it lands in. For a review finding: fix, accept with reason, or defer with an owner | [Module 3](module-3-model-routing.md), [Module 5](module-5-capstone.md) |
 | **Intervention** | Any time you step into a run to steer it — a correction, clarification, or manual edit | [Module 0](module-0-baseline.md) |
