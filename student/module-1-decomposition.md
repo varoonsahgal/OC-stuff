@@ -2,7 +2,7 @@
 
 > 🎯 **Goal:** write a **task card** (a short spec) for each piece of the importer, so an agent knows exactly **what to build, what it may touch, and how it will be checked**.
 >
-> **You'll leave with:** `workshop/plan.md` + two cards. In Module 4 you hand these cards to agents.
+> **You'll leave with:** `workshop/plan.md` + two cards. In Module 4, two agents each get one card and build the importer, and a third reviews the result.
 
 ---
 
@@ -68,7 +68,7 @@ The ticket asks for **one** thing: `src/panic_pantry/importer.py`. So why two ca
 - If the two sets of tests disagree, the ticket has a gap. Better to find it now than at midnight
 - Same reason a teammate reviews your PR instead of you
 
-> **Piece 1 builds it. Piece 2 checks it, independently.** Different files, no shared work, so they can run at the same time.
+> **Piece 1 builds it. Piece 2 checks it, independently.** Different files, no shared work, so neither waits for the other.
 
 ---
 
@@ -82,13 +82,13 @@ flowchart TD
     Q --> I
 ```
 
-*Figure 2 — You decide first, two agents build at the same time, you check at the end.*
-Text alternative: step 1, you freeze the contract. Step 2, two agents work at the same time, one writing the importer and one writing tests. Step 3, you merge and run all tests.
+*Figure 2 — You decide first, two agents build independently, you check at the end.*
+Text alternative: step 1, you freeze the contract. Step 2, two agents work independently, one writing the importer and one writing tests. Step 3, you merge and run all tests.
 
 - **Contract** = the rules both tasks build against: the 9 acceptance criteria in `tickets/TICKET-001.md`
 - **Freeze** = declare those rules final. Nobody changes them mid-run
 - **Why freeze first?** Both agents build against the contract. Change it halfway and both are wrong
-- **Why can 2a and 2b run at the same time?** Each writes a different file, and neither needs the other's file
+- **Why are 2a and 2b independent?** Each writes a different file, and neither needs the other's file. So the order doesn't matter
 
 ---
 
@@ -112,6 +112,37 @@ The other lines (`Why separate`, `Permissions/model`, `Return format`) you just 
 
 ---
 
+## What you're preparing for
+
+In **Module 4** you build the importer again, this time with a team of agents. Each one gets exactly one job:
+
+```mermaid
+flowchart LR
+    Y["You + main agent<br/>freeze · hand off · merge"] -->|"card 1"| I["Implementer<br/>writes importer.py"]
+    Y -->|"card 2"| T["Test author<br/>writes test_promo_import.py"]
+    I -->|report| Y
+    T -->|report| Y
+    Y -->|"the diff"| R["Reviewer<br/>reads only, reports problems"]
+    R -->|findings| Y
+```
+
+*Figure 3 — Who does what in Module 4. Every arrow out of "you" is a message that carries a card.*
+Text alternative: you and the main agent send card 1 to the implementer and card 2 to the test author. Both report back. You then send the combined diff to the reviewer, which reports problems back to you.
+
+| Agent | Gets | May change | Comes from |
+|---|---|---|---|
+| **You + main agent** | the plan | only the merge | already there |
+| **Implementer** | card 1 | `importer.py` only | you build it in Module 2 |
+| **Test author** | card 2 | `test_promo_import.py` only | the main agent picks one in Module 4 |
+| **Reviewer** | the finished diff | nothing (read-only) | you build it in Module 2 |
+
+- **Each helper starts with an empty memory.** It knows only what's in the card you paste. A gap in the card becomes a guess
+- **Then you compare.** Same ticket, same model, same 15 minutes as the single agent in Module 0. Did the team do better?
+
+> **Today you write the instructions. Module 2 builds the workers. Module 4 runs them.**
+
+---
+
 ## Exercise 1 — Write the cards (10 min) 🔨
 
 ```bash
@@ -127,7 +158,7 @@ You only create files in `workshop/`.
 |---|---|---|
 | **Read by** | You | One agent |
 | **Covers** | The whole job | One piece |
-| **Holds** | Your own jobs (freeze first, merge last), which pieces run at the same time | Only what that agent needs to work alone |
+| **Holds** | Your own jobs (freeze first, merge last), which pieces are independent | Only what that agent needs to work alone |
 
 > **The plan is for you: the whole picture. Cards are for agents: one task each, nothing extra.**
 
@@ -146,7 +177,7 @@ Policy: discounts above 20% need approval; exactly 20% is active.
 - Before: freeze the contract (this file).
 - After: merge both files, then run python3 -m unittest discover -s tests -v
 
-## Handed off (run at the same time)
+## Handed off (independent: different files, either order)
 | Card | Who | Makes | Check |
 |---|---|---|---|
 | T1 csv_parser | implementer agent | src/panic_pantry/importer.py | python3 -m unittest tests.test_importer_contract -v |
@@ -206,7 +237,7 @@ Tests should check what the **ticket** says, not what the importer happens to do
 <details>
 <summary><b>Why do the two cards need different "In scope" files?</b></summary>
 
-So the two agents can work at the same time without overwriting each other. Same file = collision.
+So the two agents never overwrite each other's work, whichever runs first. Same file = collision.
 </details>
 
 <details>
@@ -219,4 +250,4 @@ They're how "done" gets measured. An agent that edits them can make broken code 
 
 ---
 
-**Next:** [module-2-agent-crew.md](module-2-agent-crew.md): build the agents that will receive these cards, with limits enforced by settings, not by asking nicely.
+**Next:** [module-2-agent-crew.md](module-2-agent-crew.md): build the implementer and the reviewer, with limits enforced by settings, not by asking nicely.
