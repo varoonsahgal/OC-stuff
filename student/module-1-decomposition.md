@@ -72,7 +72,20 @@ Use this split for the exercise:
 | T1 — implement importer | Implementer | `src/panic_pantry/importer.py` | `python3 -m unittest tests.test_importer_contract -v` |
 | T2 — add tests | Test helper | `tests/test_promo_import.py` | `python3 -m unittest tests.test_promo_import -v` |
 
-In `workshop/plan.md`, record this split and add one sentence explaining why the tasks can be assigned separately. Include your own work: freeze the contract before delegation, then integrate the files and run the full test suite.
+Copy this short template into `workshop/plan.md`. Fill in the split reason.
+
+```markdown
+# Plan — TICKET-001 importer
+
+Contract: tickets/TICKET-001.md, criteria 1–9. Freeze before delegation.
+My work: freeze the contract; integrate both files and run the full suite.
+Split reason: <Why can these tasks be assigned separately?>
+
+| Card | Owner | Output | Check |
+|---|---|---|---|
+| T1 csv_parser | Implementer | src/panic_pantry/importer.py | python3 -m unittest tests.test_importer_contract -v |
+| T2 import_tests | Test helper | tests/test_promo_import.py | python3 -m unittest tests.test_promo_import -v |
+```
 
 ### Step 2 — Save the importer card (1 min)
 
@@ -84,7 +97,7 @@ Outcome: Create src/panic_pantry/importer.py with import_promotions(csv_path, se
 Inputs: tickets/TICKET-001.md; src/panic_pantry/promotions.py; src/panic_pantry/models.py; fixtures/promos_clean.csv; fixtures/promos_messy.csv.
 Contract: Follow criteria 1–9. Duplicates include codes already in the store (WELCOME10, STAFF-PICK, MIDNIGHT-VIP, BIGSPENDER). Let the service decide approval; do not compare against 20 yourself.
 In scope: src/panic_pantry/importer.py only.
-Out of scope: tests/, fixtures/, data/promotions.json.seed, scripts/, and every other file.
+Out of scope: all files except src/panic_pantry/importer.py; do not edit tests/, fixtures/, data/promotions.json.seed, or scripts.
 Dependencies: Contract frozen.
 Acceptance check: python3 -m unittest tests.test_importer_contract -v
 Permissions/model: TBD
@@ -93,14 +106,16 @@ Return: summary, changed paths, checks run, findings, uncertainties
 
 ### Step 3 — Create the test card (8 min)
 
-Copy T1 into `workshop/cards/import_tests.md`. Change these five details for T2:
+Copy T1 into `workshop/cards/import_tests.md`. Change these task-specific lines for T2:
 
 | Card detail | T2 value |
 |---|---|
 | **Title** | `T2 — import_tests: write independent tests` |
 | **Outcome** | Create `tests/test_promo_import.py` with tests for the ticket's acceptance criteria |
 | **Inputs** | The ticket and fixtures, including `fixtures/promos_messy.expected.md`; do not read `importer.py` |
+| **Contract** | Test the frozen ticket criteria, including the 20% approval boundary, duplicates, and row outcomes. Base expectations on the ticket and fixtures, not the importer. |
 | **In scope** | `tests/test_promo_import.py` only |
+| **Out of scope** | All files except `tests/test_promo_import.py`; do not edit the fixed contract tests, importer, fixtures, seed data, or scripts. |
 | **Acceptance check** | `python3 -m unittest tests.test_promo_import -v` |
 
 Leave the other safety and return-format lines in place. The test command is run after the importer is ready.
