@@ -1,206 +1,328 @@
-# Module 2 — Micro-lecture 2 + Exercise 2: build a small agent crew
+# Module 2 — Build the agent crew
 
-**Where you are:** you have `workshop/plan.md` and two task cards with disjoint scopes. This module builds the crew that will execute them — a read-only reviewer and an implementer — and proves that a boundary you can't test is a boundary you don't have.
+> 🎯 **Goal:** build two helper agents, a **reviewer** that can't edit and an **implementer** that can, and prove the reviewer's limit is real.
+>
+> **You'll leave with:** `.opencode/agents/reviewer.md` and `.opencode/agents/implementer.md`. In Module 4 these two agents run your cards.
 
 ---
 
-## Micro-lecture 2 — A role is a boundary
+## Why more than one agent?
 
-**Claim: an agent role is useful only when it changes objective, context, or authority.** A renamed agent with the same permissions is a costume, not a control.
+In Module 0, one agent did everything: read the ticket, wrote the code, ran the tests, and decided it was done.
 
-Three boundaries matter in OpenCode 1.18.33 ([docs: agents](https://opencode.ai/docs/agents), verified 2026-09-28):
+That has three problems:
 
-- **Objective** — the agent file's body is its system prompt; a reviewer optimizes for findings, not for making the diff look finished.
-- **Context** — a subagent runs in a **child session with fresh context**. It knows nothing your parent session discussed. That's a feature (no leaked confusion) and a duty: **the handoff must be complete** — task packet, paths, contract, checks. Anthropic's context-engineering guidance is the same story: attention is a finite budget; give the child exactly what it needs and demand a compact summary back ([Anthropic: Effective Context Engineering](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents), Sep 2025).
-- **Authority** — `permission` in the agent's frontmatter: `allow` / `ask` / `deny` on `read`, `edit` (covers write/edit/patch), `bash`, `task`, `webfetch` ([docs: permissions](https://opencode.ai/docs/permissions)). A read-only reviewer is `edit: deny`, `bash: deny` (or a bash pattern map allowing only specific read commands). Note: `tools:` frontmatter is deprecated — use `permission`.
+- **It grades its own homework.** The agent that wrote the code is the one deciding the code is fine
+- **It has every permission all the time.** The same agent that needs to edit files to build things could also edit files while "just reviewing"
+- **Its memory fills up.** Every file read and test run stays in one conversation, and the details that matter get buried
 
-> 📘 **Concept — the three permission levels**
->
-> | Level | What happens when the agent tries the action | Use it for |
-> |---|---|---|
-> | `allow` | Runs immediately, no prompt | Actions that are safe for this role |
-> | `ask` | OpenCode **pauses and asks you**: approve **once**, approve **always** (for matching requests, for the rest of the session), or **reject** | Actions you want to see before they happen |
-> | `deny` | **Blocked by OpenCode** — the agent gets an error, not a choice | Authority this role should never have |
->
-> The key word is *OpenCode*: the check happens in the tool layer, after the model decides to act and before anything touches your files. The model's intentions don't enter into it.
+> **Fix: split the work by job.** One agent builds, a different agent checks. Each gets only the permissions its job needs.
 
-Because the child starts fresh, be concrete about **what a child session does NOT know**:
+---
 
-- It does **not** inherit your chat — not the plan you discussed, not the corrections you made, not the findings from earlier delegations.
-- It does **not** know which files matter unless you name them.
-- It does **not** know your acceptance bar unless the packet states it.
+## Where this fits
 
-What it **does** get: your delegation message (the packet), the project's `AGENTS.md` rules (loaded automatically), and the repo files its permissions let it read. That's the complete list. If your packet plus those two sources can't stand alone, the delegation fails before it starts.
+| Module | What happens | Step |
+|---|---|---|
+| 0 | One agent builds the importer alone | Baseline |
+| 1 | You split the job and write a card for each piece | Split |
+| **2 (here)** | **You build the agents that will work those cards** | **Staff** |
+| 3 | You pick a model for each agent | Budget |
+| 4 | You hand the cards to the crew, run it, compare with Module 0 | Run |
+| 5 | You recover from a launch-night failure | Recover |
 
-> 🔑 **Key takeaway:** A role only matters when it changes objective, context, or authority — otherwise it's a costume.
+> **Module 1 wrote the instructions. This module builds the workers. Module 4 runs them.**
 
-The joke that is also the lesson: **the reviewer is the health inspector. If you give it a chainsaw, the costume is not the safety control.** "Please don't edit files" is a request; `edit: deny` is a boundary. And hiding an agent from the picker is not a security boundary either — permissions are. (`hidden: true` in frontmatter only removes a subagent from the `@` autocomplete menu. The primary can still reach it through the Task tool, and it keeps whatever permissions it has.)
+---
 
-### Two ways to start a subagent
+## The crew, and why these two
 
-> 📘 **Concept — @-mention vs. the Task tool**
->
-> | | **@-mention** | **Task tool** |
-> |---|---|---|
-> | Who picks the subagent | **You**, by name: `@reviewer …` | **The primary agent**, on its own judgment |
-> | Who writes the child's first message | You — your message *is* the packet | The primary — it writes a packet from what you told it |
-> | How the choice gets made | You typed the name | The primary reads every available subagent's **`description`** and picks the best match |
-> | What governs it | The subagent's own `permission` | The **primary's** `permission.task` (which subagents it may launch), *then* the subagent's own `permission` |
->
-> A **tool** is an action the model can call: read a file, run bash, edit. The **Task tool** is the action "start a subagent with this prompt." Two consequences you'll feel in Exercise 4:
->
-> 1. **Your agent's `description` is a routing signal.** A vague description ("helps with code") means the primary may pick the wrong helper, or none. "Read-only reviewer for promotion-policy diffs; never edits" gets picked for review and passed over for writing tests.
-> 2. **`permission.task` controls delegation targets.** It takes patterns over subagent names, and the last matching rule wins — e.g., `"*": deny` then `"reviewer": allow` lets an agent delegate only to the reviewer. A denied subagent is removed from the Task tool entirely, so the model never even tries it.
->
-> If no custom subagent fits, the primary usually falls back to the built-in **general** subagent — a capable multi-step helper with broad tools. That's fine for research and dangerous for scoped writing unless your packet states the scope.
+| Agent | Job | Can it edit? | Used in |
+|---|---|---|---|
+| `@implementer` | Writes `importer.py` from card T1 | **Yes** | Module 4 |
+| `@reviewer` | Reads code, reports problems | **No.** Blocked by config | This module and Module 4 |
 
-You will learn the child-session navigation keys in the exercise, right when you need them.
+**These two jobs are opposites**, and that's why you build them:
+
+- **The implementer makes things.** It needs edit rights
+- **The reviewer judges things.** If it could edit, it would "just fix" what it finds, and nobody would check the fix. No edit rights keeps it honest
+
+**What about the test author (card T2)?** You don't build one. In Module 4 the main agent picks a helper for that card on its own. Watching what it picks is part of the lesson.
+
+---
+
+## A role is a boundary
+
+Naming an agent "reviewer" changes nothing by itself. A role only matters if it changes at least one of these:
+
+| Boundary | What changes | Set where |
+|---|---|---|
+| **Objective** | What it's trying to do (find problems vs. finish code) | The agent file's body (its system prompt) |
+| **Context** | What it knows | The message you send it |
+| **Authority** | What it's *allowed* to do | `permission:` in the agent file |
+
+> **"Please don't edit files" is a request. `edit: deny` is a boundary.** You'll watch the difference happen in step 3.
+
+### Permission levels
+
+| Level | What happens |
+|---|---|
+| `allow` | Runs, no question asked |
+| `ask` | OpenCode pauses and asks you: once, always, or reject |
+| `deny` | OpenCode blocks it. The agent gets an error |
+
+OpenCode checks this **itself**, before the action runs. What the model "wants" doesn't matter.
+
+Note: `hidden: true` only hides an agent from the `@` menu. It's not a security control. Permissions are.
+
+---
+
+## A helper starts with an empty memory
+
+When you hand work to a helper (a **subagent**), it runs in its own **child session**. It does **not** see your chat.
+
+| The child gets | The child does NOT get |
+|---|---|
+| The message you send it | Anything you said earlier in your chat |
+| The project's `AGENTS.md` | Which files matter, unless you name them |
+| Files its permissions let it read | Your bar for "done", unless you state it |
 
 ```mermaid
 flowchart LR
-    subgraph Parent["Parent session (primary agent)"]
-        TP["Task packet:<br/>card + paths + contract + checks"]
-        DEC["Review report,<br/>decide integration"]
-    end
-    subgraph Child["Child session — FRESH context"]
-        W["@reviewer works"]
-    end
-    subgraph Perm["Permission boundary (config, not politeness)"]
-        P1["edit: deny"]
-        P2["bash: deny except git diff/status, unittest"]
-    end
-    TP -->|"@reviewer + packet"| W
-    W -->|"compact report:<br/>findings, paths, uncertainties"| DEC
-    Perm -.enforced on.- Child
+    Y["You (parent session)"] -->|"task packet"| C["@reviewer (child session)<br/>starts empty"]
+    C -->|"short report"| Y
+    P["Permissions:<br/>edit: deny"] -.enforced on.- C
 ```
 
-*Figure 4 — Parent and child sessions with the permission boundary. The child starts empty; the packet is everything it knows.*
-Text alternative: the parent session sends a complete task packet to a child session that starts with fresh context; the child returns a compact report; a configuration-level permission boundary (edit denied, bash restricted) is enforced on the child regardless of what its prompt says.
+*Figure 4 — The packet is everything the child knows. The permissions are enforced no matter what it's told.*
+Text alternative: you send a task packet to the reviewer's child session, which starts empty. It sends back a short report. Its permissions (edit denied) are enforced on it regardless.
+
+### What is a task packet?
+
+**The task packet is the message you send to a helper.** It's the helper's entire briefing.
+
+| | Card (Module 1) | Packet |
+|---|---|---|
+| What it is | A file in `workshop/cards/` | The text of one message |
+| Who reads it | You, while planning | The helper, as its first message |
+
+A good packet answers five questions:
+
+1. **Task:** what am I doing?
+2. **Rules:** what must I follow?
+3. **Files:** what should I read?
+4. **Report:** what do I send back?
+5. **Limits:** what must I not do?
+
+> **The card is the recipe. The packet is the recipe handed to the cook.** In Module 4, the packet is mostly your card, pasted in whole.
+
+### Two ways to start a helper
+
+| | `@reviewer …` | Ask the main agent to delegate |
+|---|---|---|
+| Who picks the helper | **You** | **The main agent** |
+| Who writes the packet | You | The main agent |
+| How it picks | You typed the name | It reads each agent's `description` |
+
+You'll use `@` today. In Module 4 you'll try the second way, so **write a clear `description`**: it's how the main agent decides who gets which job.
 
 ---
 
-## Exercise 2 — Build a small agent crew (32 min) 🔨
+## Exercise 2 — Build the crew (32 min) 🔨
 
-**Goal:** configure one read-only reviewer and one implementer, prove the reviewer's boundary is **configuration**, and run a real fresh-context delegation.
+**What you'll do:**
 
-**Starting checkpoint:**
+1. Copy in the **implementer** (done for you)
+2. Write the **reviewer** yourself
+3. Try to make the reviewer edit a file, and watch OpenCode block it
+4. Send the reviewer a real task and read its report
+5. Look inside the reviewer's session to see what it knew
+
+**Setup:**
 
 ```bash
 cd sandbox/panic-pantry
-git status                       # clean apart from your workshop/ files from Ex1
+git status                # clean, apart from your workshop/ files
 mkdir -p .opencode/agents
 opencode
 ```
 
-You may create/edit only `.opencode/agents/*.md` this exercise.
+You only create files in `.opencode/agents/`.
 
-### Steps
+### How an agent file works
 
-> 📘 **Concept — anatomy of an agent file**
->
-> An agent is one Markdown file. The file name is the agent's name (`reviewer.md` → `@reviewer`). The top of the file is **YAML frontmatter**, a settings block fenced by `---` lines. Everything below the second fence is the agent's **system prompt**: standing instructions it reads before every task. Here's the shape, using a *different* role so you still write your own reviewer:
->
-> ```markdown
-> ---
-> description: Read-only security auditor for auth code. Reports findings; never edits.
-> mode: subagent
-> temperature: 0.1
-> permission:
->   edit: deny
->   webfetch: deny
->   bash:
->     "*": deny
->     "git diff*": allow
->     "git log*": allow
-> ---
-> You are a security auditor. Look for input-validation gaps, auth bypasses,
-> and secrets in code. Return findings by severity with file:line citations.
-> ```
->
-> | Field | Meaning |
-> |---|---|
-> | `description` | **Required.** What the agent is for. Shown in the `@` menu and read by primaries deciding whom to delegate to |
-> | `mode` | `primary` (appears in the Tab rotation), `subagent` (only reachable via @-mention or the Task tool), or `all` (both). **If you leave it out, it defaults to `all`**, so an agent you meant as a helper also joins the Tab rotation |
-> | `model` | Optional. Pins a model for this agent (`provider_id/model_id`); otherwise it uses the session's model (Module 3) |
-> | `temperature` | Optional. Randomness: low (≈0–0.2) gives focused, repeatable output — good for review; higher values give more varied output |
-> | `permission` | The authority map. A bash **pattern map** lists command patterns (`*` matches anything) with a level for each; the **last matching rule wins**, so the catch-all `"*"` goes first |
-> | `hidden` | Optional. `true` hides a subagent from the `@` menu. Not a security control |
->
-> YAML is whitespace-sensitive: use spaces, never tabs, and quote any key containing `*` or spaces.
+One Markdown file per agent. The file name is the agent name: `reviewer.md` → `@reviewer`.
 
-1. **Create `.opencode/agents/reviewer.md`.** Project-level Markdown agent; frontmatter needs `description` (required), `mode` (`primary`|`subagent`|`all`), optionally `model`, `temperature`, `permission`; the body is the system prompt ([docs: agents](https://opencode.ai/docs/agents), verified 2026-09-28 on OpenCode 1.18.33). Requirements:
-   - `mode: subagent`, a description that says what it reviews and that it never edits;
-   - **permissions deny edits and restrict bash** — either deny bash outright or use a pattern map allowing only `git diff`/`git status` and the test command. In a bash pattern map, the **last matching rule wins**, so put `"*": deny` first, then your allows ([docs: permissions](https://opencode.ai/docs/permissions));
-   - a review checklist in the body covering: **approval bypass** (anything above 20% becoming active without a manager), **duplicate handling**, **row-level reporting with 1-based line numbers**, and **missing tests**;
-   - a fixed return format: findings by severity, file:line citations, uncertainties.
+```markdown
+---
+description: What it's for. Shown in the @ menu and read by the main agent.
+mode: subagent
+temperature: 0.1
+permission:
+  edit: deny
+  bash:
+    "*": deny
+    "git diff*": allow
+---
+Everything below the second --- is the system prompt:
+the standing instructions it reads before every task.
+```
 
-2. **Create `.opencode/agents/implementer.md`.** `mode: subagent`; edits allowed; bash allowed for the test command; body instructs it to follow a supplied task card exactly and return changed paths + checks run. (You'll use it in Exercise 4.) "Bash allowed for the test command" means a pattern map again: `"*": deny` first, then `"python3 -m unittest*": allow`. Write its `description` so a primary would never mistake it for a reviewer or a test author.
+| Field | Meaning |
+|---|---|
+| `description` | **Required.** What the agent is for |
+| `mode` | `subagent` = only reachable by `@` or delegation. **Always set it**: if left out, the agent also shows up as a main agent |
+| `temperature` | Low (≈0.1) = focused, repeatable. Good for both of these jobs |
+| `permission` | What it may do. For `bash`, list command patterns. **The last matching rule wins**, so put `"*": deny` first, then the allows |
 
-3. **Prove the boundary.** Ask the reviewer to break its own rules:
+YAML tips: spaces only, no tabs. Put quotes around any key with `*` or a space.
+
+### Step 1 — Copy in the implementer (2 min)
+
+Save this as `.opencode/agents/implementer.md`:
+
+```markdown
+---
+description: Writes src/panic_pantry/importer.py from a task card. Builds code only; never writes tests or reviews.
+mode: subagent
+temperature: 0.1
+permission:
+  edit: allow
+  bash:
+    "*": deny
+    "python3 -m unittest*": allow
+---
+You carry out exactly one task card. It arrives in your first message.
+
+- Change only the files on the card's "In scope" line.
+- Follow the card's contract exactly. If something is unclear, stop and say so.
+- Run the card's acceptance check before you finish.
+
+Report back:
+- Files you changed
+- Checks you ran, with pass/fail
+- Anything you're unsure about
+```
+
+Notice: it **can** edit any file. Its scope ("`importer.py` only") comes from the card. You'll check that it stayed in scope in Module 4.
+
+### Step 2 — Write the reviewer (10 min)
+
+Create `.opencode/agents/reviewer.md`. Use the shape above. It needs:
+
+**Frontmatter**
+- [ ] `description`: says what it reviews **and** that it never edits
+- [ ] `mode: subagent`
+- [ ] `edit: deny`
+- [ ] `bash`: `"*": deny`, then allow only `git diff*`, `git status*`, and `python3 -m unittest*`
+
+**Body: a checklist of what to look for**
+- [ ] **Approval bypass:** can a discount above 20% become active without a manager?
+- [ ] **Duplicates:** are repeated codes handled, including codes already in the store?
+- [ ] **Row reporting:** are bad rows reported with 1-based line numbers?
+- [ ] **Missing tests:** which rules have no test?
+
+**Body: how to report**
+- [ ] Findings grouped by severity
+- [ ] A `file:line` for each finding
+- [ ] A list of things it's unsure about
+
+Module 4 reuses this checklist to review the final code, so make it specific.
+
+### Step 3 — Try to break the limit (3 min)
+
+Ask the reviewer to do the one thing it's not allowed to do:
 
 ```text
 @reviewer Please add a clarifying comment to src/panic_pantry/store.py.
 ```
 
-   The edit must be **blocked by configuration** — you should see OpenCode deny the edit permission, not just the agent politely declining. Capture the denial (copy the output). "The prompt told it not to" does not pass this exercise.
+✅ **Pass:** OpenCode shows a **permission denial** on the edit. Copy that output.
 
-> 🔑 **Key takeaway:** "Please don't edit files" is a request; `edit: deny` is a boundary — and you just watched the difference fire on screen.
+❌ **Not a pass:** the agent politely says "I'm not allowed to edit." That's the prompt talking, not the config. Recheck your `permission:` block.
 
-4. **Delegate a real investigation with a complete packet** (fresh context — include everything):
+### Step 4 — Send a real task (8 min)
+
+The reviewer checks the risks **before** any code is written. Paste this as one message:
 
 ```text
-@reviewer Task: pre-implementation review for TICKET-001.
-Context: tickets/TICKET-001.md is the frozen contract. Policy: discounts above 20%
-require manager approval (exactly 20% is active), enforced in
-src/panic_pantry/promotions.py PromotionService.create_promotion.
-Inspect: AGENTS.md, tickets/TICKET-001.md, src/panic_pantry/promotions.py,
-src/panic_pantry/models.py, tests/test_importer_contract.py, fixtures/promos_messy.expected.md.
-Return: (1) the three riskiest ways an importer could violate the contract,
-(2) which contract test would catch each, (3) any contract ambiguity you find,
-with file:line citations. Do not edit anything.
+@reviewer
+
+Task: Review the risks for TICKET-001 before any code is written.
+
+Rules: tickets/TICKET-001.md is final.
+Discounts above 20% need manager approval. Exactly 20% is active.
+
+Read:
+- AGENTS.md
+- tickets/TICKET-001.md
+- src/panic_pantry/promotions.py
+- src/panic_pantry/models.py
+- tests/test_importer_contract.py
+- fixtures/promos_messy.expected.md
+
+Report:
+1. The 3 likeliest ways an importer could break the rules
+2. Which existing test would catch each one
+3. Anything in the ticket that's unclear
+Give a file:line for each point.
+
+Limits: Do not edit anything.
 ```
 
-5. **Inspect the child session.** Use **<Leader>+Down** to enter the first child session, **Left/Right** to cycle children, **Up** to return to the parent (default keybinds — remappable; verified 2026-09-28 on OpenCode 1.18.33). The leader key is `ctrl+x`, so "<Leader>+Down" is `ctrl+x`, release, then ↓. Note what the child did and did *not* know from your parent conversation.
+Spot the five parts of a packet: **Task, Rules, Read, Report, Limits.**
 
-> 📘 **Concept — the session tree**
->
-> Every delegation adds a child under the session that made it. Together they form a **session tree**:
->
-> ```text
-> Parent session  (you ↔ Build)
-> ├── child 1: @reviewer  — boundary test (step 3)
-> └── child 2: @reviewer  — pre-implementation review (step 4)
-> ```
->
-> Walking the tree is how you audit a delegation: `<Leader>+Down` drops into the first child, Left/Right moves between siblings, Up climbs back to the parent. The child's **first message is the packet exactly as it arrived**. That's where you check whether the handoff was complete, and, in Exercise 4, who wrote it: *you* (@-mention) or *the primary* (Task tool).
+Save the report. A good one flags at least one real risk, for example the importer setting a promotion's status itself instead of letting the service decide.
 
-> 🔑 **Key takeaway:** The first message of a child session is the whole world that child lived in — read it, and you know why it did what it did.
+### Step 5 — Look inside the child session (3 min)
 
-> 💡 **Field note:** The reviewer-agent pattern is CI policy checking in miniature: a check with independent incentives, mechanical enforcement, and a fixed report format. If your team relies on "the author remembered to look," you've found where to add the reviewer — human or agent.
+Each `@reviewer` message created a child session:
 
-**Required artifacts:** both agent files; the captured permission denial; the reviewer's investigation report.
+```text
+Your session
+├── child 1: @reviewer  (step 3, the edit attempt)
+└── child 2: @reviewer  (step 4, the review)
+```
 
-**Acceptance checks:**
-- [ ] `reviewer.md` has `description`, `mode: subagent`, and a `permission` block denying `edit` (deprecated `tools:` frontmatter not used).
-- [ ] The denial in step 3 came from OpenCode's permission system (visible denial), not from agent politeness.
-- [ ] The reviewer's checklist names approval bypass, duplicates, row reporting, and missing tests.
-- [ ] The investigation report cites file paths and flags at least one real risk (e.g., a path where the importer could self-assign status).
-- [ ] You navigated into the child session and back.
+| Keys | Does |
+|---|---|
+| `ctrl+x`, release, then `↓` | Enter the first child |
+| `←` / `→` | Move between children |
+| `↑` | Back to your session |
 
-**Hints (use in order):**
-1. Agent not appearing? The file must be under `.opencode/agents/` **inside `sandbox/panic-pantry`** (the project OpenCode was launched from), with valid YAML frontmatter, and `description` is required.
-2. Reviewer still editing? Check for a deprecated `tools:` block overriding intent — remove it and set `permission: { edit: deny, ... }`.
-3. Bash pattern map not behaving? Rule order: last match wins. `"*": deny` first, then `"git diff *": allow` etc.
+Open child 2. Its **first message is your packet, exactly as sent**. That's all it knew. Anything you said earlier in your own chat isn't there.
 
-**Troubleshooting:**
-- YAML error on load → frontmatter needs `---` fences on their own lines; quote glob keys like `"git diff *"`.
-- Reviewer asks permission for every read → set `read: allow` explicitly if your denials were broad.
-- Can't find the child session → children only exist after a delegation ran; check <Leader> key config if the keybind does nothing.
-
-**Debrief:** What would your reviewer have caught in your Exercise 0 baseline diff? Which role on your real team deserves `edit: deny` — and would anyone notice if it had a chainsaw today?
-
-> 🔑 **Key takeaway:** A child session knows nothing you didn't put in the packet — handoff completeness is your job, not the model's.
+> 🔑 **The first message of a child session is the child's whole world.** If the report is off, check the packet first.
 
 ---
 
-**Next:** [module-3-model-routing.md](module-3-model-routing.md) — now that roles have boundaries, decide which model each role deserves.
+### Done when
+
+- [ ] Both agent files exist and load
+- [ ] `reviewer.md` has `description`, `mode: subagent`, and `edit: deny` (no old-style `tools:` block)
+- [ ] You captured an OpenCode permission denial from step 3
+- [ ] The reviewer's checklist covers approval bypass, duplicates, row reporting, missing tests
+- [ ] You have the step 4 report, with file paths and at least one real risk
+- [ ] You entered a child session and came back
+
+### If something goes wrong
+
+| Problem | Fix |
+|---|---|
+| Agent doesn't show up in `@` | File must be in `sandbox/panic-pantry/.opencode/agents/`, with `---` lines around the frontmatter and a `description` |
+| Reviewer still edits | Remove any `tools:` block (old style). Use `permission: edit: deny` |
+| Bash rules act strange | Order matters: `"*": deny` first, allows after |
+| YAML error | Quote keys with `*`, use spaces not tabs |
+| Reviewer asks before every read | Add `read: allow` |
+| No child session to enter | One exists only after you send a `@reviewer` message |
+
+### Debrief
+
+- What would this reviewer have caught in your Module 0 code?
+- Who on your real team should have `edit: deny`? Do they today?
+
+<sub>Verified against OpenCode 1.18.33 on 2026-09-28. Docs: [agents](https://opencode.ai/docs/agents), [permissions](https://opencode.ai/docs/permissions). Further reading: [Anthropic, Effective Context Engineering](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents).</sub>
+
+---
+
+**Next:** [module-3-model-routing.md](module-3-model-routing.md): pick which model each agent gets.
