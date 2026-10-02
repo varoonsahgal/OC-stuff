@@ -53,6 +53,25 @@ In Exercise 0, the vague prompt worked **only because the ticket had already mad
 
 ---
 
+## Where do the two pieces come from?
+
+The ticket asks for **one** thing: `src/panic_pantry/importer.py`. So why two cards?
+
+**The rule: split where you get separate files that don't need each other.**
+
+- **Piece 1, the importer.** It's one small file. Two agents editing it at once would collide, so it stays one piece
+- **Piece 2, a second set of tests:** `tests/test_promo_import.py`. **The ticket doesn't ask for this. You add it.** It's written from the ticket alone, by an agent that never sees the importer
+
+**Why more tests?** `tests/test_importer_contract.py` already exists, but one person wrote it from one reading of the ticket.
+
+- A second writer reading only the ticket catches what the first one missed
+- If the two sets of tests disagree, the ticket has a gap. Better to find it now than at midnight
+- Same reason a teammate reviews your PR instead of you
+
+> **Piece 1 builds it. Piece 2 checks it, independently.** Different files, no shared work, so they can run at the same time.
+
+---
+
 ## How the work splits
 
 ```mermaid
