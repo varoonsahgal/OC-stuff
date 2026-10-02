@@ -18,6 +18,27 @@ In Exercise 0, the vague prompt worked **only because the ticket had already mad
 
 ---
 
+## Where this fits
+
+**Orchestration** = you split a job into pieces, hand each piece to an agent, then check and combine the results. The course goes through it one step at a time:
+
+| Module | You learn to… | Orchestration step |
+|---|---|---|
+| **0** | Watch one agent do the whole job alone | The baseline to beat |
+| **1 (here)** | Split the job and write down each piece | **Split** |
+| **2** | Build agents with hard limits on what they can touch | **Staff** |
+| **3** | Pick the right model for each piece | **Budget** |
+| **4** | Hand the cards to agents, run them, compare with Module 0 | **Run** |
+| **5** | Handle a launch-night failure | **Recover** |
+
+- **Module 0 showed the problem:** one agent with a vague prompt only did well because the ticket did the thinking
+- **This module is the fix:** *you* do the thinking, once, on paper
+- **Everything later depends on it.** Agents in Module 2 are built for these cards. Module 3 tests models on this plan. Module 4 pastes these cards into delegations
+
+> **Orchestration is mostly writing.** Bad cards in, bad agents out, no matter how good the model is.
+
+---
+
 ## The one rule
 
 **Before you hand off a task, write down what it must produce and how you'll check it's done.**
@@ -81,9 +102,19 @@ mkdir -p workshop/cards
 
 You only create files in `workshop/`.
 
+### Plan vs. cards
+
+| | `plan.md` | A card |
+|---|---|---|
+| **Read by** | You | One agent |
+| **Covers** | The whole job | One piece |
+| **Holds** | Your own jobs (freeze first, merge last), which pieces run at the same time | Only what that agent needs to work alone |
+
+> **The plan is for you: the whole picture. Cards are for agents: one task each, nothing extra.**
+
 ### Step 1 — Save the plan (1 min)
 
-Copy this into `workshop/plan.md` as is. It records the split above.
+Copy this into `workshop/plan.md` as is. It records the split above. Module 3 asks a model to find the risks in it.
 
 ```markdown
 # Plan — TICKET-001 importer
