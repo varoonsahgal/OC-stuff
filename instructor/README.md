@@ -80,26 +80,27 @@ config differ across major versions.
 - **Reset if needed:** worktree contaminated before Step 2 → `bash sandbox/setup.sh`
   rebuilds both worktrees (announce that it wipes them).
 
-### Exercise 1 — split the job (15 min: keep/delegate ≈2, plan ≈2, Builder card ≈1, Breaker card ≈6, Stranger Test ≈4)
+### Exercise 1 — split the job (20 min: keep/delegate ≈2, plan ≈2, Builder card ≈1, Breaker card ≈8, Stranger Test ≈7)
 - **In Micro-lecture 1:** run both Predicts aloud as a room ("all four start at
   once: what goes wrong?" and "how many of the 8 planted bugs does the exam
   catch?"). Take a show of hands *before* anyone opens an answer.
 - **Cue @ 4 min:** Step 1 marked; `workshop/plan.md` saved with both `___`
   filled (breaker row = `tests/test_promo_import.py`).
-- **Cue @ 11 min:** `workshop/cards/breaker.md` has no `___` left and passes
+- **Cue @ 13 min:** `workshop/cards/breaker.md` has no `___` left and passes
   the self-check. Everyone starts the Stranger Test now: **quit any OpenCode
   still open in the single-agent worktree** and run `opencode` in
   `sandbox/panic-pantry`. Otherwise the stranger can read the baseline
   `importer.py`.
-- **Cue @ 15 min:** ask one pair to read a guess that was about the *rules*
+- **Cue @ 20 min:** ask one pair to read a guess that was about the *rules*
   (for example, header strictness). Check they put the answer on **both** cards
   and in `plan.md`: no agent reads `plan.md`, so a fix there alone reaches
-  nobody. Expect strangers to mark most guesses HIGH; that's normal.
+  nobody. Expect many HIGH guesses (our one simulated run marked all five HIGH);
+  learners fix the top two and stop.
 - **Watch for:** a breaker row or TOUCH line that names `importer.py`; a
-  Breaker card that drops "Skip every test, don't fail" (that agent will write
-  tests that fail and then "fix" them, which is the weak-card result in the
+  Breaker card that drops "Skip every test, don't fail" (that agent writes
+  tests that fail while `importer.py` is missing: the weak-card result in the
   answer key); DONE lines like "looks good".
-- **Recovery:** stuck past 9 min → hand them the model `breaker.md` from the
+- **Recovery:** stuck past 11 min → hand them the model `breaker.md` from the
   answer key; they still run the Stranger Test on it. No model access → skip
   Step 5 live and walk through Trace 4 in
   [solutions/fallback-traces.md](solutions/fallback-traces.md). The debrief

@@ -113,11 +113,11 @@ Each of the six lines answers a question the agent would otherwise guess:
 
 ---
 
-## Exercise 1 — Split it (15 min) 🔨
+## Exercise 1 — Split it (20 min) 🔨
 
 ```bash
 cd sandbox/panic-pantry          # from the course root; from Module 0's worktree: cd ../../panic-pantry
-git branch --show-current        # must print main, not single-agent
+git branch --show-current        # must print main; single-agent means you're still in Module 0's worktree
 mkdir -p workshop/cards
 ```
 
@@ -125,7 +125,7 @@ You only create files in `workshop/`. If OpenCode is still open from Module 0, q
 
 ### Step 1 — Keep or delegate? (2 min)
 
-- **Do:** mark each task Keep or Delegate.
+- **Do:** decide Keep or Delegate for each task (in your head or on paper), then open the answer.
 - **Why:** every card costs minutes. Spend them where an agent pays you back.
 - **Done when:** all six are marked and checked against the answer.
 
@@ -187,7 +187,7 @@ DONE:   python3 -m unittest tests.test_importer_contract -v → Ran 9 tests, OK,
 REPORT: files changed · the exact command you ran + its last line · anything you guessed.
 ```
 
-### Step 4 — Write the Breaker card (6 min)
+### Step 4 — Write the Breaker card (8 min)
 
 - **Do:** copy this skeleton into `workshop/cards/breaker.md` and replace every `___`.
 - **Why:** each blank you fill is one less guess for the agent in Module 4.
@@ -204,7 +204,7 @@ REPORT: files changed · the exact command you ran + its last line · which tick
 
 | Blank | Where to look |
 |---|---|
-| Ways `FREE-ALL` could go live | Three shortcuts that ticket criterion 7 forbids |
+| Ways `FREE-ALL` could go live | Ticket criterion 7: setting a status itself, writing the JSON file, bypassing the threshold (for example, calling `approve()`) |
 | Rules the exam never tests | Two or more of: wrong header → nothing imports · 3 columns → error · `20.9` → error · blank row → reason exactly `"empty row"` |
 | Last READ file | The test file that already skips while `importer.py` is missing |
 | Never open | The Builder's file |
@@ -219,27 +219,26 @@ Yes, "every test skipped" is Module 0's 0/9 trap. Here it only proves the file l
 - [ ] TOUCH names a different file from the Builder's
 - [ ] DO names at least two of the four rules the exam never tests
 
-### Step 5 — The Stranger Test (4 min)
+### Step 5 — The Stranger Test (7 min)
 
 - **Do:** let a fresh agent read your card and tell you what it would have to guess.
 - **Why:** a fresh agent has only the card and the repo's `AGENTS.md`, like the agent in Module 4.
 - **Done when:** the top two HIGH guesses are answered on the right card.
 
 1. Run `opencode` here, in `sandbox/panic-pantry`. Press **Tab** to switch to the **Plan** agent (it asks before any edit or command).
-2. Type this. For the last line, type `@breaker` and pick your card from the list:
+2. Paste this one line, then type `@breaker`, pick your card from the list, and press Enter:
 
    ```text
-   Below is a task card. Do NOT do the task.
-   List the five decisions you would have to guess because the card doesn't say, worst first.
-   Mark each HIGH if a wrong guess would change which tests get written, otherwise LOW. One line each.
-   @workshop/cards/breaker.md
+   Don't do this task card. List the five decisions you'd have to guess because it doesn't say, worst first, one line each, marked HIGH if a wrong guess changes which tests get written, else LOW:
    ```
 
 3. Answer the top two HIGH guesses:
    - **About how to test** (for example, how to spot a direct write): add the answer to the Breaker card's RULES.
    - **About the rules themselves** (for example, which headers count as wrong): add the same sentence to RULES on **both** cards and to `plan.md`'s Contract line, or the two agents will answer it differently.
 
-Compare your top guess with your neighbor's: did theirs expose a rule you missed?
+   A long line can wrap onto the next; keep the six labels.
+
+In a room? Compare your top guess with a neighbor's: did theirs expose a rule you missed?
 
 > 🌍 **Real world:** Anthropic's multi-agent research system beat a single agent by 90.2% on its internal eval. The lesson: "Without detailed task descriptions, agents duplicate work, leave gaps, or fail to find necessary information." ([Anthropic, Jun 2025](https://www.anthropic.com/engineering/multi-agent-research-system)) Your card is that task description.
 

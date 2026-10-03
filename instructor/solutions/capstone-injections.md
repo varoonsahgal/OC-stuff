@@ -105,12 +105,14 @@ EOF
 ```
 
 - **Symptom:** full suite stays **green**. The tell is `git status` /
-  `git diff`: `src/panic_pantry/store.py` modified, and no task card owns it.
+  `git diff starter` (or `bash scripts/score.sh`): `src/panic_pantry/store.py`
+  modified, and no task card owns it.
 - **Expected diagnosis:** boundary conflict — a writer left its scope. Green
   tests prove nothing here; the ownership map and diff are the evidence
   (the ML5 point: a green check is evidence, not a handoff — and only of what
   it covers).
-- **Expected fix:** `git checkout -- src/panic_pantry/store.py`; note in
+- **Expected fix:** `git checkout starter -- src/panic_pantry/store.py` (restores
+  the starter version even if the change was staged); note in
   integration-notes which control would have prevented it (permission scope or
   tighter card).
 

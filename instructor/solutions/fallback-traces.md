@@ -1,15 +1,20 @@
 # INSTRUCTOR ONLY — do not distribute
 
-Deterministic fallback transcripts. All are **RECORDED** — Traces 1–2 captured
+Deterministic fallback transcripts. Traces 1–3 are **RECORDED**: Traces 1–2
 during instructor rehearsal (2026-09-26, OpenCode 1.18.33), Trace 3 on a V1
-build with an experimental flag (see its header); all lightly trimmed for
-class use. Present them as recordings, never as live output. Trace 4 (the Ex1 Stranger
-Test) is a **simulation**, not an OpenCode recording; label it that way in class. Traces 1–3 predate the
-Module 1 rewrite, so they use the old card names (`csv_parser`, `import_tests`,
-"test author"); today those are `builder.md`, `breaker.md` and "the Breaker". Use them when a
-live model behaves too well (Ex0), when the classroom model catalog cannot
-support a paired comparison (Ex3), or to show background delegation, which is
-not exercised live (Trace 3).
+build with an experimental flag (see its header), all lightly trimmed for
+class use. Present them as recordings, never as live output. Trace 4 is
+**SIMULATED** (a Claude subagent playing OpenCode's Plan agent, 2026-10-03);
+label it that way in class.
+
+Traces 1–3 predate the Module 1 rewrite, so they use the old card names
+(`csv_parser`, `import_tests`, "test author"); today those are `builder.md`,
+`breaker.md` and "the Breaker".
+
+Use them when a live model behaves too well (Ex0), when the classroom model
+catalog cannot support a paired comparison (Ex3), to show background
+delegation, which is not exercised live (Trace 3), or when the room has no
+model for the Ex1 Stranger Test (Trace 4).
 
 ---
 
@@ -255,5 +260,6 @@ The card it read is the "simulated learner's filled skeleton" in
 | 3, 4 | **About the rules** (what a wrong header is; what a blank row is) | RULES on **both** cards + `plan.md`'s Contract line, or the Builder and the Breaker answer them differently |
 | 5 | Scope (do the 20/21 boundaries need their own tests?) | Breaker DO |
 
-Point out that the stranger marked all five HIGH. Strangers usually do, which
-is why the handout asks learners to fix the top two rather than chase a count.
+Point out that the stranger marked all five HIGH. Expect many HIGHs (this is
+one simulated run, so don't promise a number); that's why the handout asks
+learners to fix the top two rather than chase a count.

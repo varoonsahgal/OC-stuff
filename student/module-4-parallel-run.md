@@ -111,14 +111,14 @@ This goes through the **Task tool** (governed by `permission.task`): the primary
 
 ```bash
 git status                                   # every changed file maps to a card?
-git add -A && git diff --cached              # stage first: new files don't show in plain git diff
+git add -A && git diff starter               # stage so new files count, then compare with the starting line
 python3 -m unittest discover -s tests -v
 ```
 
 Then ask your reviewer:
 
 ```text
-@reviewer Review the staged change in this worktree (git diff --cached) against tickets/TICKET-001.md.
+@reviewer Review everything that changed since the starter tag (git diff starter) against tickets/TICKET-001.md.
 Policy reminder: discounts above 20% require approval; exactly 20% is active.
 Run your checklist: approval bypass, duplicate handling, row reporting, missing tests.
 Return findings by severity with file:line citations.

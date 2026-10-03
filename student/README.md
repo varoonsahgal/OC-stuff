@@ -36,28 +36,28 @@ Two consequences worth knowing now:
 
 ---
 
-## Schedule (240 minutes total, 168 hands-on)
+## Schedule (240 minutes total, 173 hands-on)
 
 | Time | Min | Type | Segment |
 |---|---:|---|---|
 | 0:00–0:07 | 7 | Lecture | Opening — more agents ≠ more progress |
 | 0:07–0:32 | 25 | **Hands-on** | Exercise 0 — warm-up + single-agent baseline |
 | 0:32–0:36 | 4 | Lecture | Micro-lecture 1 — split by file, not by function |
-| 0:36–0:51 | 15 | **Hands-on** | Exercise 1 — split the job: plan + Builder and Breaker cards |
-| 0:51–1:01 | 10 | Break | |
-| 1:01–1:07 | 6 | Lecture | Micro-lecture 2 — a role is a boundary |
-| 1:07–1:39 | 32 | **Hands-on** | Exercise 2 — build a small agent crew |
-| 1:39–1:45 | 6 | Lecture | Micro-lecture 3 — model choice is a budget decision |
-| 1:45–2:17 | 32 | **Hands-on** | Exercise 3 — model routing |
-| 2:17–2:22 | 5 | Break | |
-| 2:22–2:28 | 6 | Lecture | Micro-lecture 4 — parallelism is a dependency claim |
-| 2:28–3:05 | 37 | **Hands-on** | Exercise 4 — orchestrated run + matched comparison |
-| 3:05–3:22 | 17 | Buffer | Catch-up / overflow (not yet allocated) |
+| 0:36–0:56 | 20 | **Hands-on** | Exercise 1 — split the job: plan + Builder and Breaker cards |
+| 0:56–1:06 | 10 | Break | |
+| 1:06–1:12 | 6 | Lecture | Micro-lecture 2 — a role is a boundary |
+| 1:12–1:44 | 32 | **Hands-on** | Exercise 2 — build a small agent crew |
+| 1:44–1:50 | 6 | Lecture | Micro-lecture 3 — model choice is a budget decision |
+| 1:50–2:22 | 32 | **Hands-on** | Exercise 3 — model routing |
+| 2:22–2:27 | 5 | Break | |
+| 2:27–2:33 | 6 | Lecture | Micro-lecture 4 — parallelism is a dependency claim |
+| 2:33–3:10 | 37 | **Hands-on** | Exercise 4 — orchestrated run + matched comparison |
+| 3:10–3:22 | 12 | Buffer | Catch-up / overflow (not yet allocated) |
 | 3:22–3:28 | 6 | Lecture | Micro-lecture 5 — a green check is evidence, not a handoff |
 | 3:28–3:55 | 27 | **Hands-on** | Capstone — midnight launch |
 | 3:55–4:00 | 5 | Close | Exit ticket |
 
-**Arithmetic check:** hands-on = 25 + 15 + 32 + 32 + 37 + 27 = **168 min**. Lecture = 7 + 4 + 6 + 6 + 6 + 6 = 35. Breaks = 10 + 5 = 15. Buffer = 17. Close = 5. Total = 168 + 35 + 15 + 17 + 5 = **240 min**. ✔
+**Arithmetic check:** hands-on = 25 + 20 + 32 + 32 + 37 + 27 = **173 min**. Lecture = 7 + 4 + 6 + 6 + 6 + 6 = 35. Breaks = 10 + 5 = 15. Buffer = 12. Close = 5. Total = 173 + 35 + 15 + 12 + 5 = **240 min**. ✔
 
 ---
 
@@ -128,6 +128,8 @@ Work through the modules in order. Each module is a short lecture summary follow
 | 4 | [module-4-parallel-run.md](module-4-parallel-run.md) | Micro-lecture 4 + Exercise 4 — orchestrated run + matched comparison |
 | 5 | [module-5-capstone.md](module-5-capstone.md) | Micro-lecture 5 + Capstone — midnight launch + the 5-minute close |
 | — | [appendices.md](appendices.md) | Objective coverage map, command crib sheet + agent-file skeleton, sources, image credits |
+
+Read these files rendered (on GitHub, or in VS Code's Markdown preview: Ctrl/Cmd+Shift+V) so answers stay folded until you open them.
 
 Callouts: 🎯 goal · 🌍 real-world story · ⚡ optional Level up · 🔑 the one thing to remember. (This page's Git primer and Modules 0 and 3–5 still use 📘 Concept and 💡 Field note boxes until they're rewritten.)
 

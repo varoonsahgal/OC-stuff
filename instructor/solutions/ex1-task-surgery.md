@@ -1,7 +1,7 @@
 # INSTRUCTOR ONLY — do not distribute
 
 Answer key for **Exercise 1 — Split the job** (Module 1: Micro-lecture 1, 4 min,
-plus Exercise 1, 15 min). Checked against the sandbox on 2026-10-03.
+plus Exercise 1, 20 min). Checked against the sandbox on 2026-10-03.
 
 Policy statement to keep consistent everywhere: **discounts above 20% require
 manager approval (stored `pending_approval`, unusable at checkout); exactly 20%
@@ -68,7 +68,7 @@ Show this after learners have written their own and run the Stranger Test.
 learner gets this card and runs the Stranger Test on it.
 
 ```text
-DO:     Create tests/test_promo_import.py: tests that attack the importer. First, every way FREE-ALL,100 could go live: the importer sets a status itself, calls approve(), or writes data/promotions.json directly. Then the ticket rules the exam never tests: a wrong header still imports rows, a 3-column row slips through, a 20.9 discount is accepted as 20, a blank row's reason isn't exactly "empty row".
+DO:     Create tests/test_promo_import.py: tests that attack the importer. First, every way FREE-ALL,100 could go live: the importer sets a status itself, writes data/promotions.json directly, or bypasses the threshold (for example, calls approve()). Then the ticket rules the exam never tests: a wrong header still imports rows, a 3-column row slips through, a 20.9 discount is accepted as 20, a blank row's reason isn't exactly "empty row".
 READ:   tickets/TICKET-001.md, fixtures/promos_messy.expected.md, data/promotions.json.seed, src/panic_pantry/promotions.py, src/panic_pantry/store.py, tests/test_importer_contract.py
 RULES:  Never open src/panic_pantry/importer.py. Exactly 20% → active. Above 20% → pending_approval, and rejected at checkout. Skip every test, don't fail, while importer.py is missing. Each test uses its own temp copy of the seed store. If a test fails against a real importer, report it; never weaken it.
 TOUCH:  tests/test_promo_import.py only.
@@ -76,29 +76,32 @@ DONE:   python3 -m unittest tests.test_promo_import -v → OK, every test skippe
 REPORT: files changed · the exact command you ran + its last line · which ticket criterion each test covers · anything you guessed.
 ```
 
-**The three ways `FREE-ALL` could go live** (the DO blank; criterion 7). Accept
-any three of these:
+**The three ways `FREE-ALL` could go live** (the DO blank; criterion 7, as
+the handout's hint names them):
 
 1. The importer sets `status` itself, or builds a `Promotion` directly,
    instead of calling `PromotionService.create_promotion`.
-2. It calls `service.approve()` on pending codes.
-3. It writes `data/promotions.json` directly.
+2. It writes `data/promotions.json` directly.
+3. It bypasses the threshold, for example by calling `service.approve()` on
+   pending codes.
 
-**Not** a way: comparing the discount to 20 locally (for example `>= 20`). That
-only makes the *report* lie (MIDNIGHT20 listed as pending); the service still
-stores FREE-ALL as pending and checkout still rejects it. It still breaks
-criterion 7, and the contract test `test_boundary_exactly_20_is_created_active`
-catches it.
+**If a learner writes "reimplements the threshold":** accept it as a
+criterion-7 rule worth testing, but say what it does. Comparing to 20 locally
+(for example `>= 20`) only makes the *report* lie: MIDNIGHT20 is listed as
+pending. The service still stores FREE-ALL as pending and checkout still
+rejects it. The contract test `test_boundary_exactly_20_is_created_active`
+catches the `>= 20` version. A copy that uses the right operator is only caught
+by the test-technique answer in Step 5 below.
 
 ## Step 5 — what the Stranger Test usually finds
 
-Strangers mark most guesses HIGH. That's normal: don't let learners chase a
-count. What matters is where each answer goes:
+Expect many HIGH guesses (our one simulated run marked all five HIGH); don't
+let learners chase a count. What matters is where each answer goes:
 
 | Typical guess | Kind | Where the answer goes |
 |---|---|---|
-| How to catch an importer that copies the 20% check (it behaves the same as the real rule) | How to test | Breaker RULES (e.g. "wrap `create_promotion` with `unittest.mock` and check it's called for every created or pending code") |
-| How to detect a direct write to `data/promotions.json` or a status set by hand | How to test | Breaker RULES |
+| How to catch an importer that copies the 20% check (it behaves the same as the real rule) | How to test | Breaker RULES (e.g. "patch `panic_pantry.promotions.APPROVAL_THRESHOLD_PCT` to 50 and check the report follows the service: VIP25 must land in `created`") |
+| How to detect a direct write to `data/promotions.json` or a status set by hand | How to test | Breaker RULES (e.g. "wrap `create_promotion` with `unittest.mock` and check it's called once for every created or pending code; reload the store through a fresh `PromotionService` and compare") |
 | What counts as a wrong header (reordered? extra column? different case? spaces?) | **About the rules** | **Both cards' RULES + `plan.md`** |
 | What counts as a blank row (empty line? spaces only? a bare comma?) | **About the rules** | **Both cards' RULES + `plan.md`** |
 | Whether the 20 / 21 boundaries need their own tests | Scope | Breaker DO |
@@ -142,7 +145,7 @@ then graded with `instructor/tools/breaker-mutants/check_tests.py`.
 
 | Card | What the agent produced | Planted bugs caught (of 8) |
 |---|---|---|
-| Builder card (handout) | An 83-line importer; contract tests 9/9 OK, full suite green | — |
+| Builder card (earlier wording: "codes already in the store"; the handout now says "codes the shop already has (WELCOME10 is one)") | An 83-line importer; contract tests 9/9 OK, full suite green | — |
 | Vague first draft (below) | Tests that **failed** while `importer.py` was missing, instead of skipping. It never read the contract tests. | 6 (missed: 3 columns, `20.9`) |
 | A simulated learner's filled skeleton (below) | 9 tests, all skipped cleanly before the merge | 7: all four the exam misses. Missed only duplicates-as-errors, which the exam catches, so exam + Breaker = 8 of 8 |
 | Model card (above) | 8 tests, all skipped cleanly before the merge | 8 |
@@ -169,8 +172,8 @@ A Stranger Test on this draft ranked "should the tests skip or fail while
 "fail", which was the exact mistake the stranger predicted. Use that story when
 learners ask whether the Stranger Test is worth four minutes.
 
-**The simulated learner's filled skeleton** (7.5 minutes for Step 4: a
-little over the 6 planned):
+**The simulated learner's filled skeleton** (7.5 minutes for Step 4, within
+the 8 now planned):
 
 ```text
 DO:     Create tests/test_promo_import.py: tests that attack the importer. First, every way FREE-ALL,100 could go live: the importer writes data/promotions.json directly, sets the status to active itself, or reimplements/bypasses the 20% threshold (any of these would put FREE-ALL in created/active instead of pending_approval). Then the ticket rules the exam never tests: a wrong header imports nothing at all, a row with 3 columns is an error, a 20.9 discount is rejected (not accepted as 20), a blank row's reason is exactly "empty row".

@@ -26,10 +26,18 @@ bash scripts/reset.sh >/dev/null
 echo "[setup] sandbox reset to starter state"
 
 # Commit the sandbox and its templates, never learner work left in this checkout
-# (plans, cards, agent files, notes from a dry run). Templates are added once.
+# (plans, cards, agent files, notes from a dry run). A template is staged the
+# first time, and again later only if it still matches the course repo's own
+# committed copy (a course update, not a learner's edits).
 git add -A -- . ':(exclude)workshop' ':(exclude).opencode'
+COURSE="$SCRIPT_DIR/.."
 for t in workshop/WRITABLE_FILES.md workshop/scorecard.md workshop/model-comparison.md workshop/prompts; do
-  git ls-files --error-unmatch -- "$t" >/dev/null 2>&1 || git add -- "$t"
+  if ! git ls-files --error-unmatch -- "$t" >/dev/null 2>&1; then
+    git add -- "$t"
+  elif git -C "$COURSE" rev-parse --is-inside-work-tree >/dev/null 2>&1 &&
+       git -C "$COURSE" diff --quiet HEAD -- "sandbox/panic-pantry/$t" 2>/dev/null; then
+    git add -- "$t"
+  fi
 done
 if ! git rev-parse -q --verify HEAD >/dev/null 2>&1; then
   git commit -m "starter"

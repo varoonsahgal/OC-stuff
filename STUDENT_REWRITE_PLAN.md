@@ -99,13 +99,13 @@ awk '/<details>/{d=1}!d{print}/<\/details>/{d=0}' FILE | awk '/^ *```/{c=!c;next
 |---|---:|---:|---:|
 | README | 2,232 | 550 | |
 | Module 0 | 2,170 | 1,000 | |
-| Module 1 | 1,427 | 1,500 | **1,510** (v2 adds Do/Why/Done, the Breaker scaffold, and two Predict reveals) |
+| Module 1 | 1,427 | 1,550 | **1,548** (v2 adds Do/Why/Done, the Breaker scaffold, two Predict reveals, and the Stranger Test routing) |
 | Module 2 | 1,802 | 1,100 | |
 | Module 3 | 1,538 | 900 | |
 | Module 4 | 1,673 | 1,000 | |
 | Module 5 | 1,414 | 900 | |
 | Appendices (gains the glossary) | 479 | 850 | |
-| **Total** | **12,735** | **7,600** | |
+| **Total** | **12,735** | **7,850** | |
 
 ### Engagement mechanics (use at least two per exercise)
 
@@ -875,7 +875,7 @@ Debrief: *prompts ask, permissions block, plugins enforce your own logic.* Bash 
 - Breaks = 15. Buffer = 8. Close = 5.
 - Total = 183 + 29 + 15 + 8 + 5 = **240** ✔
 
-**Interim schedule (shipped with Phase 2):** ML1 = 4, Ex1 = 15, buffer = 17, everything else unchanged. Hands-on = 168, total = 240. The rest of this table lands with Phases 3–4.
+**Interim schedule (shipped with Phase 2):** ML1 = 4, Ex1 = 20, buffer = 12, everything else unchanged. Hands-on = 173, total = 240. Ex1 grew from the planned 15 to 20 because three independent timed cold reads put it at 21–24 minutes. The final schedule (Phases 3–4) must absorb those 5 minutes, for example Ex3 32 → 30 and Ex4 42 → 40 with an 8-minute buffer. The rest of this table lands with Phases 3–4.
 
 **Why an 8-minute buffer is enough:** ⚡ Level ups are optional and collapsed. Fast tables take them and slow tables skip them, so nobody waits and the room stays in sync.
 
@@ -998,12 +998,12 @@ Every objective is still covered on the **core** path. Level ups deepen coverage
   - The appendix coverage map was corrected.
   - The Ex1 answer key was rewritten with the evidence.
   - Simulated Trace 4 added for no-model classrooms.
-- Interim schedule: Ex1 15, ML1 4, buffer 17, so 168 hands-on.
+- Interim schedule: Ex1 20, ML1 4, buffer 12, so 173 hands-on.
 - Spine rules sharpened: "blind trust", "share no files".
 
 **Open, for later phases**
 
-- **Timing.** Round-2 cold readers estimate Ex1 at about 17–21 minutes against the 15 planned. Most of the overrun is Step 4 (about 7.5 minutes) and the Stranger Test's OpenCode mechanics. The round-2 fixes target both: inline hints, and `@` to attach the card. Re-time Ex1 at the Phase 7 dry run before trimming anything else.
+- **Timing.** Three timed cold reads put Ex1 at 21–24 minutes against the 15 planned, so Ex1 is now 20 (Step 4 = 8, Step 5 = 7). The overrun came from Step 4 and the Stranger Test's OpenCode mechanics. The final fixes target both: inline hints, a one-line prompt plus `@` to attach the card. Re-time Ex1 at the Phase 7 dry run with real learners.
 - **Phase 3 (Module 2):** C4 path-scoped `edit` (verify the pattern semantics on 1.18.33 first) and C5 `permission.task`.
 - **Phase 4:** Module 5's micro-lecture title still reads "a green check is evidence, not a handoff"; align it with the spine rule then.
 
