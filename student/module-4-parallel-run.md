@@ -26,15 +26,15 @@ flowchart TB
     W1 <-. "no shared working files —<br/>neither run can contaminate the other" .-> W2
 ```
 
-*Figure 6 — Worktree isolation: one starter commit, two working directories that cannot touch each other's files.*
+*Figure 5 — Worktree isolation: one starter commit, two working directories that cannot touch each other's files.*
 Text alternative: a single starter commit branches into two Git worktrees — single-agent for the Exercise 0 baseline and orchestrated for the Exercise 4 run — with an annotation that they share no working files, so neither run can contaminate the other.
 
 > 🔑 **Key takeaway:** A file list in a prompt is coordination; a permission rule is control.
 
 > 📘 **Concept — foreground vs. background delegation**
 >
-> - **Foreground:** the primary sends a packet, then *waits*. Nothing else happens in the parent session until the child reports back. It's like handing a ticket to one station and standing at the pass until the plate arrives.
-> - **Background:** the primary sends the packet and *keeps working*: it drafts notes, launches another child, answers you. Results arrive when they're ready. That's the pass calling three tickets at once while plating a fourth.
+> - **Foreground:** the primary sends a card, then *waits*. Nothing else happens in the parent session until the child reports back. It's like handing a ticket to one station and standing at the pass until the plate arrives.
+> - **Background:** the primary sends the card and *keeps working*: it drafts notes, launches another child, answers you. Results arrive when they're ready. That's the pass calling three tickets at once while plating a fourth.
 >
 > "**Keeping the primary free**" is the goal background delegation serves: the primary (and you) stay available for coordination and judgment instead of blocking on one worker.
 
@@ -79,11 +79,11 @@ If the first copy found nothing, you skipped Exercise 2 — build the crew there
 
 | Owner | Deliverable | Writable scope |
 |---|---|---|
-| `@implementer` | importer per card | `src/panic_pantry/importer.py` only |
-| test author: a subagent the **primary** chooses (Task tool) | tests per card | `tests/test_promo_import.py` only |
+| `@implementer` | importer, per the builder card | `src/panic_pantry/importer.py` only |
+| **Breaker**: a subagent the **primary** chooses (Task tool) | tests, per the breaker card | `tests/test_promo_import.py` only |
 | **You**, typing yourself or directing the primary agent | integration notes | `workshop/integration-notes.md` only |
 
-**Who will the primary pick as test author?** It reads each subagent's `description` and chooses. Your crew has a reviewer (can't edit) and an implementer (scoped to `importer.py`), so the likeliest pick is the built-in **general** subagent. That's fine, as long as the packet states the scope. If it picks `@implementer`, it has handed a test task to an agent whose standing instructions say "importer only." Stop and note it as a routing finding, then re-delegate with a clearer instruction.
+**Who will the primary pick as the Breaker?** It reads each subagent's `description` and chooses. Your crew has a reviewer (can't edit) and an implementer (scoped to `importer.py`), so the likeliest pick is the built-in **general** subagent. That's fine, as long as the message it writes keeps your TOUCH line. If it picks `@implementer`, it has handed a test task to an agent whose standing instructions say "importer only." Stop and note it as a routing finding, then re-delegate with a clearer instruction.
 
 3. Set the implementer's model explicitly: add a `model:` line to `.opencode/agents/implementer.md` frontmatter with the exact catalog ID from `/models` — the model your Exercise 3 routing decision assigns to contract-backed implementation work. For the matched comparison this must be the same model/effort as your Exercise 0 run: the model ID *and* the variant you recorded on the Exercise 0 scorecard. Set the session's variant with `ctrl+t` to match. Note the ID and variant in your run record. If you can't confirm a child ran with that exact variant, say so in the record.
 
@@ -92,22 +92,18 @@ If the first copy found nothing, you skipped Exercise 2 — build the crew there
 Delegate using your Exercise 1 cards — **paste the full card into each delegation** (fresh context!). For example:
 
 ```text
-@implementer Execute this task card exactly. [paste workshop/cards/csv_parser.md,
-updated with the full contract from tickets/TICKET-001.md]
-Return: changed paths, the exact test command you ran, pass/fail, assumptions,
-open questions. Touch only src/panic_pantry/importer.py.
+@implementer Do exactly what this card says.
+[paste workshop/cards/builder.md, full text]
 ```
 
-For the tests card, do **not** @-mention anyone. Instead, instruct the primary agent to route it:
+For the breaker card, do **not** @-mention anyone. Instead, instruct the primary agent to route it:
 
 ```text
-Delegate the import_tests task card to the appropriate subagent.
-[paste workshop/cards/import_tests.md, full text]
-Scope: tests/test_promo_import.py only; tests/test_importer_contract.py is frozen.
-Return: changed paths, commands run, pass/fail.
+Delegate this task card to the appropriate subagent.
+[paste workshop/cards/breaker.md, full text]
 ```
 
-This goes through the **Task tool** (governed by `permission.task`): the primary picks the subagent and spawns the child session itself. Afterwards, walk the session tree (`<Leader>+Down`, Left/Right) and open both children. The implementer's first message is *your* text, word for word. The test author's first message is a packet *the primary wrote*, so check whether it kept your scope line and the contract. The new tests express the same contract in the test author's own words. Between delegations, you draft `workshop/integration-notes.md` yourself or have the primary draft it: what arrived, what was checked, what's still open. Delegations run in the foreground — sequence them; independence of deliverables is what makes the order not matter.
+This goes through the **Task tool** (governed by `permission.task`): the primary picks the subagent and spawns the child session itself. Afterwards, walk the session tree (`<Leader>+Down`, Left/Right) and open both children. The implementer's first message is *your* text, word for word. The Breaker's first message is one *the primary wrote*, so check whether it kept your TOUCH and RULES lines. The new tests express the same contract in the Breaker's own words. Between delegations, you draft `workshop/integration-notes.md` yourself or have the primary draft it: what arrived, what was checked, what's still open. Delegations run in the foreground — sequence them; independence of deliverables is what makes the order not matter.
 
 > 🔑 **Key takeaway:** Three chefs, one cutting board is not parallelism — disjoint files are what make the order not matter.
 
@@ -137,14 +133,14 @@ Elapsed time, contract tests passing, whole suite, policy handled, interventions
 **Acceptance checks:**
 - [ ] Contract confirmed frozen before any delegation started.
 - [ ] Every changed file maps to exactly one task card; no two writers shared a file (`git status` is the referee).
-- [ ] The child session for the test task was created by the primary (Task tool), not by an @-mention — check the session tree.
+- [ ] The Breaker's child session was created by the primary (Task tool), not by an @-mention — check the session tree.
 - [ ] Full suite run after integration; output captured.
 - [ ] Reviewer findings collected and each one dispositioned: **fix** (changed now), **accept** (you judge it's not a problem, with the reason written down), or **defer** (real, not tonight: with a reason and a named owner).
 - [ ] Comparison scorecard includes integration/rework time and interprets modestly — one classroom run is a demonstration, not a benchmark.
 
 **Hints (use in order):**
 1. Child result off-contract? Don't patch it silently in the parent — send *one* targeted repair delegation citing the exact acceptance check that failed.
-2. Tests card stalls? The test author needs only the contract + `fixtures/promos_messy.expected.md` — it never needs to read the importer's code. Trim its context.
+2. Breaker stalls? It needs only the contract + `fixtures/promos_messy.expected.md`. It must never read the importer's code. Trim its context.
 3. Timebox expiring mid-delegation? Stop anyway. "Unfinished at the same limit" is valid comparison data — that's the point of matched conditions.
 
 **Troubleshooting:**

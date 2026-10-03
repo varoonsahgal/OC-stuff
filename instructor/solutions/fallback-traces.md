@@ -3,7 +3,9 @@
 Deterministic fallback transcripts. All are **RECORDED** — Traces 1–2 captured
 during instructor rehearsal (2026-09-26, OpenCode 1.18.33), Trace 3 on a V1
 build with an experimental flag (see its header); all lightly trimmed for
-class use. Present them as recordings, never as live output. Use them when a
+class use. Present them as recordings, never as live output. Traces 1–3 predate the
+Module 1 rewrite, so they use the old card names (`csv_parser`, `import_tests`,
+"test author"); today those are `builder.md`, `breaker.md` and "the Breaker". Use them when a
 live model behaves too well (Ex0), when the classroom model catalog cannot
 support a paired comparison (Ex3), or to show background delegation, which is
 not exercised live (Trace 3).

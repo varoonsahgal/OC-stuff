@@ -36,28 +36,28 @@ Two consequences worth knowing now:
 
 ---
 
-## Schedule (240 minutes total, 163 hands-on)
+## Schedule (240 minutes total, 168 hands-on)
 
 | Time | Min | Type | Segment |
 |---|---:|---|---|
 | 0:00–0:07 | 7 | Lecture | Opening — more agents ≠ more progress |
 | 0:07–0:32 | 25 | **Hands-on** | Exercise 0 — warm-up + single-agent baseline |
-| 0:32–0:38 | 6 | Lecture | Micro-lecture 1 — the one rule: output + check |
-| 0:38–0:48 | 10 | **Hands-on** | Exercise 1 — write the task cards |
-| 0:48–0:58 | 10 | Break | |
-| 0:58–1:04 | 6 | Lecture | Micro-lecture 2 — a role is a boundary |
-| 1:04–1:36 | 32 | **Hands-on** | Exercise 2 — build a small agent crew |
-| 1:36–1:42 | 6 | Lecture | Micro-lecture 3 — model choice is a budget decision |
-| 1:42–2:14 | 32 | **Hands-on** | Exercise 3 — model routing |
-| 2:14–2:19 | 5 | Break | |
-| 2:19–2:25 | 6 | Lecture | Micro-lecture 4 — parallelism is a dependency claim |
-| 2:25–3:02 | 37 | **Hands-on** | Exercise 4 — orchestrated run + matched comparison |
-| 3:02–3:22 | 20 | Buffer | Catch-up / overflow (not yet allocated) |
+| 0:32–0:36 | 4 | Lecture | Micro-lecture 1 — split by file, not by function |
+| 0:36–0:51 | 15 | **Hands-on** | Exercise 1 — split the job: plan + Builder and Breaker cards |
+| 0:51–1:01 | 10 | Break | |
+| 1:01–1:07 | 6 | Lecture | Micro-lecture 2 — a role is a boundary |
+| 1:07–1:39 | 32 | **Hands-on** | Exercise 2 — build a small agent crew |
+| 1:39–1:45 | 6 | Lecture | Micro-lecture 3 — model choice is a budget decision |
+| 1:45–2:17 | 32 | **Hands-on** | Exercise 3 — model routing |
+| 2:17–2:22 | 5 | Break | |
+| 2:22–2:28 | 6 | Lecture | Micro-lecture 4 — parallelism is a dependency claim |
+| 2:28–3:05 | 37 | **Hands-on** | Exercise 4 — orchestrated run + matched comparison |
+| 3:05–3:22 | 17 | Buffer | Catch-up / overflow (not yet allocated) |
 | 3:22–3:28 | 6 | Lecture | Micro-lecture 5 — a green check is evidence, not a handoff |
 | 3:28–3:55 | 27 | **Hands-on** | Capstone — midnight launch |
 | 3:55–4:00 | 5 | Close | Exit ticket |
 
-**Arithmetic check:** hands-on = 25 + 10 + 32 + 32 + 37 + 27 = **163 min**. Lecture = 7 + 6 + 6 + 6 + 6 + 6 = 37. Breaks = 10 + 5 = 15. Buffer = 20. Close = 5. Total = 163 + 37 + 15 + 20 + 5 = **240 min**. ✔
+**Arithmetic check:** hands-on = 25 + 15 + 32 + 32 + 37 + 27 = **168 min**. Lecture = 7 + 4 + 6 + 6 + 6 + 6 = 35. Breaks = 10 + 5 = 15. Buffer = 17. Close = 5. Total = 168 + 35 + 15 + 17 + 5 = **240 min**. ✔
 
 ---
 
@@ -122,7 +122,7 @@ Work through the modules in order. Each module is a short lecture summary follow
 | Module | File | Segments covered |
 |---|---|---|
 | 0 | [module-0-baseline.md](module-0-baseline.md) | Opening lecture + Exercise 0 — warm-up + single-agent baseline |
-| 1 | [module-1-decomposition.md](module-1-decomposition.md) | Micro-lecture 1 + Exercise 1 — write the task cards |
+| 1 | [module-1-decomposition.md](module-1-decomposition.md) | Micro-lecture 1 + Exercise 1 — split the job: plan + Builder and Breaker cards |
 | 2 | [module-2-agent-crew.md](module-2-agent-crew.md) | Micro-lecture 2 + Exercise 2 — build a small agent crew |
 | 3 | [module-3-model-routing.md](module-3-model-routing.md) | Micro-lecture 3 + Exercise 3 — model routing |
 | 4 | [module-4-parallel-run.md](module-4-parallel-run.md) | Micro-lecture 4 + Exercise 4 — orchestrated run + matched comparison |
@@ -148,10 +148,10 @@ Skim this now; come back whenever a word stops making sense. Each term links to 
 | **Orchestration** | Splitting a feature into checkable tasks, handing them to agents, and integrating what comes back — you as the release lead | [Module 0](module-0-baseline.md) |
 | **Contract** | The agreed interface and rules every task builds against: function signature, return shape, edge-case behavior, policy | [Module 1](module-1-decomposition.md) |
 | **Freeze (a contract)** | Declare it final *before* work starts. Nobody changes it mid-run; if it must change, you stop, re-freeze, and re-brief everyone | [Module 1](module-1-decomposition.md) |
-| **Task card** | Your written spec for one delegated task: outcome, scope, contract, checks, return format | [Module 1](module-1-decomposition.md) |
-| **Task packet** | Everything you actually *send* in one delegation: the card, plus paths, the contract text, and the checks. The card is the recipe; the packet is the recipe handed to a cook | [Module 1](module-1-decomposition.md) |
-| **Acceptance check** | An executable way to decide "done" — a command or a concrete review question. "Looks good" isn't one | [Module 1](module-1-decomposition.md) |
-| **Idempotent** | Safe to run twice: the second run changes nothing | [Module 1](module-1-decomposition.md) |
+| **Task card** | Six lines (DO, READ, RULES, TOUCH, DONE, REPORT) that give one agent exactly one job. The card is the whole message you send it | [Module 1](module-1-decomposition.md) |
+| **Builder / Breaker** | The two TICKET-001 jobs. The Builder writes the importer; the Breaker writes tests, from the ticket alone, that try to sneak `FREE-ALL` past the 20% rule | [Module 1](module-1-decomposition.md) |
+| **Acceptance check** | An executable way to decide "done": the card's DONE line. "Looks good" isn't one | [Module 1](module-1-decomposition.md) |
+| **Idempotent** | Safe to run twice: the second run changes nothing | [TICKET-001](../sandbox/panic-pantry/tickets/TICKET-001.md), criterion 6 |
 | **Disposition** | The decided outcome for an item. For a CSV row: which `ImportReport` bucket it lands in. For a review finding: fix, accept with reason, or defer with an owner | [Module 3](module-3-model-routing.md), [Module 5](module-5-capstone.md) |
 | **Intervention** | Any time you step into a run to steer it — a correction, clarification, or manual edit | [Module 0](module-0-baseline.md) |
 | **Matched comparison** | Two runs with the same commit, ticket, tests, model, and timebox, so the only difference is the approach | [Module 4](module-4-parallel-run.md) |

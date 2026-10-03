@@ -17,7 +17,8 @@ config differ across major versions.
 | File | Purpose |
 |---|---|
 | [solutions/ex0-vague-ticket.md](solutions/ex0-vague-ticket.md) | Answer key: Ex0 expected discoveries, baseline scorecard, common near-misses |
-| [solutions/ex1-task-surgery.md](solutions/ex1-task-surgery.md) | Answer key: model plan.md and both task cards, grading criteria |
+| [solutions/ex1-task-surgery.md](solutions/ex1-task-surgery.md) | Answer key: model plan.md, Builder and Breaker cards, Stranger Test guesses, grading criteria |
+| [tools/breaker-mutants/](tools/breaker-mutants/README.md) | 8 realistic importer bugs + a checker that shows which test files catch them (backs Module 1's "the exam catches only 4 of 8") |
 | [solutions/ex2-agent-crew.md](solutions/ex2-agent-crew.md) | Answer key: implementer agent, expected denial behavior, model reviewer report |
 | [solutions/ex3-model-routing.md](solutions/ex3-model-routing.md) | Answer key: recorded comparison example, Task A scoring keys |
 | [solutions/ex4-orchestrated-run.md](solutions/ex4-orchestrated-run.md) | Answer key: integration checklist, expected worktree states, honest comparison |
@@ -79,17 +80,25 @@ config differ across major versions.
 - **Reset if needed:** worktree contaminated before Step 2 → `bash sandbox/setup.sh`
   rebuilds both worktrees (announce that it wipes them).
 
-### Exercise 1 — write the task cards (10 min: plan ≈1, first card ≈1, second card ≈8)
-- **Cue @ 2 min:** `plan.md` and `cards/csv_parser.md` saved, copied as is.
-- **Cue @ 8 min:** `cards/import_tests.md` drafted. Check the five changed
-  lines: In scope = `tests/test_promo_import.py` only; check =
-  `python3 -m unittest tests.test_promo_import -v`; Inputs exclude `importer.py`.
-- **Watch for:** "In scope" lists that overlap between the two cards — flag
-  immediately; this is the Ex4 collision seed. Also a check like "looks good" —
-  demand a command.
-- **Recovery:** anyone stuck past 8 min → hand them the model
-  `import_tests.md` from the answer key and move on. The debrief answers are
-  in the handout under collapsed sections.
+### Exercise 1 — split the job (15 min: bad split ≈2, keep/delegate ≈1, plan ≈1, Builder card ≈1, Breaker card ≈6, Stranger Test ≈4)
+- **Cue @ 2 min:** everyone has one sentence for the bad split ("A, B and C
+  all write `importer.py`; the last save wins"). If the room stalls, reveal it.
+- **Cue @ 5 min:** `workshop/plan.md` and `workshop/cards/builder.md` saved.
+- **Cue @ 11 min:** `workshop/cards/breaker.md` drafted and self-checked:
+  TOUCH = `tests/test_promo_import.py` only; RULES forbids reading
+  `importer.py`; DONE = `python3 -m unittest tests.test_promo_import -v`.
+  Everyone starts the Stranger Test now (`/new`, Tab to **Plan**).
+- **Watch for:** TOUCH lines that overlap between the two cards (flag it at
+  once: it's the Ex4 collision seed); a DONE line like "looks good" (demand a
+  command); a Breaker READ line that lists `importer.py`.
+- **Recovery:** stuck past 9 min → hand them the model `breaker.md` from the
+  answer key; they still run the Stranger Test on it. No model access → skip
+  Step 6 live and walk through Trace 4 in
+  [solutions/fallback-traces.md](solutions/fallback-traces.md). The debrief
+  answers are in the handout under collapsed sections.
+- **Backing the "4 of 8" claim:** if anyone asks, run
+  `python3 instructor/tools/breaker-mutants/check_tests.py sandbox/panic-pantry tests.test_importer_contract`
+  from the pack root (takes about a second).
 
 ### Exercise 2 — agent crew (32 min)
 - **Cue @ 12 min:** reviewer.md exists and loads (no YAML errors).
@@ -158,7 +167,7 @@ control/check to add. Collect them — they are your course feedback too.
 ## If the whole provider is down
 
 The orchestration labs need a working OpenCode + one model. If provider access
-dies mid-class: Ex1 proceeds fully offline (planning artifacts); Ex2 agent files
+dies mid-class: Ex1 Steps 1–5 are offline (Step 6 → Trace 4); Ex2 agent files
 can be written and syntax-checked offline (denial test deferred); Ex3 runs from
 recorded traces; Ex0/Ex4 comparison collapses to a walkthrough of the answer-key
 artifacts. Say plainly what is live and what is recorded — modeling honest

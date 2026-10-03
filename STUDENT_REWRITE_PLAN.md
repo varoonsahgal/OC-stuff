@@ -2,7 +2,7 @@
 
 **Goal:** make the student materials fast, clear and hard to misread for impatient developers who are new to agent orchestration. Every word should earn its place.
 **Scope:** `student/`, plus the sandbox and instructor files that must stay in sync.
-**Status:** proposal, 2026-10-03. Nothing in `student/` is changed yet. Section 15 lists the decisions I need from you.
+**Status:** approved 2026-10-03 (all six decisions in §15: yes). Phases 1–2 are done; see §16 for progress.
 
 ---
 
@@ -11,7 +11,7 @@
 1. **One spine.** The "Where this fits" table becomes the backbone of the course: the same table opens every module, with one new column, *the one rule*.
 2. **One card format.** Learners currently see two templates for the same thing: a 10-line "card" in Module 1 and a 5-part "packet" in Module 2. Both become one 6-line card: `DO · READ · RULES · TOUCH · DONE · REPORT`. The word "packet" goes away.
 3. **Rewrite Module 1 from scratch.** It opens with a "spot the bad split" puzzle, introduces a **Builder** and a **Breaker**, and ends with the **Stranger Test**: a fresh agent reads your card and lists everything it would have to guess.
-4. **Cut about 40% of the words** (14,371 → about 8,500). The glossary, git primer, schedule arithmetic and caveats move to the appendix or the instructor guide. Each module keeps one 🔑 at most.
+4. **Cut about 40% of the reading** (about 12,700 → 7,600 words of prose). The glossary, git primer, schedule arithmetic and caveats move to the appendix or the instructor guide. Each module keeps one 🔑 at most.
 5. **Add 6 core exercise steps, 14 optional "⚡ Level up" exercises and an optional Module 6 lab.** They cover path-scoped permissions, `permission.task`, a `/review` command, parallel runs with `opencode run`, one worktree per agent, a guardrail plugin, prompt injection through a CSV, and an orchestrator agent.
 6. **Add one 🌍 Real world story per module.** Each is verified, dated and linked: METR's 19%-slower study, the Mars Climate Orbiter, the Replit database deletion, RouteLLM, Cognition's Flappy Bird example, and reward hacking.
 7. **Fix the schedule.** Hands-on time is 163 of 240 minutes (68%), below the repo's own 75% bar. The new schedule has 183 minutes hands-on (76%).
@@ -89,19 +89,23 @@
 
 ### Word budgets
 
-Measured with `wc -w`, the way today's numbers were. Collapsed ⚡ blocks don't count.
+Measured as **prose**: `wc -w` after removing fenced code blocks (learners copy those; they don't read them) and collapsed `<details>` blocks (optional). "Before" is the commit before the rewrite started.
 
-| File | Now | Target |
-|---|---:|---:|
-| README | 2,267 | 600 |
-| Module 0 | 2,335 | 1,100 |
-| Module 1 | 1,802 | 1,300 |
-| Module 2 | 2,095 | 1,300 |
-| Module 3 | 1,700 | 1,000 |
-| Module 4 | 1,890 | 1,200 |
-| Module 5 | 1,602 | 1,000 |
-| Appendices (gains the glossary) | 680 | 1,000 |
-| **Total** | **14,371** | **8,500** |
+```bash
+awk '/<details>/{d=1}!d{print}/<\/details>/{d=0}' FILE | awk '/^ *```/{c=!c;next}!c' | wc -w
+```
+
+| File | Before | Target | Now |
+|---|---:|---:|---:|
+| README | 2,232 | 550 | |
+| Module 0 | 2,170 | 1,000 | |
+| Module 1 | 1,427 | 1,300 | **1,261** ✔ |
+| Module 2 | 1,802 | 1,100 | |
+| Module 3 | 1,538 | 900 | |
+| Module 4 | 1,673 | 1,000 | |
+| Module 5 | 1,414 | 900 | |
+| Appendices (gains the glossary) | 479 | 850 | |
+| **Total** | **12,735** | **7,600** | |
 
 ### Engagement mechanics (use at least two per exercise)
 
@@ -241,7 +245,7 @@ REPORT: files changed · exact command + last line of its output · anything you
   | Version note | Appendix |
   | Callout legend | One line covering the four icons |
 
-### Module 0: Baseline (2,335 → 1,100 words)
+### Module 0: Baseline (2,170 → 1,000 words of prose)
 
 - **Keep:**
   - The claim "agents multiply whatever plan you give them".
@@ -263,7 +267,7 @@ REPORT: files changed · exact command + last line of its output · anything you
 - **⚡ L0.1, "Ask it to grade itself" (2 min):** after the stop, ask the same session to "rate your implementation 1–10 and list its risks", then compare with `score.sh`. This plants Module 2's "it grades its own homework" with first-hand evidence.
 - **🔑** *Measure before you multiply.*
 
-### Module 1: Split (complete rewrite; 1,802 → about 1,300 words; Ex1 grows from 10 to 15 min)
+### Module 1: Split (complete rewrite; 1,427 → 1,261 words of prose; Ex1 grows from 10 to 15 min) ✔ done
 
 **Why rewrite rather than edit:** all four sources of confusion are structural, not wording:
 
@@ -292,7 +296,7 @@ REPORT: files changed · exact command + last line of its output · anything you
 
 #### Draft of the new `student/module-1-decomposition.md`
 
-This is a near-final draft to judge the voice. It runs about 1,290 words outside its collapsed blocks, within the 1,300 budget. Final copy goes through §14's gates.
+This was the draft used to judge the voice. **The shipped version is `student/module-1-decomposition.md`**, which differs (Step 2 has six tasks, a Figure 2, contract/frozen definitions, and the "exam catches 4 of 8" evidence).
 
 ````markdown
 # Module 1 — Split the job
@@ -525,7 +529,7 @@ Agents will edit the scoreboard if you let them.
 - Capstone Injection D needs no change (the test file path stays the same).
 - M3's Task B still reviews `plan.md`.
 
-### Module 2: Staff (2,095 → 1,300 words; surgical edits, since it was recently rewritten and mostly works)
+### Module 2: Staff (1,802 → 1,100 words of prose; surgical edits, since it was recently rewritten and mostly works)
 
 - **Keep:**
   - "Why more than one agent?" (its three problems).
@@ -569,7 +573,7 @@ Agents will edit the scoreboard if you let them.
 - **⚡ Level ups:** L2.1 step cap and doom loop, L2.2 the `/review` command, L2.3 lethal-trifecta audit (§8).
 - **🔑** *A role is a permission, not a name.*
 
-### Module 3: Budget (1,700 → 1,000 words)
+### Module 3: Budget (1,538 → 900 words of prose)
 
 - **Keep:**
   - Task A, scored objectively out of 13, and Task B with its rubric.
@@ -595,7 +599,7 @@ Agents will edit the scoreboard if you let them.
 - **⚡ Level ups:** L3.1 pin the routing in agent files, L3.2 poisoned CSV, L3.3 cost per correct row (§8).
 - **🔑** *A cheap model plus a hard check beats a pricey model plus trust.*
 
-### Module 4: Run (1,890 → 1,200 words)
+### Module 4: Run (1,673 → 1,000 words of prose)
 
 - **Keep:**
   - The ownership-map table.
@@ -627,7 +631,7 @@ Agents will edit the scoreboard if you let them.
 - **⚡ Level ups:** L4.1 truly parallel, L4.2 break it on purpose, L4.3 one worktree per agent (§8).
 - **🔑** *Parallel only when tasks share nothing.*
 
-### Module 5: Recover (1,602 → 1,000 words)
+### Module 5: Recover (1,414 → 900 words of prose)
 
 - **Keep:**
   - The Swiss cheese image and its explanation.
@@ -923,7 +927,7 @@ Every objective is still covered on the **core** path. Level ups deepen coverage
 
 ## 14. Definition of done (QA gates)
 
-- [ ] `wc -w` per file is within the §2 budget (collapsed ⚡ blocks excluded).
+- [ ] Prose words per file (§2's measure) are within budget.
 - [ ] Exactly one 🔑 per module; `grep` finds no 📘 or 💡 in `student/`.
 - [ ] Every module opens with the identical spine table.
 - [ ] `grep -ri packet student/` returns nothing.
@@ -946,7 +950,7 @@ Every objective is still covered on the **core** path. Level ups deepen coverage
 
 ---
 
-## 15. Decisions I need from you
+## 15. Decisions (all approved 2026-10-03)
 
 1. **Rename the second card to Breaker (attack tests)?** Recommended: yes. It gives the "extra tests" a reason you can feel.
 2. **Retire the word "packet"?** Recommended: yes. The card is the message.

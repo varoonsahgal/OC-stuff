@@ -1,6 +1,6 @@
 # Module 3 — Micro-lecture 3 + Exercise 3: model routing
 
-**Where you are:** you have a plan, two task cards, and a crew with configured boundaries. This module adds the last delegation decision: which model gets which task — decided by evidence, not brand loyalty.
+**Where you are:** you have a plan, a Builder card and a Breaker card, and a crew with configured boundaries. This module adds the last delegation decision: which model gets which task — decided by evidence, not brand loyalty.
 
 ---
 
@@ -26,7 +26,7 @@ quadrantChart
     Rename a variable: [0.1, 0.15]
 ```
 
-*Figure 5 — The model-routing matrix.*
+*Figure 4 — The model-routing matrix.*
 Text alternative: a two-by-two grid with ambiguity on the horizontal axis and failure cost on the vertical; bounded low-risk tasks (summaries, renames, drafting tests from a frozen contract) sit low-left and route to fast/free models with strict checks; policy review and open-ended planning sit high and right and route to stronger reasoning models plus human review.
 
 The matrix compresses into three heuristics you can apply without a whiteboard:

@@ -22,14 +22,14 @@ That has three problems:
 
 ## Where this fits
 
-| Module | What happens | Step |
-|---|---|---|
-| 0 | One agent builds the importer alone | Baseline |
-| 1 | You split the job and write a card for each piece | Split |
-| **2 (here)** | **You build the agents that will work those cards** | **Staff** |
-| 3 | You pick a model for each agent | Budget |
-| 4 | You hand the cards to the crew, run it, compare with Module 0 | Run |
-| 5 | You recover from a launch-night failure | Recover |
+| Module | You learn to… | Orchestration step | The one rule |
+|---|---|---|---|
+| 0 | Watch one agent do the whole job alone | The baseline to beat | Measure before you multiply |
+| 1 | Split the job and write down each piece | Split | Split by file, not by function |
+| **2 ← you are here** | **Build agents with hard limits on what they can touch** | **Staff** | **A role is a permission, not a name** |
+| 3 | Pick the right model for each piece | Budget | Cheap model + hard check beats pricey model + trust |
+| 4 | Hand the cards to agents, run them, compare with Module 0 | Run | Parallel only when tasks share nothing |
+| 5 | Handle a launch-night failure | Recover | Green tests are evidence, not a verdict |
 
 > **Module 1 wrote the instructions. This module builds the workers. Module 4 runs them.**
 
@@ -39,7 +39,7 @@ That has three problems:
 
 | Agent | Job | Can it edit? | Used in |
 |---|---|---|---|
-| `@implementer` | Writes `importer.py` from card T1 | **Yes** | Module 4 |
+| `@implementer` | Writes `importer.py` from the builder card | **Yes** | Module 4 |
 | `@reviewer` | Reads code, reports problems | **No.** Blocked by config | This module and Module 4 |
 
 **These two jobs are opposites**, and that's why you build them:
@@ -47,7 +47,7 @@ That has three problems:
 - **The implementer makes things.** It needs edit rights
 - **The reviewer judges things.** If it could edit, it would "just fix" what it finds, and nobody would check the fix. No edit rights keeps it honest
 
-**What about the test author (card T2)?** You don't build one. In Module 4 the main agent picks a helper for that card on its own. Watching what it picks is part of the lesson.
+**What about the Breaker (the second card)?** You don't build one. In Module 4 the main agent picks a helper for that card on its own. Watching what it picks is part of the lesson.
 
 ---
 
@@ -89,39 +89,26 @@ When you hand work to a helper (a **subagent**), it runs in its own **child sess
 
 ```mermaid
 flowchart LR
-    Y["You (parent session)"] -->|"task packet"| C["@reviewer (child session)<br/>starts empty"]
+    Y["You (parent session)"] -->|"card"| C["@reviewer (child session)<br/>starts empty"]
     C -->|"short report"| Y
     P["Permissions:<br/>edit: deny"] -.enforced on.- C
 ```
 
-*Figure 4 — The packet is everything the child knows. The permissions are enforced no matter what it's told.*
-Text alternative: you send a task packet to the reviewer's child session, which starts empty. It sends back a short report. Its permissions (edit denied) are enforced on it regardless.
+*Figure 3 — The card is everything the child knows. The permissions are enforced no matter what it's told.*
+Text alternative: you send a card to the reviewer's child session, which starts empty. It sends back a short report. Its permissions (edit denied) are enforced on it regardless.
 
-### What is a task packet?
+### The card is the message
 
-**The task packet is the message you send to a helper.** It's the helper's entire briefing.
+Whatever you send a helper is its entire briefing. So send a card, using the same six lines as Module 1: **DO, READ, RULES, TOUCH, DONE, REPORT**.
 
-| | Card (Module 1) | Packet |
-|---|---|---|
-| What it is | A file in `workshop/cards/` | The text of one message |
-| Who reads it | You, while planning | The helper, as its first message |
-
-A good packet answers five questions:
-
-1. **Task:** what am I doing?
-2. **Rules:** what must I follow?
-3. **Files:** what should I read?
-4. **Report:** what do I send back?
-5. **Limits:** what must I not do?
-
-> **The card is the recipe. The packet is the recipe handed to the cook.** In Module 4, the packet is mostly your card, pasted in whole.
+> **The card is the ticket handed to the cook.** In Module 4 you paste your Module 1 cards in whole.
 
 ### Two ways to start a helper
 
 | | `@reviewer …` | Ask the main agent to delegate |
 |---|---|---|
 | Who picks the helper | **You** | **The main agent** |
-| Who writes the packet | You | The main agent |
+| Who writes the message | You | The main agent |
 | How it picks | You typed the name | It reads each agent's `description` |
 
 You'll use `@` today. In Module 4 you'll try the second way, so **write a clear `description`**: it's how the main agent decides who gets which job.
@@ -243,34 +230,20 @@ Ask the reviewer to do the one thing it's not allowed to do:
 
 ### Step 4 — Send a real task (8 min)
 
-The reviewer checks the risks **before** any code is written. Paste this as one message:
+The reviewer checks the risks **before** any code is written. Paste this card as one message:
 
 ```text
 @reviewer
-
-Task: Review the risks for TICKET-001 before any code is written.
-
-Rules: tickets/TICKET-001.md is final.
-Discounts above 20% need manager approval. Exactly 20% is active.
-
-Read:
-- AGENTS.md
-- tickets/TICKET-001.md
-- src/panic_pantry/promotions.py
-- src/panic_pantry/models.py
-- tests/test_importer_contract.py
-- fixtures/promos_messy.expected.md
-
-Report:
-1. The 3 likeliest ways an importer could break the rules
-2. Which existing test would catch each one
-3. Anything in the ticket that's unclear
-Give a file:line for each point.
-
-Limits: Do not edit anything.
+DO:     List the 3 likeliest ways an importer could break TICKET-001's rules, before any code exists.
+READ:   AGENTS.md, tickets/TICKET-001.md, src/panic_pantry/promotions.py, src/panic_pantry/models.py,
+        tests/test_importer_contract.py, fixtures/promos_messy.expected.md
+RULES:  The ticket is final. Discounts above 20% need manager approval; exactly 20% is active.
+TOUCH:  Nothing. Read only.
+DONE:   Each risk names the existing test that would catch it, or says "no test".
+REPORT: each risk with a file:line · anything unclear in the ticket · anything you guessed.
 ```
 
-Spot the five parts of a packet: **Task, Rules, Read, Report, Limits.**
+Spot the six lines of a card: **DO, READ, RULES, TOUCH, DONE, REPORT**.
 
 Save the report. A good one flags at least one real risk, for example the importer setting a promotion's status itself instead of letting the service decide.
 
@@ -290,9 +263,9 @@ Your session
 | `←` / `→` | Move between children |
 | `↑` | Back to your session |
 
-Open child 2. Its **first message is your packet, exactly as sent**. That's all it knew. Anything you said earlier in your own chat isn't there.
+Open child 2. Its **first message is your card, exactly as sent**. That's all it knew. Anything you said earlier in your own chat isn't there.
 
-> 🔑 **The first message of a child session is the child's whole world.** If the report is off, check the packet first.
+> 🔑 **The first message of a child session is the child's whole world.** If the report is off, check the card first.
 
 ---
 

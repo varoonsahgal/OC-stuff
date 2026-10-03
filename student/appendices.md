@@ -6,17 +6,17 @@ Every objective and topic from [COURSE_OUTLINE.md](../COURSE_OUTLINE.md):
 
 | Outline objective / topic area | Where covered |
 |---|---|
-| Break complex features into agent-ready units; boundaries; task size | ML1, Ex1 ([module 1](module-1-decomposition.md)) |
-| Write task specifications and acceptance criteria | ML1, task card template, Ex1 ([module 1](module-1-decomposition.md)) |
-| Identify dependencies, sequencing, safe parallel work, needed context | ML1 (Fig. 2), Ex1, ML4, Ex4 ([module 1](module-1-decomposition.md), [module 4](module-4-parallel-run.md)) |
+| Break complex features into agent-ready units; boundaries; task size | ML1 (split by file), Ex1 Step 1 ([module 1](module-1-decomposition.md)) |
+| Write task specifications and acceptance criteria | ML1 (the 6-line card), Ex1 Steps 4–6, including the Stranger Test ([module 1](module-1-decomposition.md)) |
+| Identify dependencies, sequencing, safe parallel work, needed context | ML1 (Fig. 2), Ex1 (plan's Order line; critical-path Level up), ML4, Ex4 ([module 1](module-1-decomposition.md), [module 4](module-4-parallel-run.md)) |
 | Prompting → orchestrating; too-large/ambiguous/coupled tasks | Opening, Ex0 ([module 0](module-0-baseline.md)) |
 | Primary agent vs subagents; child sessions; fresh context | ML2, Ex2 ([module 2](module-2-agent-crew.md)) |
 | Delegating (Task tool) vs invoking directly (@-mention); letting primary pick subagents | ML2, Ex2, Ex4 ([module 2](module-2-agent-crew.md), [module 4](module-4-parallel-run.md)) |
 | Foreground vs background delegated work | ML4 — explained + recorded instructor demo (experimental in pinned V1; not exercised live) ([module 4](module-4-parallel-run.md)) |
 | Navigating parent/child sessions | ML2, Ex2 step 5 ([module 2](module-2-agent-crew.md)) |
-| When delegation adds value vs keeping work local | ML1 keep/delegate/sequence/defer, Ex1, capstone step 2 ([module 1](module-1-decomposition.md), [module 5](module-5-capstone.md)) |
+| When delegation adds value vs keeping work local | Ex1 Step 2 (keep or delegate), capstone step 2 ([module 1](module-1-decomposition.md), [module 5](module-5-capstone.md)) |
 | Creating custom agents; instructions; roles; reusable designs | Ex2 (reviewer + implementer) ([module 2](module-2-agent-crew.md)) |
-| Tool/permission control; read-only reviewer; controlled write access; preventing dangerous actions; controlling delegation targets | ML2, Ex2 (`permission`, incl. `task`) ([module 2](module-2-agent-crew.md)) |
+| Tool/permission control; read-only reviewer; controlled write access; preventing dangerous actions; controlling delegation targets | ML2, Ex2 (`permission`: `edit`, `bash`); `permission.task` governs the Task tool in Ex4 ([module 2](module-2-agent-crew.md), [module 4](module-4-parallel-run.md)) |
 | Model capability vs complexity/risk; reasoning-quality/latency/cost; variants and effort levels; escalation; avoiding expensive-model waste | ML3, Ex3 ([module 3](module-3-model-routing.md)) |
 | Selecting models in OpenCode; per-agent models | ML3 (`/models`, per-agent `model`), Ex3 ([module 3](module-3-model-routing.md)) |
 | Parallel orchestration; shared context; file ownership; conflict prevention; branches/worktrees; deliverable tracking | ML4, Ex4 ([module 4](module-4-parallel-run.md)) |

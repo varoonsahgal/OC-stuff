@@ -61,7 +61,7 @@ denied tool call visible in the session. If the agent merely *says* it won't
 edit without attempting, have the learner insist ("attempt the edit using your
 edit tool") so the configured denial actually fires once.
 
-### Expected investigation packet (step 4) — model reviewer report
+### Expected step 4 report — model reviewer findings (from the 6-line reviewer card)
 
 ```text
 Findings — pre-implementation review for TICKET-001

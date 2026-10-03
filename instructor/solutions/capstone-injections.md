@@ -150,7 +150,7 @@ append the class above.)
 1. Changed behavior: promo CSV import now reports exactly-20% codes as active,
    matching the shop policy (above 20% requires approval; exactly 20% is active).
 2. Tests run: python3 -m unittest discover -s tests -v — 33 tests, OK
-   (23 starter suite + 10 added by this example pair's Ex4 test author; your
+   (23 starter suite + 10 added by this example pair's Ex4 Breaker; your
    pairs' totals will vary).
 3. Review status: @reviewer flagged duplicated policy logic in the importer;
    fixed by classifying from the service-returned status; re-review clean.

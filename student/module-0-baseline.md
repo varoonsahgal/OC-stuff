@@ -131,7 +131,7 @@ and show me the output.
 
 **During the run:**
 - Step in when you need to, and **count every intervention** — a correction, an answer to its question, a "keep going" nudge, a hand edit. Don't count the starting prompt or a plain permission approval. *Why:* see the note below; Exercise 4 counts them the same way.
-- If it asks whether to write its own tests, answer `No — contract test only.` (That counts as an intervention.) *Why:* `tests/test_promo_import.py` is reserved for Exercise 4's test author, and extra scope here would unbalance the comparison.
+- If it asks whether to write its own tests, answer `No — contract test only.` (That counts as an intervention.) *Why:* `tests/test_promo_import.py` is reserved for Exercise 4's Breaker, and extra scope here would unbalance the comparison.
 - At 15:00, stop — finished or not. "Unfinished" is valid data.
 
 > 📘 **Concept — why interventions are the hidden cost of a run**
