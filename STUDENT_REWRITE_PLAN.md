@@ -99,13 +99,13 @@ awk '/<details>/{d=1}!d{print}/<\/details>/{d=0}' FILE | awk '/^ *```/{c=!c;next
 |---|---:|---:|---:|
 | README | 2,232 | 550 | |
 | Module 0 | 2,170 | 1,000 | |
-| Module 1 | 1,427 | 1,550 | **1,548** (v2 adds Do/Why/Done, the Breaker scaffold, two Predict reveals, and the Stranger Test routing) |
+| Module 1 | 1,427 | 1,650 | **1,631** (v2 adds Do/Why/Done, the Breaker scaffold, two Predict reveals, Stranger Test routing, and the one-writer clarification) |
 | Module 2 | 1,802 | 1,100 | |
 | Module 3 | 1,538 | 900 | |
 | Module 4 | 1,673 | 1,000 | |
 | Module 5 | 1,414 | 900 | |
 | Appendices (gains the glossary) | 479 | 850 | |
-| **Total** | **12,735** | **7,850** | |
+| **Total** | **12,735** | **7,950** | |
 
 ### Engagement mechanics (use at least two per exercise)
 

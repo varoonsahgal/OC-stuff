@@ -47,7 +47,9 @@ D writes a different file and needs nothing from A, B or C. It's a separate job:
 
 **Split by file, not by function.** Three chefs, one cutting board isn't teamwork. It's a queue with knife injuries.
 
-If two pieces of work change the same file, give them to one agent. Separate files aren't enough on their own: both agents also build against the same frozen contract.
+- **One writer per file.** If two pieces of work change the same file, give them to one agent. Reading never collides, so many agents can read one file.
+- **Taking turns doesn't fix it.** In this class agents run one after another, not at once. C would still be editing a loop that A and B designed, guessing at choices it never saw.
+- **Separate files aren't enough.** Both agents also build against the same frozen contract.
 
 ## Never let the Builder grade its own work
 
@@ -58,6 +60,7 @@ If two pieces of work change the same file, give them to one agent. Separate fil
 
 - You don't ask the locksmith who fitted the lock to test whether it can be picked.
 - A Breaker that reads the Builder's code tends to test what the code does, not what the ticket asks.
+- Checking isn't writing. A reviewer or security checker may read the Builder's file, but it reports problems and the Builder fixes them. A checker that edits what it checks ends up grading its own fix.
 - `tests/test_importer_contract.py` holds 9 frozen contract tests: the shop's official exam. Your instructor planted 8 plausible bugs in a working importer, one at a time.
 
 **Predict (10 seconds):** how many of the 8 does the exam catch?
@@ -266,9 +269,14 @@ Its tests should check what the **ticket** says, not what the importer happens t
 </details>
 
 <details>
-<summary><b>Mid-run, a teammate wants a third agent to add logging to <code>importer.py</code>. Yes or no?</b></summary>
+<summary><b>A teammate wants a security agent to <i>fix</i> <code>importer.py</code>, not just report. How, without breaking the rule?</b></summary>
 
-No. It changes the Builder's file, so it's the Builder's job. Put it on the Builder's card, or run it after the Builder finishes.
+Not while the Builder is still working on it: that's two writers on one file. Two safe options:
+
+- **Report, don't fix.** The security agent reads and reports. The Builder makes the fixes.
+- **Hand the file over.** The Builder finishes and stops. The security agent gets its own card, with `importer.py` on its TOUCH line. Someone else reviews its change.
+
+Either way, there's one writer at a time, and nobody grades their own fix.
 </details>
 
 <details>

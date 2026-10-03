@@ -22,6 +22,21 @@ Accept any answer that names the shared file plus a concrete failure
 (overwritten work, failed or conflicting edits, tangled code). Push back on
 "they'd conflict" with no mechanism.
 
+**Questions learners ask here** (the handout answers both under the rule):
+
+- *"Agents run one at a time in this class, so why does it matter?"* Because
+  taking turns doesn't remove the problem. C still edits a loop A and B
+  designed, guessing at their choices. Shared files also make the order matter
+  and blur who owns the diff. Overwrites are only the parallel version of the
+  problem.
+- *"A reviewer reads the same file. Doesn't that break the rule?"* No. The
+  rule is one **writer** per file; reading never collides (the Breaker's ban on
+  reading `importer.py` is about independence, not collisions). A checker reports and the
+  owner fixes. If a second agent must edit (say, to harden security), the
+  Builder finishes first and hands the file over: a new card, a new TOUCH line,
+  and someone else reviews the change. The debrief's security-agent question
+  checks this.
+
 **Predict 2: how many of 8 planted bugs do the 9 contract tests catch?** 4.
 Reproduce it live in about a second:
 

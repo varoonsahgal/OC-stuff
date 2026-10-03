@@ -62,7 +62,7 @@ DONE:   <a command you can paste, and the result that means "finished">
 REPORT: files changed · exact command + last line of its output · anything you guessed
 ```
 
-If the agent doesn't need it to do the job, it's not on the card. A read-only card (a reviewer's) has no command to run, so its DONE line is the bar the report must meet. Dependencies and order belong in `plan.md`; permissions and model belong in the agent file. The two TICKET-001 cards are `workshop/cards/builder.md` (writes `src/panic_pantry/importer.py`) and `workshop/cards/breaker.md` (writes `tests/test_promo_import.py` from the ticket, never from the Builder's code: tests that attack the importer, starting with every way `FREE-ALL` could go live).
+If the agent doesn't need it to do the job, it's not on the card. Ownership rule: one *writer* per file at a time (reading never collides). Checkers report and the owner fixes; a second writer only gets a file through an explicit handoff with its own card and an independent review. A read-only card (a reviewer's) has no command to run, so its DONE line is the bar the report must meet. Dependencies and order belong in `plan.md`; permissions and model belong in the agent file. The two TICKET-001 cards are `workshop/cards/builder.md` (writes `src/panic_pantry/importer.py`) and `workshop/cards/breaker.md` (writes `tests/test_promo_import.py` from the ticket, never from the Builder's code: tests that attack the importer, starting with every way `FREE-ALL` could go live).
 
 **Master analogy:** the restaurant kitchen (the chef at the pass, stations, tickets). Add one vivid second analogy only where the kitchen is weak.
 
