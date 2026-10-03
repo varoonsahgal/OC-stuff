@@ -5,10 +5,10 @@ Write model IDs exactly as OpenCode shows them. Write "unavailable" for any numb
 
 | Run | Task | Model ID (`provider/model`) | Variant | Wall-clock | Score | Tokens / cost |
 |---|---|---|---|---|---|---|
-| 1 | A: row dispositions | | | | /13 | unavailable |
-| 2 | A: row dispositions | | | | /13 | unavailable |
-| 3 | B: plan risks | | | | /6 | unavailable |
-| 4 | B: plan risks | | | | /6 | unavailable |
+| 1 | A: row dispositions | | | | /13 | |
+| 2 | A: row dispositions | | | | /13 | |
+| 3 | B: plan risks | | | | /6 | |
+| 4 | B: plan risks | | | | /6 | |
 
 ## My routing decision
 

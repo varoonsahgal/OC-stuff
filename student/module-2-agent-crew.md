@@ -4,6 +4,17 @@
 >
 > **You'll leave with:** `.opencode/agents/reviewer.md` and `.opencode/agents/implementer.md`. In Module 4 these two agents run your cards.
 
+| Module | You learn to… | Orchestration step | The one rule |
+|---|---|---|---|
+| 0 | Watch one agent do the whole job alone | The baseline to beat | Measure before you multiply |
+| 1 | Split the job and write down each piece | Split | Split by file, not by function |
+| **2 ← you are here** | **Build agents with hard limits on what they can touch** | **Staff** | **A role is a permission, not a name** |
+| 3 | Pick the right model for each piece | Budget | Cheap model + hard check beats pricey model + blind trust |
+| 4 | Hand the cards to agents, run them, compare with Module 0 | Run | Parallel only when tasks share no files |
+| 5 | Handle a launch-night failure | Recover | Green tests are evidence, not a verdict |
+
+> **Module 1 wrote the instructions. This module builds the workers. Module 4 runs them.**
+
 ---
 
 ## Why more than one agent?
@@ -17,21 +28,6 @@ That has three problems:
 - **Its memory fills up.** Every file read and test run stays in one conversation, and the details that matter get buried
 
 > **Fix: split the work by job.** One agent builds, a different agent checks. Each gets only the permissions its job needs.
-
----
-
-## Where this fits
-
-| Module | You learn to… | Orchestration step | The one rule |
-|---|---|---|---|
-| 0 | Watch one agent do the whole job alone | The baseline to beat | Measure before you multiply |
-| 1 | Split the job and write down each piece | Split | Split by file, not by function |
-| **2 ← you are here** | **Build agents with hard limits on what they can touch** | **Staff** | **A role is a permission, not a name** |
-| 3 | Pick the right model for each piece | Budget | Cheap model + hard check beats pricey model + trust |
-| 4 | Hand the cards to agents, run them, compare with Module 0 | Run | Parallel only when tasks share nothing |
-| 5 | Handle a launch-night failure | Recover | Green tests are evidence, not a verdict |
-
-> **Module 1 wrote the instructions. This module builds the workers. Module 4 runs them.**
 
 ---
 
@@ -101,7 +97,7 @@ Text alternative: you send a card to the reviewer's child session, which starts 
 
 Whatever you send a helper is its entire briefing. So send a card, using the same six lines as Module 1: **DO, READ, RULES, TOUCH, DONE, REPORT**.
 
-> **The card is the ticket handed to the cook.** In Module 4 you paste your Module 1 cards in whole.
+> **The card is the order slip handed to the cook.** In Module 4 you paste your Module 1 cards in whole.
 
 ### Two ways to start a helper
 
@@ -181,14 +177,11 @@ permission:
 ---
 You carry out exactly one task card. It arrives in your first message.
 
-- Change only the files on the card's "In scope" line.
-- Follow the card's contract exactly. If something is unclear, stop and say so.
-- Run the card's acceptance check before you finish.
+- Change only the files on the card's TOUCH line.
+- Follow the card's RULES exactly. If something is unclear, stop and say so.
+- Run the card's DONE command before you finish.
 
-Report back:
-- Files you changed
-- Checks you ran, with pass/fail
-- Anything you're unsure about
+Report back exactly what the card's REPORT line asks for.
 ```
 
 Notice: it **can** edit any file. Its scope ("`importer.py` only") comes from the card. You'll check that it stayed in scope in Module 4.

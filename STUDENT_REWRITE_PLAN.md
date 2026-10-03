@@ -79,7 +79,7 @@
 | Module | New terms |
 |---|---|
 | 0 | primary agent, intervention, scorecard |
-| 1 | contract, plan, card |
+| 1 | contract (frozen), card, Builder/Breaker |
 | 2 | subagent, permission, child session |
 | 3 | model ID, variant, escalation |
 | 4 | ownership map, worktree, Task tool |
@@ -99,7 +99,7 @@ awk '/<details>/{d=1}!d{print}/<\/details>/{d=0}' FILE | awk '/^ *```/{c=!c;next
 |---|---:|---:|---:|
 | README | 2,232 | 550 | |
 | Module 0 | 2,170 | 1,000 | |
-| Module 1 | 1,427 | 1,300 | **1,261** ✔ |
+| Module 1 | 1,427 | 1,450 | **1,438** ✔ (v2 adds Do/Why/Done and the Breaker scaffold) |
 | Module 2 | 1,802 | 1,100 | |
 | Module 3 | 1,538 | 900 | |
 | Module 4 | 1,673 | 1,000 | |
@@ -149,8 +149,8 @@ This is the table you liked. Its wording stays exactly as it is, with one column
 | **0** | Watch one agent do the whole job alone | The baseline to beat | Measure before you multiply |
 | **1** | Split the job and write down each piece | **Split** | Split by file, not by function |
 | **2** | Build agents with hard limits on what they can touch | **Staff** | A role is a permission, not a name |
-| **3** | Pick the right model for each piece | **Budget** | Cheap model + hard check beats pricey model + trust |
-| **4** | Hand the cards to agents, run them, compare with Module 0 | **Run** | Parallel only when tasks share nothing |
+| **3** | Pick the right model for each piece | **Budget** | Cheap model + hard check beats pricey model + blind trust |
+| **4** | Hand the cards to agents, run them, compare with Module 0 | **Run** | Parallel only when tasks share no files |
 | **5** | Handle a launch-night failure | **Recover** | Green tests are evidence, not a verdict |
 
 **Where it appears:**
@@ -309,8 +309,8 @@ This was the draft used to judge the voice. **The shipped version is `student/mo
 | 0 | Watch one agent do the whole job alone | The baseline to beat | Measure before you multiply |
 | **1 ← you are here** | **Split the job and write down each piece** | **Split** | **Split by file, not by function** |
 | 2 | Build agents with hard limits on what they can touch | Staff | A role is a permission, not a name |
-| 3 | Pick the right model for each piece | Budget | Cheap model + hard check beats pricey model + trust |
-| 4 | Hand the cards to agents, run them, compare with Module 0 | Run | Parallel only when tasks share nothing |
+| 3 | Pick the right model for each piece | Budget | Cheap model + hard check beats pricey model + blind trust |
+| 4 | Hand the cards to agents, run them, compare with Module 0 | Run | Parallel only when tasks share no files |
 | 5 | Handle a launch-night failure | Recover | Green tests are evidence, not a verdict |
 
 ## Why bother?
@@ -535,7 +535,7 @@ Agents will edit the scoreboard if you let them.
   - "Why more than one agent?" (its three problems).
   - The role-is-a-boundary table.
   - The permission levels table.
-  - The child-session table and Figure 4.
+  - The child-session table and Figure 3.
   - The agent file anatomy.
   - Steps 1, 2, 3 and 5.
   - The troubleshooting table.
@@ -609,7 +609,7 @@ Agents will edit the scoreboard if you let them.
   - Dispositions (fix / accept with reason / defer with owner).
   - The debrief questions.
 - **Cut:**
-  - Figure 6. Keep one worktree diagram, and put it here.
+  - Figure 5 (worktree isolation) or README's Figure 0. Keep one worktree diagram, and put it here.
   - The foreground/background concept box, which becomes 2 lines.
   - The "three chefs" paragraph, which moves to M1.
   - Acceptance checks go from 6 to 4.
@@ -629,7 +629,7 @@ Agents will edit the scoreboard if you let them.
   - **Integration:** `bash scripts/score.sh`, then `/review` (if L2.2 is done) or the 6-line reviewer card, then dispositions.
   - **Comparison:** the side-by-side scorecard (Ex0 vs. Ex4), with a "rework minutes" row.
 - **⚡ Level ups:** L4.1 truly parallel, L4.2 break it on purpose, L4.3 one worktree per agent (§8).
-- **🔑** *Parallel only when tasks share nothing.*
+- **🔑** *Parallel only when tasks share no files.*
 
 ### Module 5: Recover (1,414 → 900 words of prose)
 
@@ -642,7 +642,7 @@ Agents will edit the scoreboard if you let them.
   - The exit ticket.
 - **Cut:**
   - One of the two back-to-back 🔑.
-  - Figure 7 (the receipts mermaid), since the table says the same thing.
+  - Figure 6 (the receipts mermaid), since the table says the same thing.
   - The prose receipts list, which becomes a table: `# | Receipt | Catches | Do`.
 - **Rewrite:**
   - **🌍 METR on reward hacking:** frontier models overwrote the timer that scored them and read the answer key. o3 did it in **39 of 128 runs (30.4%)** on RE-Bench ([METR, Jun 2025](https://metr.org/blog/2025-06-05-recent-reward-hacking/)). An agent's "all tests pass" is a claim from the party that benefits from it.
@@ -874,6 +874,8 @@ Debrief: *prompts ask, permissions block, plugins enforce your own logic.* Bash 
 - Lecture = 5 + 4 + 5 + 5 + 5 + 5 = 29.
 - Breaks = 15. Buffer = 8. Close = 5.
 - Total = 183 + 29 + 15 + 8 + 5 = **240** ✔
+
+**Interim schedule (shipped with Phase 2):** ML1 = 4, Ex1 = 15, buffer = 17, everything else unchanged. Hands-on = 168, total = 240. The rest of this table lands with Phases 3–4.
 
 **Why an 8-minute buffer is enough:** ⚡ Level ups are optional and collapsed. Fast tables take them and slow tables skip them, so nobody waits and the room stays in sync.
 

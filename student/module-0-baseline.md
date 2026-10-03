@@ -196,4 +196,4 @@ git add -A && git diff --cached > /tmp/baseline.diff    # keep notes and the dif
 
 ---
 
-**Next:** [module-1-decomposition.md](module-1-decomposition.md) — learn to write the kind of ticket your agent found for you, with a frozen contract.
+**Next:** [module-1-decomposition.md](module-1-decomposition.md) — split TICKET-001 into a plan and two cards, one per agent, against a frozen contract.

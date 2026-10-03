@@ -4,15 +4,13 @@
 >
 > **You'll leave with:** `workshop/plan.md`, `workshop/cards/builder.md`, `workshop/cards/breaker.md`.
 
-**Orchestration** means splitting a job into pieces, handing each piece to an agent, then checking and combining what comes back. The course does it one step at a time:
-
 | Module | You learn to… | Orchestration step | The one rule |
 |---|---|---|---|
 | 0 | Watch one agent do the whole job alone | The baseline to beat | Measure before you multiply |
 | **1 ← you are here** | **Split the job and write down each piece** | **Split** | **Split by file, not by function** |
 | 2 | Build agents with hard limits on what they can touch | Staff | A role is a permission, not a name |
-| 3 | Pick the right model for each piece | Budget | Cheap model + hard check beats pricey model + trust |
-| 4 | Hand the cards to agents, run them, compare with Module 0 | Run | Parallel only when tasks share nothing |
+| 3 | Pick the right model for each piece | Budget | Cheap model + hard check beats pricey model + blind trust |
+| 4 | Hand the cards to agents, run them, compare with Module 0 | Run | Parallel only when tasks share no files |
 | 5 | Handle a launch-night failure | Recover | Green tests are evidence, not a verdict |
 
 ---
@@ -21,75 +19,97 @@
 
 - In Module 0 the ticket did the thinking. Most repos don't have that ticket.
 - No ticket means the agent guesses. Five agents means five different guesses, at once, in your code.
-- **Orchestration is mostly writing.** Bad cards in, bad agents out, whatever the model.
+- **Orchestration** (splitting a job across agents and checking what comes back) is mostly writing. A vague brief makes even a strong model guess.
 
-> 🌍 **Real world:** in 1999 NASA lost the $125M Mars Climate Orbiter because one team's software reported thrust in pound-force seconds while the other team's expected newton-seconds. The interface spec said metric. Nobody checked. ([Mars Climate Orbiter](https://en.wikipedia.org/wiki/Mars_Climate_Orbiter))
-> Two agents building against two readings of one ticket is the same crash, only smaller.
-
-- **Contract** = the rules both agents build against. Here it's the 9 acceptance criteria in `tickets/TICKET-001.md`.
-- **Frozen** = final. Nobody changes it mid-run. If it must change, stop everyone and re-brief.
+The **contract** is what every agent builds against: the 9 acceptance criteria in `tickets/TICKET-001.md` (the function, what it returns, every edge case, the 20% rule). **Freeze** it (make it final) before any agent starts. To change it, stop everyone and re-brief.
 
 ---
 
-## Rule 1 — Split by file, not by function
+## Split by file, not by function
+
+A teammate splits TICKET-001 four ways. The ticket's whole deliverable is one file: `src/panic_pantry/importer.py`.
+
+| Agent | Job |
+|---|---|
+| A | Parse the CSV |
+| B | Validate each row |
+| C | Skip duplicates |
+| D | Write tests that attack the importer |
+
+**Predict (30 seconds):** all four start at once. What goes wrong?
+
+<details><summary>Answer</summary>
+
+A, B and C all change `importer.py`. One may overwrite another's work, edits may fail against a file that changed underneath them, or you get three halves of one loop that nobody designed together. Parsing, validating and skipping duplicates happen in the same loop, so they're one job for one agent: the **Builder**.
+
+D writes a different file and needs nothing from A, B or C. It's a separate job: the **Breaker**.
+</details>
 
 Three chefs, one cutting board isn't teamwork. It's a queue with knife injuries.
 
-If two pieces of work end up in **the same file**, they're one job. Give that job to one agent.
+**If two pieces of work change the same file, give them to one agent.** Separate files aren't enough on their own: both agents also build against the same frozen contract.
 
-## Rule 2 — Never let the builder grade its own work
+## Never let the Builder grade its own work
 
 | Agent | Job | Writes | Reads |
 |---|---|---|---|
-| **Builder** | Makes the importer | `src/panic_pantry/importer.py` | The ticket + the code it calls |
-| **Breaker** | Writes tests that try to sneak `FREE-ALL` past the 20% rule | `tests/test_promo_import.py` | **The ticket, never the Builder's code** |
+| **Builder** | Makes the importer | `src/panic_pantry/importer.py` | The ticket + the shop code it calls |
+| **Breaker** | Writes tests that attack the ticket, starting with every way `FREE-ALL` could go live | `tests/test_promo_import.py` | The ticket + the shop code its tests call. **Never the Builder's code** |
 
 - You don't ask the locksmith who fitted the lock to test whether it can be picked.
-- A Breaker that reads the Builder's code inherits the Builder's blind spots. So it works from the ticket.
-- `tests/test_importer_contract.py` is the shop's official exam, and it's frozen. We planted 8 realistic bugs in a working importer, and **the exam catches only 4**. It misses:
-  - a wrong header that still imports every row
-  - a 3-column row that slips through
-  - `20.9` quietly accepted as `20`
-  - the wrong reason for a blank row
+- A Breaker that reads the Builder's code tends to test what the code does, not what the ticket asks.
+- `tests/test_importer_contract.py` holds 9 frozen contract tests: the shop's official exam. Your instructor planted 8 plausible bugs in a working importer, one at a time.
 
-  The Breaker hunts for gaps like these.
+**Predict (10 seconds):** how many of the 8 does the exam catch?
+
+<details><summary>Answer</summary>
+
+Only 4. It misses:
+
+- a wrong header that gets flagged, and then every row imports anyway
+- a row with 3 columns that slips through
+- a `20.9` discount accepted as `20` instead of rejected
+- a blank row reported as `"blank line"` instead of `"empty row"`
+
+None of these lets `FREE-ALL` go live (the service still blocks that), but each one breaks the ticket. So the Breaker attacks every criterion, not just the 20% rule.
+</details>
+
+> 🌍 **Real world:** in 1999 NASA lost the $125M Mars Climate Orbiter. One team's software reported thruster impulse in pound-force seconds; the navigation software expected newton-seconds, as the spec required. No test checked the handoff. ([Mars Climate Orbiter](https://en.wikipedia.org/wiki/Mars_Climate_Orbiter))
+>
+> A written contract isn't enough: something must check each side against it. Here, the exam plus a Breaker.
 
 ```mermaid
 flowchart LR
     F{{"You: freeze the contract"}} --> B["Builder<br/>writes importer.py"]
     F --> K["Breaker<br/>writes test_promo_import.py"]
-    B --> M["You: merge, run every test, get a review"]
+    B --> M["You: combine both files,<br/>run every test"]
     K --> M
 ```
 
-*Figure 2 — You decide first. Builder and Breaker work alone, in either order. You check last.*
-Text alternative: you freeze the contract; the Builder and the Breaker then work independently, in either order; you merge, run every test, and get a review.
+*Figure 2 — Freeze first. Builder and Breaker work alone, in either order. Check last.*
+Text alternative: you freeze the contract; Builder and Breaker work independently; you combine both files and run every test.
 
 ---
 
-## Plan vs. card
+## The card is the whole message
 
-| | `plan.md`: the ticket rail | A card: one ticket |
+| | `plan.md` | A card |
 |---|---|---|
 | **Read by** | You | One agent |
 | **Covers** | The whole job: who, which file, which check, what order | One job, nothing extra |
 
-> **If the agent doesn't need it to do the job, it's not on the card.**
+The agent never sees your chat. Apart from the repo's `AGENTS.md`, the card is all it gets. **If the agent doesn't need it to do the job, it's not on the card.**
 
-## A card is six lines
-
-Each line answers a question the agent would otherwise guess.
+Each of the six lines answers a question the agent would otherwise guess:
 
 | Line | Answers |
 |---|---|
 | **DO** | What do I produce? |
 | **READ** | What do I read first? |
 | **RULES** | What must stay true? |
-| **TOUCH** | Which files may I change, and nothing else? |
-| **DONE** | What command proves I'm finished? |
+| **TOUCH** | Which files may I change? *Only* these. |
+| **DONE** | What command proves I'm finished? (your acceptance check) |
 | **REPORT** | What do I send back? Always ends with *anything you guessed*. |
-
-The agent can't see your chat or your plan. **The card is the whole message you send it.**
 
 ---
 
@@ -100,137 +120,136 @@ cd sandbox/panic-pantry          # the main checkout, not a worktree
 mkdir -p workshop/cards
 ```
 
-You only create files in `workshop/`.
+You only create files in `workshop/`. If OpenCode is still open from Module 0, quit it: you'll start it here in Step 5.
 
-### Step 1 — Spot the bad split (2 min)
+### Step 1 — Keep or delegate? (2 min)
 
-A teammate proposes:
+- **Do:** mark each task Keep or Delegate.
+- **Why:** every card costs minutes. Spend them where an agent pays you back.
+- **Done when:** all six are marked and checked against the answer.
 
-| Agent | Job | File |
-|---|---|---|
-| A | Parse the CSV | `importer.py` |
-| B | Validate each row | `importer.py` |
-| C | Skip duplicates | `importer.py` |
-| D | Write tests | `tests/test_promo_import.py` |
-
-**Do:** write one sentence: what breaks if A, B and C run at the same time?
-
-<details><summary>Answer</summary>
-
-They all edit `importer.py`. The last one to save wins, and the other two jobs vanish. A + B + C are one job, so they get one agent: the **Builder**. D writes a different file and needs nothing from the others, so it's a separate job: the **Breaker**.
-</details>
-
-### Step 2 — Keep or delegate? (1 min)
-
-**Delegate when the brief is shorter than the job and the result can be checked.** Otherwise, keep it.
+**Delegate when the brief is shorter than the job, the result can be checked, and it's not a judgment call.**
 
 | Task | Keep or delegate? |
 |---|---|
 | Settle an unclear rule in the ticket | ? |
 | Write `importer.py` | ? |
 | Rename one variable | ? |
-| Write attack tests from the ticket | ? |
-| Find every file that calls `create_promotion` | ? |
-| Make the GO / NO-GO call at midnight | ? |
+| Write tests that attack the importer | ? |
+| Predict the result of all 13 rows in `fixtures/promos_messy.csv` | ? |
+| Make the GO / NO-GO call at midnight (ship it or don't) | ? |
 
 <details><summary>Answer</summary>
 
 | Task | Answer | Why |
 |---|---|---|
-| Settle an unclear rule | **Keep** | It's a judgment call. An agent would guess. |
-| Write `importer.py` | **Delegate** | Short brief, checked by the contract tests |
-| Rename one variable | **Keep** | Briefing it takes longer than doing it |
-| Write attack tests | **Delegate** | Short brief, and the tests run |
-| Find every caller | **Delegate** | Short brief, and you can check the answer with a search |
-| GO / NO-GO | **Keep** | The final call is yours |
+| Settle an unclear rule | **Keep** | A judgment call. No command can check it. |
+| Write `importer.py` | **Delegate** | Short brief. The contract tests and the Breaker's tests check it. |
+| Rename one variable | **Keep** | Briefing it takes longer than doing it. |
+| Write tests that attack the importer | **Delegate** | Short brief. The tests run against the finished importer. |
+| Predict all 13 rows | **Delegate** | Short brief. `fixtures/promos_messy.expected.md` checks every row. |
+| GO / NO-GO | **Keep** | A judgment call, and it's yours. |
 </details>
 
-### Step 3 — Save the plan (1 min)
+### Step 2 — Save the plan (2 min)
 
-Copy into `workshop/plan.md`:
+- **Do:** copy this into `workshop/plan.md`, then fill both `___`.
+- **Why:** the plan holds what no agent needs: the order, and your own jobs. Writing the contract line is the freeze.
+- **Done when:** it's saved with no `___` left.
 
 ```markdown
 # Plan — TICKET-001
 
 Contract (frozen): tickets/TICKET-001.md, criteria 1–9. Above 20% → pending_approval; exactly 20% → active.
-Order: I freeze the contract → Builder and Breaker, either order → I merge, run every test, get a review.
+Order: freeze the contract → Builder and Breaker, either order → I combine both files and run every test.
 
-| Card    | Agent                    | Writes                       | Done when                                                       |
-|---------|--------------------------|------------------------------|-----------------------------------------------------------------|
-| builder | implementer (Module 2)   | src/panic_pantry/importer.py | python3 -m unittest tests.test_importer_contract -v → 9 tests OK |
-| breaker | primary picks (Module 4) | tests/test_promo_import.py   | python3 -m unittest tests.test_promo_import -v → no errors       |
+| Card    | Writes                       | Done when                                                                      |
+|---------|------------------------------|--------------------------------------------------------------------------------|
+| builder | src/panic_pantry/importer.py | python3 -m unittest tests.test_importer_contract -v → 9 tests OK, none skipped |
+| breaker | ___                          | python3 -m unittest tests.test_promo_import -v → OK, every test skipped until importer.py exists |
 
-Kept by me: settling unclear rules, freezing the contract, merging, the GO/NO-GO call.
+Kept by me: ___ (your Keep answers from Step 1), freezing the contract, combining the files.
 ```
 
-### Step 4 — Read the Builder card (1 min)
+### Step 3 — Copy the Builder card (1 min)
 
-Copy into `workshop/cards/builder.md`. Read each line and ask: *what would the agent guess without it?*
+- **Do:** copy this into `workshop/cards/builder.md`.
+- **Why:** it's your model for the Breaker card. RULES blocks a real bug: an importer that decides "pending" by comparing to 20 itself.
+- **Done when:** it's saved.
 
 ```text
 DO:     Create src/panic_pantry/importer.py with import_promotions(csv_path, service) -> ImportReport, as specified in tickets/TICKET-001.md.
 READ:   tickets/TICKET-001.md, src/panic_pantry/promotions.py, src/panic_pantry/models.py, fixtures/promos_clean.csv, fixtures/promos_messy.csv, fixtures/promos_messy.expected.md
-RULES:  Criteria 1–9 are final. The service decides approval: never compare to 20 yourself. "Duplicate" includes codes already in the store.
+RULES:  Criteria 1–9 are final. The service decides approval: never compare to 20 yourself. "Duplicate" includes codes the shop already has (WELCOME10 is one).
 TOUCH:  src/panic_pantry/importer.py only.
 DONE:   python3 -m unittest tests.test_importer_contract -v → Ran 9 tests, OK, none skipped.
 REPORT: files changed · the exact command you ran + its last line · anything you guessed.
 ```
 
-### Step 5 — Write the Breaker card (6 min)
+### Step 4 — Write the Breaker card (6 min)
 
-Create `workshop/cards/breaker.md` with the same six labels. Answer these as you go:
+- **Do:** copy this skeleton into `workshop/cards/breaker.md` and replace every `___`.
+- **Why:** each blank is a guess you take away from the agent that runs this card in Module 4.
+- **Done when:** no `___` is left and the self-check passes.
 
-- **DO:** which file? What should its tests *try* to do?
-- **READ:** which files tell it what correct behavior looks like?
-- **RULES:** which file must it never open, and why? Name three ways a bad importer could let `FREE-ALL,100` go live.
-- **TOUCH:** which one file?
-- **DONE:** which command? Its tests will *skip* until `importer.py` exists. Say so on the card, so nobody "fixes" that.
+```text
+DO:     Create tests/test_promo_import.py: tests that attack the importer. First, every way FREE-ALL,100 could go live: ___. Then the ticket rules the exam never tests: ___.
+READ:   tickets/TICKET-001.md, fixtures/promos_messy.expected.md, data/promotions.json.seed, src/panic_pantry/promotions.py, src/panic_pantry/store.py, ___
+RULES:  Never open ___. Exactly 20% → ___. Above 20% → ___, and rejected at checkout. Skip every test, don't fail, while importer.py is missing. Each test uses its own temp copy of the seed store. If a test fails against a real importer, report it; never weaken it.
+TOUCH:  ___ only.
+DONE:   ___ → OK, every test skipped until importer.py exists.
+REPORT: files changed · the exact command you ran + its last line · which ticket criterion each test covers · anything you guessed.
+```
 
-**Self-check before Step 6:**
+| Blank | Where to look |
+|---|---|
+| Ways `FREE-ALL` could go live | Name three. Ticket criterion 7 lists what the importer must never do. |
+| Rules the exam never tests | The four misses in the second Predict answer |
+| Last READ file | Which test file already skips while `importer.py` is missing? |
+| Never open | The Builder's file |
+| 20% lines | The Contract line in `plan.md` |
+| TOUCH, DONE | The breaker row in `plan.md` |
 
+**Self-check:**
+
+- [ ] No `___` left
 - [ ] TOUCH names a different file from the Builder's
-- [ ] RULES forbids reading `importer.py`
-- [ ] Exactly 20% → active is tested
-- [ ] 21% and above → `pending_approval`, *and* rejected at checkout, is tested
-- [ ] DONE is a command you could paste into a terminal
+- [ ] DO names at least two of the four rules the exam never tests
 
-### Step 6 — The Stranger Test (4 min)
+### Step 5 — The Stranger Test (4 min)
 
-A fresh agent knows only what's on the card. So let one read it.
+- **Do:** let a fresh agent read your card and tell you what it would have to guess.
+- **Why:** a fresh agent has only the card and the repo's `AGENTS.md`, like the agent in Module 4.
+- **Done when:** the top two HIGH guesses are answered on your card.
 
-1. In OpenCode, type `/new`, then press **Tab** to switch to **Plan**.
+1. Start OpenCode here, in `sandbox/panic-pantry`: run `opencode`. Type `/new`, then press **Tab** to switch to the **Plan** agent (OpenCode's read-only mode).
 2. Paste:
 
    ```text
    Below is a task card. Do NOT do the task.
-   List every decision you would have to guess because the card doesn't say.
-   Rank them: which wrong guess would break the result?
+   List the five decisions you would have to guess because the card doesn't say, worst first.
+   Mark each HIGH if a wrong guess would change which tests get written, otherwise LOW. One line each.
 
    [paste workshop/cards/breaker.md here]
    ```
 
-3. Fix the top two guesses in your card.
+3. Answer the top two HIGH guesses on your card. If a guess is about the rules themselves (for example, which headers count as wrong), answer it in `plan.md`'s Contract line instead, so the Builder gets the same answer.
 
-**Done when:** no remaining guess would change which tests get written.
+How many HIGH guesses did your card get? Compare with your neighbor: fewest wins.
 
-> 🌍 Anthropic hit the same wall building its multi-agent research system: "Without detailed task descriptions, agents duplicate work, leave gaps, or fail to find necessary information." ([Anthropic, Jun 2025](https://www.anthropic.com/engineering/multi-agent-research-system))
-
-### Done when
-
-- [ ] `plan.md`, `builder.md` and `breaker.md` are saved
-- [ ] Your Breaker card passes the self-check and survived the Stranger Test
+> 🌍 **Real world:** Anthropic's multi-agent research system beat a single agent by 90.2% on its internal eval. Its builders' lesson: "Without detailed task descriptions, agents duplicate work, leave gaps, or fail to find necessary information." ([Anthropic, Jun 2025](https://www.anthropic.com/engineering/multi-agent-research-system)) Your card is that task description.
 
 <details><summary>⚡ <b>Level up — find the critical path (3 min)</b></summary>
 
-Add a third card to your plan: a read-only **Reviewer** that checks the merged code. What must it wait for? Draw the plan as boxes and arrows.
+Add a **Reviewer** row to your plan: a read-only agent that checks the combined code. What must it wait for? Draw your plan as boxes and arrows.
 
-The longest chain of "waits for" is the **critical path**. It's the shortest time the whole job can ever take, however many agents you add.
+The **critical path** is the chain of "waits for" with the largest total time. However many agents you add, the job can't finish sooner. Only shortening a step or removing a wait helps.
 
-![A graph of five tasks, A to E. Arrows are labeled with durations. The red chain A→B→E→C takes 7 units; the other routes from A to C take 5.](images/critical-path.png)
+![A graph of five milestones, A to E, joined by six arrows labeled with how long each step takes. The red chain A→B→E→C takes 7 units; the other routes from A to C take 5.](images/critical-path.png)
 
-*The red chain takes 7 units, so the job can't finish sooner than 7, however many workers you add. Diagram: Illes, [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:5n_PERT_graph_with_critical_path.svg), public domain.*
+*The red chain takes 7 units, so the job can't finish sooner than 7. Diagram: Illes, [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:5n_PERT_graph_with_critical_path.svg), public domain.*
 
-In your plan: which chain is the critical path, and which step on it is yours?
+In your plan, which chain is the critical path, and which steps on it are yours? (In this classroom, agents run one after another, so the Builder and the Breaker are both on it.)
 </details>
 
 ---
@@ -244,15 +263,15 @@ Its tests should check what the **ticket** says, not what the importer happens t
 </details>
 
 <details>
-<summary><b>Why must the two TOUCH lines name different files?</b></summary>
+<summary><b>Mid-run, a teammate wants a third agent to add logging to <code>importer.py</code>. Yes or no?</b></summary>
 
-So the two agents never overwrite each other, whichever runs first. Same file = collision.
+No. It changes the Builder's file, so it's the Builder's job. Put it on the Builder's card, or run it after the Builder finishes.
 </details>
 
 <details>
-<summary><b>Why lock the tests, fixtures, seed data and scripts?</b></summary>
+<summary><b>The Builder's TOUCH line says <i>only</i>. Why does that word matter?</b></summary>
 
-They're how "done" gets measured. METR caught frontier models overwriting the timer that scored them and reading the answer key. On one benchmark, o3 did it in 39 of 128 runs ([METR, Jun 2025](https://metr.org/blog/2025-06-05-recent-reward-hacking/)). Agents will edit the scoreboard if you let them.
+It puts everything else off-limits, including the contract tests, fixtures, seed data and scripts that measure "done". Agents can edit the scoreboard if you let them. METR, an AI evaluation lab, caught OpenAI's o3 rewriting the timer that scored it. On one benchmark that shows the model its own scoring code, o3 tried some kind of score hack in 39 of 128 runs ([METR, Jun 2025](https://metr.org/blog/2025-06-05-recent-reward-hacking/)).
 </details>
 
 > 🔑 **Decide at 2 PM what you'd otherwise discover at midnight.**

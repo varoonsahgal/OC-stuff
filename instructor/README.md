@@ -80,20 +80,26 @@ config differ across major versions.
 - **Reset if needed:** worktree contaminated before Step 2 → `bash sandbox/setup.sh`
   rebuilds both worktrees (announce that it wipes them).
 
-### Exercise 1 — split the job (15 min: bad split ≈2, keep/delegate ≈1, plan ≈1, Builder card ≈1, Breaker card ≈6, Stranger Test ≈4)
-- **Cue @ 2 min:** everyone has one sentence for the bad split ("A, B and C
-  all write `importer.py`; the last save wins"). If the room stalls, reveal it.
-- **Cue @ 5 min:** `workshop/plan.md` and `workshop/cards/builder.md` saved.
-- **Cue @ 11 min:** `workshop/cards/breaker.md` drafted and self-checked:
-  TOUCH = `tests/test_promo_import.py` only; RULES forbids reading
-  `importer.py`; DONE = `python3 -m unittest tests.test_promo_import -v`.
-  Everyone starts the Stranger Test now (`/new`, Tab to **Plan**).
-- **Watch for:** TOUCH lines that overlap between the two cards (flag it at
-  once: it's the Ex4 collision seed); a DONE line like "looks good" (demand a
-  command); a Breaker READ line that lists `importer.py`.
+### Exercise 1 — split the job (15 min: keep/delegate ≈2, plan ≈2, Builder card ≈1, Breaker card ≈6, Stranger Test ≈4)
+- **In Micro-lecture 1:** run both Predicts aloud as a room ("all four start at
+  once: what goes wrong?" and "how many of the 8 planted bugs does the exam
+  catch?"). Take a show of hands *before* anyone opens an answer.
+- **Cue @ 4 min:** Step 1 marked; `workshop/plan.md` saved with both `___`
+  filled (breaker row = `tests/test_promo_import.py`).
+- **Cue @ 11 min:** `workshop/cards/breaker.md` has no `___` left and passes
+  the self-check. Everyone starts the Stranger Test now: **quit any OpenCode
+  still open in the single-agent worktree** and run `opencode` in
+  `sandbox/panic-pantry`. Otherwise the stranger can read the baseline
+  `importer.py`.
+- **Cue @ 15 min:** ask for HIGH counts; fewest wins. Ask one pair to read a
+  guess that changed the contract (it belongs in `plan.md`, not just the card).
+- **Watch for:** a breaker row or TOUCH line that names `importer.py`; a
+  Breaker card that drops "Skip every test, don't fail" (that agent will write
+  tests that fail and then "fix" them, which is the weak-card result in the
+  answer key); DONE lines like "looks good".
 - **Recovery:** stuck past 9 min → hand them the model `breaker.md` from the
   answer key; they still run the Stranger Test on it. No model access → skip
-  Step 6 live and walk through Trace 4 in
+  Step 5 live and walk through Trace 4 in
   [solutions/fallback-traces.md](solutions/fallback-traces.md). The debrief
   answers are in the handout under collapsed sections.
 - **Backing the "4 of 8" claim:** if anyone asks, run
@@ -129,7 +135,7 @@ config differ across major versions.
 - **Before start:** confirm every learner copied `.opencode/agents/` and cards
   into the orchestrated worktree and set the **same model as Ex0**.
 - **Cue @ launch:** contract confirmed frozen; ownership map read aloud once:
-  importer → `src/panic_pantry/importer.py`; tests → `tests/test_promo_import.py`;
+  importer → `src/panic_pantry/importer.py`; Breaker → `tests/test_promo_import.py`;
   primary → `workshop/integration-notes.md`.
 - **Hard stop @ 15:00** of the window. Then integration checks even if unfinished.
 - **Watch for:** agents editing `tests/test_importer_contract.py` (frozen — this

@@ -16,7 +16,7 @@ is allowed and becomes `active`.**
 - [ ] Contract confirmed frozen (plan.md/ticket re-read) before first delegation.
 - [ ] Same model/effort as Ex0 set via `/models` before the window.
 - [ ] Delegations carried the full card text (fresh child context).
-- [ ] The tests-card child session was created by the **primary via the Task
+- [ ] The Breaker's child session was created by the **primary via the Task
       tool** (governed by `permission.task`) — the learner instructed
       "Delegate this task card to the appropriate subagent" + the breaker card
       rather than @-mentioning; verify in the session tree.
@@ -26,7 +26,7 @@ is allowed and becomes `active`.**
       run record.
 - [ ] `git status` shows exactly: `src/panic_pantry/importer.py` (new),
       `tests/test_promo_import.py` (new), `workshop/integration-notes.md` (new),
-      plus copied `.opencode/agents/*` — nothing else. Any other change =
+      plus copied `.opencode/agents/*` and `workshop/cards/*` — nothing else. Any other change =
       boundary violation to disposition.
 - [ ] No two writers on one file (compare status output to the ownership map).
 - [ ] `python3 -m unittest discover -s tests -v` run by the learner post-merge;

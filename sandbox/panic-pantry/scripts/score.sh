@@ -1,95 +1,224 @@
 #!/usr/bin/env bash
 # Print the measured rows of the Panic Pantry scorecard for THIS checkout.
-# Run it from anywhere inside a checkout or worktree:
-#   bash scripts/score.sh
-# It never edits files and always exits 0. It is a report, not a gate.
-# Model + variant and the intervention count can't be measured; fill those in yourself.
-set -uo pipefail
-cd "$(dirname "$0")/.."
+#   bash scripts/score.sh        (works from any folder, in any worktree)
+# It reports; it never edits tracked files, and it always exits 0.
+# Model + variant and the intervention count can't be measured: fill those in yourself.
+cd "$(dirname "$0")/.." || exit 0
+PYTHONDONTWRITEBYTECODE=1 exec python3 - <<'PY'
+import io, os, re, subprocess, sys, tokenize
 
-CONTRACT=tests/test_importer_contract.py
-IMPORTER=src/panic_pantry/importer.py
-FROZEN_RE='^(tests/test_importer_contract\.py|fixtures/|scripts/|tickets/|data/promotions\.json\.seed|AGENTS\.md)'
+CONTRACT = "tests/test_importer_contract.py"
+IMPORTER = "src/panic_pantry/importer.py"
+FROZEN = re.compile(r"^(tests/test_importer_contract\.py$|fixtures/|scripts/|tickets/|data/promotions\.json\.seed$|AGENTS\.md$)")
+TIMEOUT = 120
+PAD = " " * 23
 
-branch="$(git branch --show-current 2>/dev/null || true)"
-echo "Scorecard for: $(pwd)"
-echo "Branch:        ${branch:-"(not a git checkout)"}"
-echo
 
-# --- Contract tests ---------------------------------------------------------
-total="$(grep -c '^    def test_' "$CONTRACT" 2>/dev/null || true)"
-[ -n "$total" ] && [ "$total" -gt 0 ] || total=9
-loaderr=0
-out="$(python3 -m unittest tests.test_importer_contract -v 2>&1)"
-passed="$(printf '%s\n' "$out" | grep -c ' \.\.\. ok$' || true)"
-last="$(printf '%s\n' "$out" | grep -E '^(OK|FAILED)' | tail -1)"
-if ! printf '%s\n' "$out" | grep -qE '^Ran [0-9]+ test' || printf '%s\n' "$out" | grep -q '_FailedTest'; then
-  passed=0; loaderr=1
-  err="$(printf '%s\n' "$out" | grep -E '^[A-Za-z]*(Error|Exception)' | tail -1)"
-  note="ERROR: the tests can't load importer.py: ${err:-run the command below to see why}"
-elif printf '%s\n' "$out" | grep -q 'skipped=' && [ "$passed" -eq 0 ]; then
-  note="SKIPPED: the tests can't import import_promotions (file missing, misnamed, or a failed import inside it), which counts as 0"
-else
-  note="$last"
-fi
-printf '%-22s %s/%s   (%s)\n' "Contract tests" "$passed" "$total" "$note"
+def row(label, text):
+    print(f"{label:<22} {text}".rstrip())
 
-# --- Whole suite ------------------------------------------------------------
-suite="$(python3 -m unittest discover -s tests 2>&1)"
-ran="$(printf '%s\n' "$suite" | grep -E '^Ran [0-9]+ test' | tail -1 | sed -E 's/ in [0-9.]+s$//')"
-result="$(printf '%s\n' "$suite" | grep -E '^(OK|FAILED)' | tail -1)"
-printf '%-22s %s, %s\n' "Whole suite" "${ran:-"did not run"}" "${result:-"no result line"}"
 
-# --- Policy source check ----------------------------------------------------
-# The importer must let PromotionService decide approval. Flag code that looks like
-# it decides by itself. These are heuristics: read each flagged line yourself.
-if [ "$loaderr" = 1 ]; then
-  printf '%-22s %s\n' "Policy source check" "n/a (importer.py doesn't load; fix that first)"
-elif [ -f "$IMPORTER" ]; then
-  hits="$(grep -nE \
-    -e 'APPROVAL_THRESHOLD_PCT' \
-    -e '(<|>|<=|>=|==|!=)[[:space:]]*20([^0-9]|$)' \
-    -e '(^|[^0-9])20[[:space:]]*(<|>|<=|>=|==|!=)' \
-    -e '\.status[[:space:]]*=[^=]' \
-    -e 'status[[:space:]]*=[[:space:]]*["'"'"']' \
-    -e '\.approve\(' \
-    -e 'promotions\.json' \
-    -e 'json\.dump' \
-    "$IMPORTER" | grep -v 'len(' || true)"
-  if [ -z "$hits" ]; then
-    printf '%-22s %s\n' "Policy source check" "OK: the importer never compares to 20, sets a status, approves, or writes the store"
-  else
-    printf '%-22s %s\n' "Policy source check" "CHECK BY EYE: these lines may decide approval themselves"
-    printf '%s\n' "$hits" | sed 's/^/                         importer.py:/'
-  fi
-else
-  printf '%-22s %s\n' "Policy source check" "n/a ($IMPORTER doesn't exist)"
-fi
+def git(*args):
+    try:
+        p = subprocess.run(["git", *args], capture_output=True, timeout=30)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    return p.stdout.decode("utf-8", "replace") if p.returncode == 0 else None
 
-# --- Files changed ----------------------------------------------------------
-printf '%-22s\n' "Files changed"
-changes="$(git status --short --untracked-files=all -- . 2>/dev/null || true)"
-if [ -z "$changes" ]; then
-  echo "                       (none)"
-else
-  while IFS= read -r line; do
-    path="${line:3}"
-    case "$path" in
-      src/panic_pantry/importer.py) tag="Builder's file" ;;
-      tests/test_promo_import.py)   tag="Breaker's file" ;;
-      workshop/*|.opencode/*)       tag="your notes and agent setup" ;;
-      *)
-        if printf '%s' "$path" | grep -qE "$FROZEN_RE"; then
-          tag="FROZEN FILE CHANGED: nobody may edit this"
-        else
-          tag="NO CARD OWNS THIS FILE: boundary problem?"
-        fi ;;
-    esac
-    printf '                       %-44s %s\n' "$line" "$tag"
-  done <<< "$changes"
-fi
 
-echo
-echo "Fill in by hand: model + variant (from the status bar), interventions (your tally)."
-echo "Details: python3 -m unittest tests.test_importer_contract -v"
-exit 0
+def run_tests(args):
+    """Run unittest with -b so prints and logging inside tests can't garble the result."""
+    try:
+        cmd = [sys.executable, "-m", "unittest"]
+        cmd += ["discover", "-b", *args[1:]] if args[:1] == ["discover"] else ["-b", *args]
+        p = subprocess.run(cmd,
+                           capture_output=True, text=True, timeout=TIMEOUT)
+    except subprocess.TimeoutExpired:
+        return None
+    return p.stdout + p.stderr
+
+
+def summary(out):
+    """(ran, passed, skipped, last line) from unittest's own summary, or None if the tests didn't load."""
+    ran = re.findall(r"^Ran (\d+) tests? in", out, re.M)
+    status = re.findall(r"^(OK|FAILED)\b(.*)$", out, re.M)
+    if not ran or not status or "_FailedTest" in out:
+        return None
+    n = int(ran[-1])
+    word, rest = status[-1]
+    counts = {k: int(v) for k, v in re.findall(r"(failures|errors|skipped|expected failures)=(\d+)", rest)}
+    return n, n - sum(counts.values()), counts.get("skipped", 0), (word + rest).strip()
+
+
+def load_error(out):
+    where = re.findall(r'File "([^"]+)", line (\d+)', out)
+    err = re.findall(r"^(\w*(?:Error|Exception)\b.*)$", out, re.M)
+    place = ""
+    if where:
+        path, line = where[-1]
+        if os.path.isabs(path):
+            path = os.path.relpath(path)
+        place = f" in {path} line {line}"
+    return f"{err[-1] if err else 'the tests did not load'}{place}"
+
+
+def code_only(src):
+    """The source with comments removed and string contents blanked (quotes kept)."""
+    chars = list(src)
+    starts, pos = [], 0
+    for line in src.splitlines(keepends=True):
+        starts.append(pos)
+        pos += len(line)
+    starts.append(pos)
+
+    def off(rc):
+        r, c = rc
+        return starts[r - 1] + c if r - 1 < len(starts) else len(chars)
+
+    def blank(a, b):
+        for i in range(max(a, 0), min(b, len(chars))):
+            if chars[i] != "\n":
+                chars[i] = " "
+
+    try:
+        toks = list(tokenize.generate_tokens(io.StringIO(src).readline))
+    except (tokenize.TokenError, SyntaxError):
+        return re.sub(r"#[^\n]*", "", src)
+    fmid = getattr(tokenize, "FSTRING_MIDDLE", None)
+    for t in toks:
+        a, b = off(t.start), off(t.end)
+        if t.type == tokenize.COMMENT or (fmid is not None and t.type == fmid):
+            blank(a, b)
+        elif t.type == tokenize.STRING:
+            s = t.string
+            i = next((k for k, ch in enumerate(s) if ch in "'\""), 0)
+            q = 3 if s[i:i + 3] in ('"""', "'''") else 1
+            blank(a + i + q, b - q)
+    return "".join(chars)
+
+
+CMP = r"(?:<=|>=|==|!=|<|>)"
+CODE_PATTERNS = [
+    (r"APPROVAL_THRESHOLD_PCT", "uses the service's threshold constant"),
+    (rf"{CMP}\s*2[01]\b|\b2[01]\s*{CMP}", "compares a number to 20 or 21"),
+    (r"^\s*[A-Za-z_]\w*\s*=\s*2[01]\s*$", "stores 20 or 21 in a name"),
+    (r"\.status\s*=(?!=)|\bstatus\s*=\s*[\"']", "sets a status"),
+    (r"\bPromotion\s*\(", "builds a Promotion itself instead of calling create_promotion"),
+    (r"\._promotions\b", "reaches into the service's private store"),
+    (r"\.approve\s*\(", "approves a promotion"),
+    (r"\bjson\.dump", "writes JSON itself"),
+]
+
+
+def policy_scan(path):
+    src = open(path, encoding="utf-8", errors="replace").read()
+    original = src.splitlines()
+    code = code_only(src).splitlines()
+    no_comments = re.sub(r"#[^\n]*", "", src).splitlines()
+    hits = []
+    for i, line in enumerate(code):
+        cleaned = re.sub(rf"len\([^()]*\)\s*{CMP}\s*\d+|\d+\s*{CMP}\s*len\([^()]*\)", "", line)
+        reasons = [why for pat, why in CODE_PATTERNS if re.search(pat, cleaned)]
+        if i < len(no_comments) and "promotions.json" in no_comments[i]:
+            reasons.append("names the store file")
+        if reasons:
+            hits.append(f"importer.py:{i + 1}: {original[i].strip()}   <- {', '.join(reasons)}")
+    return hits
+
+
+def changed_files():
+    if git("rev-parse", "--is-inside-work-tree") is None:
+        return "Files changed", ["(can't tell: this folder isn't a git checkout)"]
+    if git("rev-parse", "-q", "--verify", "refs/tags/starter^{commit}"):
+        base, label = "starter", "Files changed since starter"
+    elif git("rev-parse", "-q", "--verify", "HEAD"):
+        base, label = "HEAD", "Files changed since the last commit"
+    else:
+        return "Files changed", ["(can't tell: nothing is committed yet)"]
+    entries = []
+    parts = (git("diff", "--name-status", "--no-renames", "--relative", "-z", base, "--", ".") or "").split("\0")
+    for k in range(0, len(parts) - 1, 2):
+        entries.append((parts[k][:1], parts[k + 1]))
+    others = git("ls-files", "--others", "--exclude-standard", "-z", "--", ".") or ""
+    entries += [("?", p) for p in others.split("\0") if p]
+    lines = []
+    for code, path in sorted(entries, key=lambda e: e[1]):
+        if path == IMPORTER:
+            tag = "Builder's file"
+        elif path == "tests/test_promo_import.py":
+            tag = "Breaker's file"
+        elif path.startswith(("workshop/", ".opencode/")):
+            tag = "your notes and agent setup"
+        elif FROZEN.match(path):
+            tag = "FROZEN FILE CHANGED: nobody may edit this"
+        else:
+            tag = "NO CARD OWNS THIS FILE: boundary problem?"
+        kind = {"A": "added", "M": "changed", "D": "deleted", "?": "new", "T": "changed"}.get(code, code)
+        lines.append(f"{kind:<8} {path:<40} {tag}")
+    return label, lines or ["(none)"]
+
+
+def main():
+    branch = (git("branch", "--show-current") or "").strip()
+    if not branch and git("rev-parse", "--is-inside-work-tree") is not None:
+        at = (git("describe", "--tags", "--exact-match") or git("rev-parse", "--short", "HEAD") or "?").strip()
+        branch = f"(detached at {at})"
+    print(f"Scorecard for: {os.getcwd()}")
+    print(f"Branch:        {branch or '(not a git checkout)'}")
+    print()
+
+    try:
+        total = len(re.findall(r"^\s+def test_", open(CONTRACT, encoding="utf-8").read(), re.M)) or 9
+    except OSError:
+        total = 9
+    out = run_tests(["tests.test_importer_contract", "-v"])
+    hung = out is None
+    if hung:
+        row("Contract tests", f"0/{total}   (TIMEOUT: a test ran over {TIMEOUT}s; look for an infinite loop)")
+    else:
+        s = summary(out)
+        if s is None:
+            row("Contract tests", f"0/{total}   (ERROR: the tests can't load: {load_error(out)})")
+        elif s[2] == s[0] and s[1] == 0:
+            row("Contract tests", f"0/{total}   (SKIPPED: the tests can't import import_promotions: "
+                                  "file missing, misnamed, or a failed import inside it. Counts as 0)")
+        else:
+            row("Contract tests", f"{s[1]}/{total}   ({s[3]})")
+
+    out = None if hung else run_tests(["discover", "-s", "tests"])
+    if hung:
+        row("Whole suite", "not run: the contract tests already timed out")
+    elif out is None:
+        row("Whole suite", f"TIMEOUT after {TIMEOUT}s")
+    else:
+        s = summary(out)
+        row("Whole suite", f"ran {s[0]} tests: {s[3]}" if s else f"ERROR: {load_error(out)}")
+
+    if os.path.isfile(IMPORTER):
+        hits = policy_scan(IMPORTER)
+        if hits:
+            row("Policy source check", "CHECK BY EYE: these lines may decide approval themselves")
+            for h in hits:
+                print(PAD + h)
+        else:
+            row("Policy source check", "nothing flagged (a text scan: still read how it picks created vs. pending)")
+    else:
+        row("Policy source check", f"n/a ({IMPORTER} doesn't exist)")
+
+    label, lines = changed_files()
+    row(label, "")
+    for line in lines:
+        print(PAD + line)
+
+    print()
+    print("Fill in by hand: model + variant (status bar), interventions (your tally),")
+    print("                 elapsed and rework minutes (your timer), tokens / cost (opencode stats).")
+    print("Details: python3 -m unittest tests.test_importer_contract -v")
+
+
+try:
+    main()
+except Exception as exc:  # a report must never crash the room
+    print(f"\nscore.sh hit an unexpected problem: {exc!r}. Run the tests directly instead.")
+sys.exit(0)
+PY

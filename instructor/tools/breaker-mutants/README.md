@@ -27,7 +27,7 @@ python3 instructor/tools/breaker-mutants/check_tests.py sandbox/worktrees/orches
 **Other uses:**
 
 - **Grade a Breaker (Ex4, capstone).** Run it on the learner's worktree with `tests.test_promo_import` added. A strong Breaker card produces tests that catch most of the four the contract misses.
-- **Level up L5.2 ("test the tester").** Learners plant one of these bugs themselves and see whether their tests notice.
+- **Level up L5.2 ("test the tester"), planned for the Module 5 rewrite.** Learners will plant one of these bugs themselves and see whether their tests notice.
 
 **Notes:**
 

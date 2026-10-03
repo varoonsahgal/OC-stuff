@@ -116,24 +116,31 @@ EOF
 
 ### Injection D — test asserts a stale signature (task/context gap)
 
-Append a bad test to the learner's `tests/test_promo_import.py` (create the
-file with the header block below if the pair never produced one):
+Append a bad test to the learner's `tests/test_promo_import.py`. The block is
+self-contained, so it works whatever names the learner's Breaker file uses,
+and it creates the file if the pair never produced one:
 
 ```bash
 cat >> tests/test_promo_import.py <<'EOF'
 
 
-class StaleContractTests(unittest.TestCase):
+# --- stale test from an early draft ---
+import sys as _sys
+import unittest as _unittest
+from pathlib import Path as _Path
+
+_ROOT = _Path(__file__).resolve().parents[1]
+_sys.path.insert(0, str(_ROOT / "src"))
+from panic_pantry.importer import import_promotions as _stale_import  # noqa: E402
+
+
+class StaleContractTests(_unittest.TestCase):
     def test_import_uses_default_service(self):
         # stale assumption from an early draft: single-argument signature
-        report = import_promotions(CLEAN_CSV)
+        report = _stale_import(_ROOT / "fixtures" / "promos_clean.csv")
         self.assertEqual(len(report.created), 6)
 EOF
 ```
-
-(If creating the file from scratch, first copy the import/skip scaffold from the
-top of `tests/test_importer_contract.py`, keeping `CLEAN_CSV` defined, then
-append the class above.)
 
 - **Symptom:** `TypeError: import_promotions() missing 1 required positional
   argument: 'service'` — one failing test; everything else green.

@@ -40,12 +40,12 @@ permission:
 You implement exactly one task card supplied in the delegation message.
 
 Rules:
-- Change only the files the card lists as in scope. If the card and reality
+- Change only the files on the card's TOUCH line. If the card and reality
   conflict, stop and report; do not improvise.
 - All promotion creation goes through PromotionService.create_promotion.
   Policy: discounts above 20% require approval; exactly 20% is active. Never
   reimplement or bypass this.
-- Standard library only. Run the card's acceptance command before returning.
+- Standard library only. Run the card's DONE command before returning.
 
 Return format: summary (≤5 lines); changed paths; exact commands run with
 pass/fail; assumptions; open questions.

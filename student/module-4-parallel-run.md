@@ -8,11 +8,11 @@
 
 **Claim: when you run two agents in parallel, you are claiming their tasks don't depend on each other. Parallel-safe work needs a stable interface, independent outputs, and clear ownership.** If the claim is false, you'll pay it back in merge conflicts.
 
-The kitchen version: **three chefs, one cutting board.** Three agents editing `importer.py` isn't parallelism, it's a queue with extra steps and knife injuries. The importer feature *is* genuinely decomposable — but only after Exercise 1's gate: freeze `import_promotions(csv_path, service) -> ImportReport`, then the implementation, the contract tests, and the integration notes have independent outputs and disjoint files.
+The kitchen version: **three chefs, one cutting board.** Three agents editing `importer.py` isn't parallelism, it's a queue with extra steps and knife injuries. The importer feature *is* genuinely decomposable — but only after Exercise 1's gate: freeze `import_promotions(csv_path, service) -> ImportReport`, then the implementation, the Breaker's attack tests, and the integration notes have independent outputs and disjoint files.
 
 Three levels of protection — and they are not the same thing:
 
-- **Coordination** — a file-ownership list in each task card ("in scope / out of scope"). Guidance: agents usually honor it, nothing enforces it.
+- **Coordination** — the card's TOUCH line ("`tests/test_promo_import.py` only"). Guidance: agents usually honor it, nothing enforces it.
 - **Isolation** — Git worktrees and branches. Enforced by the filesystem: two runs that share no working files *cannot* contaminate each other, no matter how badly a prompt goes. Our two worktrees exist precisely so the baseline and orchestrated runs stay clean of each other.
 - **Control** — `permission` rules in agent config. Enforced by OpenCode: an agent with `edit: deny` cannot write, whatever it was asked.
 
@@ -103,7 +103,7 @@ Delegate this task card to the appropriate subagent.
 [paste workshop/cards/breaker.md, full text]
 ```
 
-This goes through the **Task tool** (governed by `permission.task`): the primary picks the subagent and spawns the child session itself. Afterwards, walk the session tree (`<Leader>+Down`, Left/Right) and open both children. The implementer's first message is *your* text, word for word. The Breaker's first message is one *the primary wrote*, so check whether it kept your TOUCH and RULES lines. The new tests express the same contract in the Breaker's own words. Between delegations, you draft `workshop/integration-notes.md` yourself or have the primary draft it: what arrived, what was checked, what's still open. Delegations run in the foreground — sequence them; independence of deliverables is what makes the order not matter.
+This goes through the **Task tool** (governed by `permission.task`): the primary picks the subagent and spawns the child session itself. Afterwards, walk the session tree (`<Leader>+Down`, Left/Right) and open both children. The implementer's first message is *your* text, word for word. The Breaker's first message is one *the primary wrote*, so check whether it kept your TOUCH and RULES lines. The Breaker's tests attack gaps the frozen contract tests miss; any that fail after integration are findings, not tests to weaken. Between delegations, you draft `workshop/integration-notes.md` yourself or have the primary draft it: what arrived, what was checked, what's still open. Delegations run in the foreground — sequence them; independence of deliverables is what makes the order not matter.
 
 > 🔑 **Key takeaway:** Three chefs, one cutting board is not parallelism — disjoint files are what make the order not matter.
 
@@ -140,7 +140,7 @@ Elapsed time, contract tests passing, whole suite, policy handled, interventions
 
 **Hints (use in order):**
 1. Child result off-contract? Don't patch it silently in the parent — send *one* targeted repair delegation citing the exact acceptance check that failed.
-2. Breaker stalls? It needs only the contract + `fixtures/promos_messy.expected.md`. It must never read the importer's code. Trim its context.
+2. Breaker stalls? Check its READ line: the ticket, the fixtures, and the shop code its tests call (`promotions.py`, `store.py`). It must never open `importer.py`.
 3. Timebox expiring mid-delegation? Stop anyway. "Unfinished at the same limit" is valid comparison data — that's the point of matched conditions.
 
 **Troubleshooting:**

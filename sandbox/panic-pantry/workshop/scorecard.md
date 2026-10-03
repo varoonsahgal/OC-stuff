@@ -1,7 +1,7 @@
 # Scorecard: one agent (Module 0) vs. a crew (Module 4)
 
-Run `bash scripts/score.sh` in the checkout you're scoring and copy its numbers in.
-Two rows can't be measured; fill those in yourself.
+Run `bash scripts/score.sh` in the checkout you're scoring and copy in its four rows: contract tests, whole suite, policy source check, files changed.
+Fill in the other five yourself: model + variant, interventions, elapsed, rework minutes, tokens / cost.
 
 | Row | Module 0: one agent | Module 4: crew |
 |---|---|---|

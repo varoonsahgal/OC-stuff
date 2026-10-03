@@ -43,8 +43,8 @@ Every page under `student/` must pass these rules. The full rationale, word budg
 | 0 | Watch one agent do the whole job alone | The baseline to beat | Measure before you multiply |
 | 1 | Split the job and write down each piece | Split | Split by file, not by function |
 | 2 | Build agents with hard limits on what they can touch | Staff | A role is a permission, not a name |
-| 3 | Pick the right model for each piece | Budget | Cheap model + hard check beats pricey model + trust |
-| 4 | Hand the cards to agents, run them, compare with Module 0 | Run | Parallel only when tasks share nothing |
+| 3 | Pick the right model for each piece | Budget | Cheap model + hard check beats pricey model + blind trust |
+| 4 | Hand the cards to agents, run them, compare with Module 0 | Run | Parallel only when tasks share no files |
 | 5 | Handle a launch-night failure | Recover | Green tests are evidence, not a verdict |
 
 **Callouts: four kinds only.** 🎯 goal (1 per module) · 🌍 real-world story with a number, a date, a link, and a one-line "so what" (1–2 per module) · ⚡ optional Level up, collapsed (1–3 per module) · 🔑 the bumper sticker (exactly 1 per module, at the end). Don't use 📘 or 💡.
@@ -62,7 +62,7 @@ DONE:   <a command you can paste, and the result that means "finished">
 REPORT: files changed · exact command + last line of its output · anything you guessed
 ```
 
-If the agent doesn't need it to do the job, it's not on the card. Dependencies and order belong in `plan.md`; permissions and model belong in the agent file. The two TICKET-001 cards are `workshop/cards/builder.md` (writes `src/panic_pantry/importer.py`) and `workshop/cards/breaker.md` (writes `tests/test_promo_import.py` from the ticket alone, trying to sneak `FREE-ALL` past the 20% rule).
+If the agent doesn't need it to do the job, it's not on the card. Dependencies and order belong in `plan.md`; permissions and model belong in the agent file. The two TICKET-001 cards are `workshop/cards/builder.md` (writes `src/panic_pantry/importer.py`) and `workshop/cards/breaker.md` (writes `tests/test_promo_import.py` from the ticket, never from the Builder's code: tests that attack the importer, starting with every way `FREE-ALL` could go live).
 
 **Master analogy:** the restaurant kitchen (the chef at the pass, stations, tickets). Add one vivid second analogy only where the kitchen is weak.
 

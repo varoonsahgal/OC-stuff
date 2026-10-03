@@ -129,11 +129,7 @@ Work through the modules in order. Each module is a short lecture summary follow
 | 5 | [module-5-capstone.md](module-5-capstone.md) | Micro-lecture 5 + Capstone — midnight launch + the 5-minute close |
 | — | [appendices.md](appendices.md) | Objective coverage map, command crib sheet + agent-file skeleton, sources, image credits |
 
-Watch for three recurring callouts:
-
-- 📘 **Concept** — a term or mechanism explained right where you first need it. If one says "quick version," the full treatment comes in a later module.
-- 🔑 **Key takeaway** — the one sentence to remember from that point in the module.
-- 💡 **Field note** — how the exercise maps to your daily engineering work.
+Callouts: 🎯 goal · 🌍 real-world story · ⚡ optional Level up · 🔑 the one thing to remember. (Modules 0 and 3–5 still use 📘 Concept and 💡 Field note boxes until they're rewritten.)
 
 ---
 
@@ -145,11 +141,11 @@ Skim this now; come back whenever a word stops making sense. Each term links to 
 
 | Term | Plain-English meaning | Taught in |
 |---|---|---|
-| **Orchestration** | Splitting a feature into checkable tasks, handing them to agents, and integrating what comes back — you as the release lead | [Module 0](module-0-baseline.md) |
+| **Orchestration** | Splitting a feature into checkable tasks, handing them to agents, and integrating what comes back — you as the release lead | [Module 1](module-1-decomposition.md) |
 | **Contract** | The agreed interface and rules every task builds against: function signature, return shape, edge-case behavior, policy | [Module 1](module-1-decomposition.md) |
 | **Freeze (a contract)** | Declare it final *before* work starts. Nobody changes it mid-run; if it must change, you stop, re-freeze, and re-brief everyone | [Module 1](module-1-decomposition.md) |
 | **Task card** | Six lines (DO, READ, RULES, TOUCH, DONE, REPORT) that give one agent exactly one job. The card is the whole message you send it | [Module 1](module-1-decomposition.md) |
-| **Builder / Breaker** | The two TICKET-001 jobs. The Builder writes the importer; the Breaker writes tests, from the ticket alone, that try to sneak `FREE-ALL` past the 20% rule | [Module 1](module-1-decomposition.md) |
+| **Builder / Breaker** | The two TICKET-001 jobs. The Builder writes the importer. The Breaker writes tests from the ticket (never from the Builder's code) that attack it, starting with every way `FREE-ALL` could go live | [Module 1](module-1-decomposition.md) |
 | **Acceptance check** | An executable way to decide "done": the card's DONE line. "Looks good" isn't one | [Module 1](module-1-decomposition.md) |
 | **Idempotent** | Safe to run twice: the second run changes nothing | [TICKET-001](../sandbox/panic-pantry/tickets/TICKET-001.md), criterion 6 |
 | **Disposition** | The decided outcome for an item. For a CSV row: which `ImportReport` bucket it lands in. For a review finding: fix, accept with reason, or defer with an owner | [Module 3](module-3-model-routing.md), [Module 5](module-5-capstone.md) |
@@ -163,9 +159,9 @@ Skim this now; come back whenever a word stops making sense. Each term links to 
 | **Primary agent** | The agent you talk to directly in the main conversation. Built-ins: **Build** (full tools) and **Plan** (edits and shell require your approval). Tab switches between them | [Module 0](module-0-baseline.md) |
 | **Subagent** | A helper agent the primary (or you) hands one task to. Built-ins in 1.18.33: **explore** (fast, read-only codebase search) and **general** (multi-step research and tasks). You'll build your own | [Module 2](module-2-agent-crew.md) |
 | **Session / child session** | A session is one conversation. A delegation creates a **child session** under it — a new conversation with fresh, empty context | [Module 2](module-2-agent-crew.md) |
-| **Session tree** | A parent session plus the child sessions its delegations created. You walk it with the child-navigation keys | [Module 2](module-2-agent-crew.md) |
+| **Session tree** | A parent session plus the child sessions its delegations created. You walk it with the child-navigation keys | [Module 4](module-4-parallel-run.md) |
 | **@-mention** | *You* choose the subagent: `@reviewer check the diff` | [Module 2](module-2-agent-crew.md) |
-| **Task tool** | The tool the *primary agent* calls to delegate on its own. It chooses the subagent by reading each subagent's `description` | [Module 2](module-2-agent-crew.md) |
+| **Task tool** | The tool the *primary agent* calls to delegate on its own. It chooses the subagent by reading each subagent's `description` | [Module 4](module-4-parallel-run.md) |
 | **Permission** (`allow` / `ask` / `deny`) | Configured authority per action: `allow` runs, `ask` pauses for your approval, `deny` blocks — whatever the prompt says | [Module 2](module-2-agent-crew.md) |
 | **Frontmatter** | The YAML block between `---` fences at the top of an agent file — its settings. The body below is its system prompt | [Module 2](module-2-agent-crew.md) |
 | **Provider / model ID** | A provider is a model service (Anthropic, OpenAI, OpenCode Zen, …). Models are named `provider_id/model_id` | [Module 3](module-3-model-routing.md) |
