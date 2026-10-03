@@ -25,7 +25,7 @@ config differ across major versions.
 | [solutions/capstone-injections.md](solutions/capstone-injections.md) | The four capstone injection steps, diagnoses, and model release note |
 | [solutions/reviewer-agent.md](solutions/reviewer-agent.md) | Known-good `.opencode/agents/reviewer.md` learners build in Ex2 |
 | [solutions/importer_solution.py](solutions/importer_solution.py) | Known-good importer; drop into `src/panic_pantry/importer.py` to make the full suite pass |
-| [solutions/fallback-traces.md](solutions/fallback-traces.md) | Recorded transcripts: Ex0 "bad plan," Ex3 model comparison, background-delegation demo |
+| [solutions/fallback-traces.md](solutions/fallback-traces.md) | Recorded transcripts: Ex0 "bad plan," Ex3 model comparison, background-delegation demo; simulated Ex1 Stranger Test (Trace 4) |
 
 ## Pre-class setup (day before + morning of)
 
@@ -91,8 +91,10 @@ config differ across major versions.
   still open in the single-agent worktree** and run `opencode` in
   `sandbox/panic-pantry`. Otherwise the stranger can read the baseline
   `importer.py`.
-- **Cue @ 15 min:** ask for HIGH counts; fewest wins. Ask one pair to read a
-  guess that changed the contract (it belongs in `plan.md`, not just the card).
+- **Cue @ 15 min:** ask one pair to read a guess that was about the *rules*
+  (for example, header strictness). Check they put the answer on **both** cards
+  and in `plan.md`: no agent reads `plan.md`, so a fix there alone reaches
+  nobody. Expect strangers to mark most guesses HIGH; that's normal.
 - **Watch for:** a breaker row or TOUCH line that names `importer.py`; a
   Breaker card that drops "Skip every test, don't fail" (that agent will write
   tests that fail and then "fix" them, which is the weak-card result in the
@@ -173,7 +175,7 @@ control/check to add. Collect them — they are your course feedback too.
 ## If the whole provider is down
 
 The orchestration labs need a working OpenCode + one model. If provider access
-dies mid-class: Ex1 Steps 1–5 are offline (Step 6 → Trace 4); Ex2 agent files
+dies mid-class: Ex1 Steps 1–4 are offline (Step 5 → Trace 4); Ex2 agent files
 can be written and syntax-checked offline (denial test deferred); Ex3 runs from
 recorded traces; Ex0/Ex4 comparison collapses to a walkthrough of the answer-key
 artifacts. Say plainly what is live and what is recorded — modeling honest

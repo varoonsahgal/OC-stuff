@@ -9,7 +9,7 @@ lists what learners (and their agents) may create or edit per exercise.
 | 1 — Split the job | tag `starter` | `workshop/plan.md`, `workshop/cards/builder.md`, `workshop/cards/breaker.md` | all of `src/`, `tests/` |
 | 2 — Agent crew | tag `starter` | `.opencode/agents/*.md` (agent configs) | all of `src/`, `tests/` |
 | 3 — Model routing | tag `starter` | `workshop/model-comparison.md`, scratch branch files | shared fixtures and tests |
-| 4 — Orchestrated run | tag `starter`, worktree `orchestrated` | `src/panic_pantry/importer.py` (implementer), `tests/test_promo_import.py` (Breaker), `workshop/integration-notes.md` (primary) | each other's files above |
+| 4 — Orchestrated run | tag `starter`, worktree `orchestrated` | `src/panic_pantry/importer.py` (implementer), `tests/test_promo_import.py` (Breaker), `workshop/integration-notes.md` (primary); plus the `.opencode/agents/*.md` and `workshop/cards/*.md` you copy in (`implementer.md` gets a `model:` line) | each other's files above |
 | Capstone | end of Ex. 4 | files from Ex. 4 plus `workshop/release-note.md` | fixtures, scripts |
 
 Always read-only for every exercise: `tests/test_importer_contract.py`,

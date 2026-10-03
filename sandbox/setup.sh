@@ -25,7 +25,12 @@ git config user.email >/dev/null 2>&1 || git config user.email "instructor@panic
 bash scripts/reset.sh >/dev/null
 echo "[setup] sandbox reset to starter state"
 
-git add -A
+# Commit the sandbox and its templates, never learner work left in this checkout
+# (plans, cards, agent files, notes from a dry run). Templates are added once.
+git add -A -- . ':(exclude)workshop' ':(exclude).opencode'
+for t in workshop/WRITABLE_FILES.md workshop/scorecard.md workshop/model-comparison.md workshop/prompts; do
+  git ls-files --error-unmatch -- "$t" >/dev/null 2>&1 || git add -- "$t"
+done
 if ! git rev-parse -q --verify HEAD >/dev/null 2>&1; then
   git commit -m "starter"
   echo "[setup] created starter commit"

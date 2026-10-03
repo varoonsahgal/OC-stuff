@@ -113,7 +113,7 @@ For each: the risk, the evidence in the repo, and the smallest mitigation.
 
 **Rubric score (0–2 each):** specificity of evidence; would the mitigation actually work; did it catch anything about approval, duplicates, or idempotency you missed?
 
-> 🔑 **Key takeaway:** A cheap model plus a deterministic check beats an expensive model plus trust.
+> 🔑 **Key takeaway:** A cheap model plus a deterministic check beats an expensive model plus blind trust.
 
 ### Record in `workshop/model-comparison.md`
 

@@ -146,7 +146,7 @@ def changed_files():
         if path == IMPORTER:
             tag = "Builder's file"
         elif path == "tests/test_promo_import.py":
-            tag = "Breaker's file"
+            tag = "reserved for the Ex4 Breaker: out of scope here" if BRANCH == "single-agent" else "Breaker's file"
         elif path.startswith(("workshop/", ".opencode/")):
             tag = "your notes and agent setup"
         elif FROZEN.match(path):
@@ -158,8 +158,11 @@ def changed_files():
     return label, lines or ["(none)"]
 
 
+BRANCH = (git("branch", "--show-current") or "").strip()
+
+
 def main():
-    branch = (git("branch", "--show-current") or "").strip()
+    branch = BRANCH
     if not branch and git("rev-parse", "--is-inside-work-tree") is not None:
         at = (git("describe", "--tags", "--exact-match") or git("rev-parse", "--short", "HEAD") or "?").strip()
         branch = f"(detached at {at})"

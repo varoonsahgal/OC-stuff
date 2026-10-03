@@ -3,7 +3,8 @@
 Deterministic fallback transcripts. All are **RECORDED** — Traces 1–2 captured
 during instructor rehearsal (2026-09-26, OpenCode 1.18.33), Trace 3 on a V1
 build with an experimental flag (see its header); all lightly trimmed for
-class use. Present them as recordings, never as live output. Traces 1–3 predate the
+class use. Present them as recordings, never as live output. Trace 4 (the Ex1 Stranger
+Test) is a **simulation**, not an OpenCode recording; label it that way in class. Traces 1–3 predate the
 Module 1 rewrite, so they use the old card names (`csv_parser`, `import_tests`,
 "test author"); today those are `builder.md`, `breaker.md` and "the Breaker". Use them when a
 live model behaves too well (Ex0), when the classroom model catalog cannot
@@ -220,3 +221,39 @@ child sessions are experimental in V1 and their behavior may change.
 notes) while the child worked, then *collected and checked* the child's return
 before integrating — the same receipts as foreground delegation. Background
 only changes scheduling; ownership of integration never moves.
+
+---
+
+## Trace 4 — Exercise 1 Stranger Test (SIMULATED)
+
+Use when the room has no model access for Ex1 Step 5, or to show what a
+useful stranger answer looks like. **Simulated on 2026-10-03:** a fresh Claude
+subagent played OpenCode's Plan agent. It got the Step 5 prompt and a Breaker
+card that another simulated learner filled in from the skeleton, plus
+read access to an isolated sandbox copy. It is not an OpenCode transcript.
+
+The card it read is the "simulated learner's filled skeleton" in
+[ex1-task-surgery.md](ex1-task-surgery.md#evidence-the-cards-were-tested-on-real-agents-2026-10-03).
+
+> **[SIMULATED — Plan agent, Ex1 Step 5 prompt + learner's breaker.md]**
+>
+> Here are the five guesses the card forces, worst first. I haven't written anything.
+>
+> 1. **HIGH:** How to catch an importer that copies the 20% check instead of letting the service decide. With the real 20% rule, a copied `pct > 20` check behaves exactly the same, so catching it means patching `APPROVAL_THRESHOLD_PCT` or passing in a fake or recording `PromotionService`. The card doesn't say whether that's allowed alongside "Each test uses its own temp copy of the seed store".
+> 2. **HIGH:** How to catch a direct write, or an importer that sets the status itself. Do I check the repo's real `data/promotions.json` (the service's default path is relative to the current directory), the temp store reloaded through a new `PromotionService`, or both? Do I also record that `create_promotion` runs once per created row with the discount unchanged (100, not cut to 20) and that `approve()` is never called?
+> 3. **HIGH:** What counts as a "wrong header": misspelled, reordered, an extra column, uppercase, extra spaces, a byte-order mark at the start, or a file with only the header? A reasonable importer might accept some of these. Also, does "imports nothing at all" mean `errors == [(1, reason)]` exactly, with no row errors and the store file unchanged?
+> 4. **HIGH:** What a "blank row" is: an empty line, spaces only, a bare `,`, or a blank line at the end of the file? Which of these must give exactly `"empty row"`? The fixture only has one empty line in the middle of the file (line 12).
+> 5. **HIGH:** Do the RULES lines "Exactly 20% → active / Above 20% → pending_approval, rejected at checkout" need their own boundary tests (20 and 21)? Or do they only set what the FREE-ALL tests check? DO limits the second part to "the ticket rules the exam never tests", and the exam already tests MIDNIGHT20.
+>
+> HIGH guesses: 5.
+
+### Debrief key — where each answer goes
+
+| # | Kind | Where it goes |
+|---|---|---|
+| 1, 2 | How to test (catching a copied threshold; spotting a direct write or a hand-set status) | Breaker RULES only |
+| 3, 4 | **About the rules** (what a wrong header is; what a blank row is) | RULES on **both** cards + `plan.md`'s Contract line, or the Builder and the Breaker answer them differently |
+| 5 | Scope (do the 20/21 boundaries need their own tests?) | Breaker DO |
+
+Point out that the stranger marked all five HIGH. Strangers usually do, which
+is why the handout asks learners to fix the top two rather than chase a count.

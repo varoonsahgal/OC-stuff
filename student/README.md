@@ -129,7 +129,7 @@ Work through the modules in order. Each module is a short lecture summary follow
 | 5 | [module-5-capstone.md](module-5-capstone.md) | Micro-lecture 5 + Capstone — midnight launch + the 5-minute close |
 | — | [appendices.md](appendices.md) | Objective coverage map, command crib sheet + agent-file skeleton, sources, image credits |
 
-Callouts: 🎯 goal · 🌍 real-world story · ⚡ optional Level up · 🔑 the one thing to remember. (Modules 0 and 3–5 still use 📘 Concept and 💡 Field note boxes until they're rewritten.)
+Callouts: 🎯 goal · 🌍 real-world story · ⚡ optional Level up · 🔑 the one thing to remember. (This page's Git primer and Modules 0 and 3–5 still use 📘 Concept and 💡 Field note boxes until they're rewritten.)
 
 ---
 

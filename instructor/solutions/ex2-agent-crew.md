@@ -20,35 +20,31 @@ Pass bar: `description` present; `mode: subagent`; `permission` (not deprecated
 `"*": deny` first — last matching rule wins); checklist covers approval bypass,
 duplicates, row reporting, missing tests; fixed return format.
 
-### Implementer agent file (model answer)
+### Implementer agent file
+
+Learners copy this verbatim from Module 2, Step 1 ("done for you"); it is
+reproduced here so the key and the handout can't drift. Its scope comes from
+the card's TOUCH line, not from a path rule (path-scoped `edit` permissions are
+planned for the Module 2 rewrite).
 
 ```markdown
 ---
-description: Implements exactly one supplied task card in the Panic Pantry sandbox, then reports changed paths and checks run
+description: Writes src/panic_pantry/importer.py from a task card. Builds code only; never writes tests or reviews.
 mode: subagent
-temperature: 0.2
+temperature: 0.1
 permission:
-  read: allow
   edit: allow
-  webfetch: deny
   bash:
     "*": deny
     "python3 -m unittest*": allow
-    "git status": allow
-    "git diff*": allow
 ---
-You implement exactly one task card supplied in the delegation message.
+You carry out exactly one task card. It arrives in your first message.
 
-Rules:
-- Change only the files on the card's TOUCH line. If the card and reality
-  conflict, stop and report; do not improvise.
-- All promotion creation goes through PromotionService.create_promotion.
-  Policy: discounts above 20% require approval; exactly 20% is active. Never
-  reimplement or bypass this.
-- Standard library only. Run the card's DONE command before returning.
+- Change only the files on the card's TOUCH line.
+- Follow the card's RULES exactly. If something is unclear, stop and say so.
+- Run the card's DONE command before you finish.
 
-Return format: summary (≤5 lines); changed paths; exact commands run with
-pass/fail; assumptions; open questions.
+Report back exactly what the card's REPORT line asks for.
 ```
 
 ### Expected denial behavior (step 3)

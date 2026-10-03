@@ -12,7 +12,7 @@ The receipts, in order — and the specific failure each one exists to catch:
 
 1. **Child summary + changed paths** — does every path map to a task card? *Catches boundary violations:* a file changed that no card owns is invisible to a green suite but obvious against the ownership map.
 2. **Deterministic tests** — `python3 -m unittest discover -s tests -v`, run by *you*, output captured. *Catches claimed-but-never-run:* an agent reporting "all tests pass" from a stale or partial run is a claim; your own captured output is evidence.
-3. **The diff** — `git diff`, read with your own eyes. *Catches plausible-but-wrong:* agents write code that looks finished; the diff is where reimplemented policy and quiet scope creep hide. Plausible is not the bar.
+3. **The diff** — `git add -A && git diff --cached` (new files only show once staged), read with your own eyes. *Catches plausible-but-wrong:* agents write code that looks finished; the diff is where reimplemented policy and quiet scope creep hide. Plausible is not the bar.
 4. **Independent review** — `@reviewer`, whose incentives are findings, not completion. *Catches author blindness:* the implementer cannot flag the assumption it didn't know it made; a reviewer with a checklist can.
 5. **The human decision** — findings get dispositioned: fix, accept with reason, or defer with an owner. *Catches silent deferral:* a finding nobody answered is a decision nobody made. Silence is not a disposition.
 
@@ -69,7 +69,7 @@ The capstone injects a real integration issue. Your finish line is not a fix; it
 
 ```bash
 python3 -m unittest discover -s tests -v     # something is now wrong — or is it?
-git status && git diff
+git status && git add -A && git diff --cached
 ```
 
 You may edit your Exercise 4 files plus `workshop/release-note.md`.
@@ -84,7 +84,7 @@ You may edit your Exercise 4 files plus `workshop/release-note.md`.
 3. **Inspect the resulting diff** and get reviewer findings:
 
 ```text
-@reviewer Review the latest change in this worktree against tickets/TICKET-001.md.
+@reviewer Review the staged change in this worktree (git diff --cached) against tickets/TICKET-001.md.
 Policy: discounts above 20% require approval; exactly 20% is active.
 Findings by severity with file:line citations, plus anything still missing tests.
 ```

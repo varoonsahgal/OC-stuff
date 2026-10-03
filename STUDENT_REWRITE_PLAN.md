@@ -2,7 +2,7 @@
 
 **Goal:** make the student materials fast, clear and hard to misread for impatient developers who are new to agent orchestration. Every word should earn its place.
 **Scope:** `student/`, plus the sandbox and instructor files that must stay in sync.
-**Status:** approved 2026-10-03 (all six decisions in §15: yes). Phases 1–2 are done; see §16 for progress.
+**Status:** approved 2026-10-03 (all six decisions in §15: yes). Phases 1–2 are done; §16 logs what shipped and what the validation found.
 
 ---
 
@@ -99,7 +99,7 @@ awk '/<details>/{d=1}!d{print}/<\/details>/{d=0}' FILE | awk '/^ *```/{c=!c;next
 |---|---:|---:|---:|
 | README | 2,232 | 550 | |
 | Module 0 | 2,170 | 1,000 | |
-| Module 1 | 1,427 | 1,450 | **1,438** ✔ (v2 adds Do/Why/Done and the Breaker scaffold) |
+| Module 1 | 1,427 | 1,500 | **1,510** (v2 adds Do/Why/Done, the Breaker scaffold, and two Predict reveals) |
 | Module 2 | 1,802 | 1,100 | |
 | Module 3 | 1,538 | 900 | |
 | Module 4 | 1,673 | 1,000 | |
@@ -960,3 +960,50 @@ Every objective is still covered on the **core** path. Level ups deepen coverage
 4. **Schedule.** Accept 183 hands-on minutes and an 8-minute buffer, with Level ups as the elastic buffer?
 5. **Module 6 and TICKET-002.** Build them in Phase 6, or defer?
 6. **`scripts/score.sh`.** Add it to the sandbox? It's an instructor-owned file in a directory that is read-only for agents.
+
+---
+
+## 16. Progress log
+
+### Phases 1–2 — shipped 2026-10-03
+
+**Phase 1 (foundations)**
+
+- `sandbox/panic-pantry/scripts/score.sh`: prints the measured scorecard rows. It is tested on 15+ scenarios: no importer, correct importer, policy violations hidden in constants or on `len()` lines, prints and logging inside tests, syntax errors in the importer or elsewhere, infinite loops, committed frozen edits, renames, paths with spaces, detached HEAD, worktrees, non-git folders, and `sh` instead of `bash`.
+- Templates: `workshop/scorecard.md`, `workshop/model-comparison.md`, and `workshop/prompts/task-{a,b}.txt`, identical to Module 3's prompts.
+- Style guide, spine table, and the 6-line card spec in `.github/copilot-instructions.md`.
+- `instructor/tools/breaker-mutants/check_tests.py`: plants 8 bugs generated from the reference solution and grades any test module against them. It refuses to grade tests that fail on correct code.
+- `sandbox/setup.sh` no longer commits learner work (cards, plans, agent files) into the `starter` tag when re-run.
+
+**Phase 2 (Module 1, two review rounds)**
+
+- Module 1 was rewritten, then revised after two rounds of agent validation: 13 agents in round 1, 7 in round 2.
+- Every card was run by an agent that had only the card. Results:
+
+| Card | Planted bugs caught |
+|---|---|
+| Frozen contract tests | 4 of 8 |
+| Vague first draft | 6 (its tests failed instead of skipping) |
+| Simulated learner's filled skeleton | 7 (exam + Breaker = 8) |
+| Model card | 8 |
+
+- Builder + Breaker tests integrate green (31–32 tests).
+- Cold-read clarity went from 6/10 (v1) to 7/10 (v2), before the round-2 fixes.
+- Knock-on edits:
+  - "packet", "test author" and the old card names retired.
+  - Figures renumbered.
+  - Module 2's implementer uses the card lines; its spine table moved under the goal.
+  - Modules 4 and 5 stage before `git diff`, so new files show.
+  - Capstone Injection D is self-contained.
+  - The appendix coverage map was corrected.
+  - The Ex1 answer key was rewritten with the evidence.
+  - Simulated Trace 4 added for no-model classrooms.
+- Interim schedule: Ex1 15, ML1 4, buffer 17, so 168 hands-on.
+- Spine rules sharpened: "blind trust", "share no files".
+
+**Open, for later phases**
+
+- **Timing.** Round-2 cold readers estimate Ex1 at about 17–21 minutes against the 15 planned. Most of the overrun is Step 4 (about 7.5 minutes) and the Stranger Test's OpenCode mechanics. The round-2 fixes target both: inline hints, and `@` to attach the card. Re-time Ex1 at the Phase 7 dry run before trimming anything else.
+- **Phase 3 (Module 2):** C4 path-scoped `edit` (verify the pattern semantics on 1.18.33 first) and C5 `permission.task`.
+- **Phase 4:** Module 5's micro-lecture title still reads "a green check is evidence, not a handoff"; align it with the spine rule then.
+

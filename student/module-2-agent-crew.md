@@ -236,7 +236,7 @@ DONE:   Each risk names the existing test that would catch it, or says "no test"
 REPORT: each risk with a file:line · anything unclear in the ticket · anything you guessed.
 ```
 
-Spot the six lines of a card: **DO, READ, RULES, TOUCH, DONE, REPORT**.
+Spot the six lines of a card: **DO, READ, RULES, TOUCH, DONE, REPORT**. A read-only card has no command to run, so its DONE is the bar the report must meet.
 
 Save the report. A good one flags at least one real risk, for example the importer setting a promotion's status itself instead of letting the service decide.
 

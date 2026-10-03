@@ -18,14 +18,14 @@
 ## Why bother?
 
 - In Module 0 the ticket did the thinking. Most repos don't have that ticket.
-- No ticket means the agent guesses. Five agents means five different guesses, at once, in your code.
+- No ticket, and the agent guesses. Five agents make five different guesses, at once.
 - **Orchestration** (splitting a job across agents and checking what comes back) is mostly writing. A vague brief makes even a strong model guess.
 
 The **contract** is what every agent builds against: the 9 acceptance criteria in `tickets/TICKET-001.md` (the function, what it returns, every edge case, the 20% rule). **Freeze** it (make it final) before any agent starts. To change it, stop everyone and re-brief.
 
 ---
 
-## Split by file, not by function
+## A teammate's four-agent plan
 
 A teammate splits TICKET-001 four ways. The ticket's whole deliverable is one file: `src/panic_pantry/importer.py`.
 
@@ -45,16 +45,16 @@ A, B and C all change `importer.py`. One may overwrite another's work, edits may
 D writes a different file and needs nothing from A, B or C. It's a separate job: the **Breaker**.
 </details>
 
-Three chefs, one cutting board isn't teamwork. It's a queue with knife injuries.
+**Split by file, not by function.** Three chefs, one cutting board isn't teamwork. It's a queue with knife injuries.
 
-**If two pieces of work change the same file, give them to one agent.** Separate files aren't enough on their own: both agents also build against the same frozen contract.
+If two pieces of work change the same file, give them to one agent. Separate files aren't enough on their own: both agents also build against the same frozen contract.
 
 ## Never let the Builder grade its own work
 
 | Agent | Job | Writes | Reads |
 |---|---|---|---|
 | **Builder** | Makes the importer | `src/panic_pantry/importer.py` | The ticket + the shop code it calls |
-| **Breaker** | Writes tests that attack the ticket, starting with every way `FREE-ALL` could go live | `tests/test_promo_import.py` | The ticket + the shop code its tests call. **Never the Builder's code** |
+| **Breaker** | Writes tests, from the ticket, that attack the importer, starting with every way `FREE-ALL` could go live | `tests/test_promo_import.py` | The ticket + the shop code its tests call. **Never the Builder's code** |
 
 - You don't ask the locksmith who fitted the lock to test whether it can be picked.
 - A Breaker that reads the Builder's code tends to test what the code does, not what the ticket asks.
@@ -116,7 +116,8 @@ Each of the six lines answers a question the agent would otherwise guess:
 ## Exercise 1 — Split it (15 min) 🔨
 
 ```bash
-cd sandbox/panic-pantry          # the main checkout, not a worktree
+cd sandbox/panic-pantry          # from the course root; from Module 0's worktree: cd ../../panic-pantry
+git branch --show-current        # must print main, not single-agent
 mkdir -p workshop/cards
 ```
 
@@ -136,7 +137,7 @@ You only create files in `workshop/`. If OpenCode is still open from Module 0, q
 | Write `importer.py` | ? |
 | Rename one variable | ? |
 | Write tests that attack the importer | ? |
-| Predict the result of all 13 rows in `fixtures/promos_messy.csv` | ? |
+| Predict the result of all 13 rows in `fixtures/promos_messy.csv` (an answer key exists) | ? |
 | Make the GO / NO-GO call at midnight (ship it or don't) | ? |
 
 <details><summary>Answer</summary>
@@ -154,7 +155,7 @@ You only create files in `workshop/`. If OpenCode is still open from Module 0, q
 ### Step 2 — Save the plan (2 min)
 
 - **Do:** copy this into `workshop/plan.md`, then fill both `___`.
-- **Why:** the plan holds what no agent needs: the order, and your own jobs. Writing the contract line is the freeze.
+- **Why:** the plan holds what no agent needs: the order and your own jobs. Writing the contract line is the freeze.
 - **Done when:** it's saved with no `___` left.
 
 ```markdown
@@ -168,7 +169,7 @@ Order: freeze the contract → Builder and Breaker, either order → I combine b
 | builder | src/panic_pantry/importer.py | python3 -m unittest tests.test_importer_contract -v → 9 tests OK, none skipped |
 | breaker | ___                          | python3 -m unittest tests.test_promo_import -v → OK, every test skipped until importer.py exists |
 
-Kept by me: ___ (your Keep answers from Step 1), freezing the contract, combining the files.
+Kept by me: ___ (your Keep answers from Step 1 that belong to this ticket), freezing the contract, combining the files.
 ```
 
 ### Step 3 — Copy the Builder card (1 min)
@@ -189,7 +190,7 @@ REPORT: files changed · the exact command you ran + its last line · anything y
 ### Step 4 — Write the Breaker card (6 min)
 
 - **Do:** copy this skeleton into `workshop/cards/breaker.md` and replace every `___`.
-- **Why:** each blank is a guess you take away from the agent that runs this card in Module 4.
+- **Why:** each blank you fill is one less guess for the agent in Module 4.
 - **Done when:** no `___` is left and the self-check passes.
 
 ```text
@@ -203,12 +204,14 @@ REPORT: files changed · the exact command you ran + its last line · which tick
 
 | Blank | Where to look |
 |---|---|
-| Ways `FREE-ALL` could go live | Name three. Ticket criterion 7 lists what the importer must never do. |
-| Rules the exam never tests | The four misses in the second Predict answer |
-| Last READ file | Which test file already skips while `importer.py` is missing? |
+| Ways `FREE-ALL` could go live | Three shortcuts that ticket criterion 7 forbids |
+| Rules the exam never tests | Two or more of: wrong header → nothing imports · 3 columns → error · `20.9` → error · blank row → reason exactly `"empty row"` |
+| Last READ file | The test file that already skips while `importer.py` is missing |
 | Never open | The Builder's file |
 | 20% lines | The Contract line in `plan.md` |
 | TOUCH, DONE | The breaker row in `plan.md` |
+
+Yes, "every test skipped" is Module 0's 0/9 trap. Here it only proves the file loads; Module 4 grades the tests against the Builder's importer.
 
 **Self-check:**
 
@@ -220,24 +223,25 @@ REPORT: files changed · the exact command you ran + its last line · which tick
 
 - **Do:** let a fresh agent read your card and tell you what it would have to guess.
 - **Why:** a fresh agent has only the card and the repo's `AGENTS.md`, like the agent in Module 4.
-- **Done when:** the top two HIGH guesses are answered on your card.
+- **Done when:** the top two HIGH guesses are answered on the right card.
 
-1. Start OpenCode here, in `sandbox/panic-pantry`: run `opencode`. Type `/new`, then press **Tab** to switch to the **Plan** agent (OpenCode's read-only mode).
-2. Paste:
+1. Run `opencode` here, in `sandbox/panic-pantry`. Press **Tab** to switch to the **Plan** agent (it asks before any edit or command).
+2. Type this. For the last line, type `@breaker` and pick your card from the list:
 
    ```text
    Below is a task card. Do NOT do the task.
    List the five decisions you would have to guess because the card doesn't say, worst first.
    Mark each HIGH if a wrong guess would change which tests get written, otherwise LOW. One line each.
-
-   [paste workshop/cards/breaker.md here]
+   @workshop/cards/breaker.md
    ```
 
-3. Answer the top two HIGH guesses on your card. If a guess is about the rules themselves (for example, which headers count as wrong), answer it in `plan.md`'s Contract line instead, so the Builder gets the same answer.
+3. Answer the top two HIGH guesses:
+   - **About how to test** (for example, how to spot a direct write): add the answer to the Breaker card's RULES.
+   - **About the rules themselves** (for example, which headers count as wrong): add the same sentence to RULES on **both** cards and to `plan.md`'s Contract line, or the two agents will answer it differently.
 
-How many HIGH guesses did your card get? Compare with your neighbor: fewest wins.
+Compare your top guess with your neighbor's: did theirs expose a rule you missed?
 
-> 🌍 **Real world:** Anthropic's multi-agent research system beat a single agent by 90.2% on its internal eval. Its builders' lesson: "Without detailed task descriptions, agents duplicate work, leave gaps, or fail to find necessary information." ([Anthropic, Jun 2025](https://www.anthropic.com/engineering/multi-agent-research-system)) Your card is that task description.
+> 🌍 **Real world:** Anthropic's multi-agent research system beat a single agent by 90.2% on its internal eval. The lesson: "Without detailed task descriptions, agents duplicate work, leave gaps, or fail to find necessary information." ([Anthropic, Jun 2025](https://www.anthropic.com/engineering/multi-agent-research-system)) Your card is that task description.
 
 <details><summary>⚡ <b>Level up — find the critical path (3 min)</b></summary>
 
