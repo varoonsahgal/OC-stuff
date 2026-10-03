@@ -115,6 +115,14 @@ EOF
   the starter version even if the change was staged); note in
   integration-notes which control would have prevented it (permission scope or
   tighter card).
+- **Debrief twist (since Module 2 path-locks the implementer):** learners will
+  say "impossible, my implementer can't edit `store.py`". True, and Module 2's
+  `debug agent` check proved it. So ask: **who else could have?** Build (no
+  path lock), `general` (if Build routed the Breaker card to it), any agent
+  whose bash allows a write, the implementer through code it runs under
+  `python3 -m unittest`, or a person. A lock on one agent narrows the
+  suspects; only the diff names the culprit. (The injection is applied by
+  script, so the lock never had a chance to fire.)
 
 ### Injection D — test asserts a stale signature (task/context gap)
 

@@ -7,7 +7,7 @@ lists what learners (and their agents) may create or edit per exercise.
 |---|---|---|---|
 | 0 — Vague ticket / baseline | tag `starter`, worktree `single-agent` | `src/panic_pantry/importer.py` only (`tests/test_promo_import.py` is reserved for the Ex4 Breaker) | everything else |
 | 1 — Split the job | tag `starter` | `workshop/plan.md`, `workshop/cards/builder.md`, `workshop/cards/breaker.md` | all of `src/`, `tests/` |
-| 2 — Agent crew | tag `starter` | `.opencode/agents/*.md` (agent configs) | all of `src/`, `tests/` |
+| 2 — Build the crew | tag `starter` | `.opencode/agents/implementer.md`, `reviewer.md`, `lead.md`; `.opencode/commands/review-ticket.md` (optional Level up) | all of `src/`, `tests/` (the lock checks must leave `store.py` unchanged) |
 | 3 — Model routing | tag `starter` | `workshop/model-comparison.md`, scratch branch files | shared fixtures and tests |
 | 4 — Orchestrated run | tag `starter`, worktree `orchestrated` | `src/panic_pantry/importer.py` (implementer, running the builder card), `tests/test_promo_import.py` (Breaker), `workshop/integration-notes.md` (primary); plus the `.opencode/agents/*.md` and `workshop/cards/*.md` you copy in (`implementer.md` gets a `model:` line) | each other's files above |
 | Capstone | end of Ex. 4 | files from Ex. 4 plus `workshop/release-note.md` | fixtures, scripts |

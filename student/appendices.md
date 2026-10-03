@@ -15,8 +15,8 @@ Every objective and topic from [COURSE_OUTLINE.md](../COURSE_OUTLINE.md):
 | Foreground vs background delegated work | ML4 — explained + recorded instructor demo (experimental in pinned V1; not exercised live) ([module 4](module-4-parallel-run.md)) |
 | Navigating parent/child sessions | ML2, Ex2 step 5 ([module 2](module-2-agent-crew.md)) |
 | When delegation adds value vs keeping work local | Ex1 Step 1 (keep or delegate), capstone step 2 ([module 1](module-1-decomposition.md), [module 5](module-5-capstone.md)) |
-| Creating custom agents; instructions; roles; reusable designs | Ex2 (reviewer + implementer) ([module 2](module-2-agent-crew.md)) |
-| Tool/permission control; read-only reviewer; controlled write access; preventing dangerous actions; controlling delegation targets | ML2, Ex2 (`permission`: `edit`, `bash`); `permission.task` governs the Task tool in Ex4 ([module 2](module-2-agent-crew.md), [module 4](module-4-parallel-run.md)) |
+| Creating custom agents; instructions; roles; reusable designs | Ex2 (implementer, reviewer, lead; `/review-ticket` command Level up) ([module 2](module-2-agent-crew.md)) |
+| Tool/permission control; read-only reviewer; controlled write access; preventing dangerous actions; controlling delegation targets | ML2, Ex2: `edit: deny` reviewer, path-locked implementer, `bash` allowlists, locks proved with `opencode debug agent` (Step 3); `permission.task` allowlist on the lead (Step 6); trifecta Level up. Ex4 lets the primary route a card ([module 2](module-2-agent-crew.md), [module 4](module-4-parallel-run.md)) |
 | Model capability vs complexity/risk; reasoning-quality/latency/cost; variants and effort levels; escalation; avoiding expensive-model waste | ML3, Ex3 ([module 3](module-3-model-routing.md)) |
 | Selecting models in OpenCode; per-agent models | ML3 (`/models`, per-agent `model`), Ex3 ([module 3](module-3-model-routing.md)) |
 | Parallel orchestration; shared context; file ownership; conflict prevention; branches/worktrees; deliverable tracking | ML4, Ex4 ([module 4](module-4-parallel-run.md)) |
@@ -32,6 +32,8 @@ bash scripts/check_env.sh                         # environment + suite check
 bash sandbox/setup.sh                             # (pack root) rebuild worktrees — DISCARDS worktree work
 opencode models                                   # list model IDs (CLI)
 opencode stats                                    # token/cost data
+opencode debug agent reviewer --tool write --params '{"filePath":"src/panic_pantry/store.py","content":"# hi"}'
+                                                  # run one tool with an agent's permissions, no model (Module 2)
 # TUI: /models picker · Tab = Build/Plan · @agent = invoke subagent
 # <Leader>+Down = first child session · Left/Right = cycle children · Up = parent (default keybinds — remappable)
 # <Leader> = ctrl+x by default (press, release, then the next key)
@@ -49,11 +51,13 @@ mode: subagent                 # omit and it defaults to "all"
 permission:
   edit: deny                   # allow | ask | deny
   bash:
-    "*": deny                  # catch-all FIRST — last matching rule wins
+    "*": deny                  # catch-all FIRST (last matching rule wins), and QUOTE it
     "git diff*": allow
 ---
 <system prompt: objective, checklist, return format>
 ```
+
+Path lock: `edit: {"*": deny, "src/panic_pantry/importer.py": allow}` (paths count from the git repo root). Delegation allowlist (primary agents): `task: {"*": deny, "reviewer": allow}`. `hidden: true` only hides an agent from the `@` menu; it isn't a security control.
 
 ## Appendix C — Sources
 
@@ -110,12 +114,12 @@ Look things up here; don't pre-read it. Each term links to the module that teach
 
 | Term | Plain-English meaning | Taught in |
 |---|---|---|
-| **Primary agent** | The agent you talk to directly in the main conversation. Built-ins: **Build** (full tools) and **Plan** (edits and shell require your approval). Tab switches between them | [Module 0](module-0-baseline.md) |
-| **Subagent** | A helper agent the primary (or you) hands one task to. Built-ins in 1.18.33: **explore** (fast, read-only codebase search) and **general** (multi-step research and tasks). You'll build your own | [Module 2](module-2-agent-crew.md) |
+| **Primary agent** | The agent you talk to directly in the main conversation. Built-ins: **Build** (full tools) and **Plan** (can't edit your files, but can still run shell commands). Tab switches between them | [Module 0](module-0-baseline.md) |
+| **Subagent** | A helper agent the primary (or you) hands one task to. Built-ins in 1.18.33: **explore** (fast codebase search; read-only by its prompt only, since it may run shell commands) and **general** (multi-step tasks; can edit). You'll build your own | [Module 2](module-2-agent-crew.md) |
 | **Session / child session** | A session is one conversation. A delegation creates a **child session** under it — a new conversation with fresh, empty context | [Module 2](module-2-agent-crew.md) |
 | **Session tree** | A parent session plus the child sessions its delegations created. You walk it with the child-navigation keys | [Module 4](module-4-parallel-run.md) |
 | **@-mention** | *You* choose the subagent: `@reviewer check the diff` | [Module 2](module-2-agent-crew.md) |
-| **Task tool** | The tool the *primary agent* calls to delegate on its own. It chooses the subagent by reading each subagent's `description` | [Module 4](module-4-parallel-run.md) |
+| **Task tool** | The tool the *primary agent* calls to delegate on its own. It chooses the subagent by reading each subagent's `description`; `permission.task` limits which ones it may pick. Subagents don't get it | [Module 2](module-2-agent-crew.md), [Module 4](module-4-parallel-run.md) |
 | **Permission** (`allow` / `ask` / `deny`) | Configured authority per action: `allow` runs, `ask` pauses for your approval, `deny` blocks — whatever the prompt says | [Module 2](module-2-agent-crew.md) |
 | **Frontmatter** | The YAML block between `---` fences at the top of an agent file — its settings. The body below is its system prompt | [Module 2](module-2-agent-crew.md) |
 | **Provider / model ID** | A provider is a model service (Anthropic, OpenAI, OpenCode Zen, …). Models are named `provider_id/model_id` | [Module 3](module-3-model-routing.md) |

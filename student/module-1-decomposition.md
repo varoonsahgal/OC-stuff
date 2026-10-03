@@ -228,7 +228,7 @@ Yes, "every test skipped" is Module 0's 0/9 trap. Here it only proves the file l
 - **Why:** a fresh agent has only the card and the repo's `AGENTS.md`, like the agent in Module 4.
 - **Done when:** the top two HIGH guesses are answered on the right card.
 
-1. Run `opencode` here, in `sandbox/panic-pantry`. Press **Tab** to switch to the **Plan** agent (it asks before any edit or command).
+1. Run `opencode` here, in `sandbox/panic-pantry`. Press **Tab** to switch to the **Plan** agent (it can't edit your files).
 2. Paste this one line, then type `@breaker`, pick your card from the list, and press Enter:
 
    ```text

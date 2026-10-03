@@ -41,7 +41,7 @@ Today your role is **release lead**. Many stations cook; one person at the pass 
 
 | On screen | Tells you | Key |
 |---|---|---|
-| **Build** / **Plan** | Which **primary agent** you're talking to. Build edits files and runs commands; Plan asks before any edit or command | **Tab** switches |
+| **Build** / **Plan** | Which **primary agent** you're talking to. Build edits files and runs commands; Plan can't edit your files but can still run commands | **Tab** switches |
 | Model name | The model this agent uses right now | `/models` changes it |
 | `variants` | The model's effort setting (e.g. more reasoning) | **ctrl+t** cycles |
 | `commands` / `interrupt` | Every action, searchable / stop the agent | **ctrl+p** / **esc** |

@@ -2,7 +2,7 @@
 
 **Goal:** make the student materials fast, clear and hard to misread for impatient developers who are new to agent orchestration. Every word should earn its place.
 **Scope:** `student/`, plus the sandbox and instructor files that must stay in sync.
-**Status:** approved 2026-10-03 (all six decisions in §15: yes). Phases 1–2 are done; §16 logs what shipped and what the validation found.
+**Status:** approved 2026-10-03 (all six decisions in §15: yes). Phases 1–3 are done; §16 logs what shipped and what the validation found.
 
 ---
 
@@ -97,10 +97,10 @@ awk '/<details>/{d=1}!d{print}/<\/details>/{d=0}' FILE | awk '/^ *```/{c=!c;next
 
 | File | Before | Target | Now |
 |---|---:|---:|---:|
-| README | 2,232 | 550 | |
-| Module 0 | 2,170 | 1,000 | |
+| README | 2,232 | 550 | **691** (the shop-in-60-seconds table and setup check stay: cold readers needed both) |
+| Module 0 | 2,170 | 1,000 | **1,161** |
 | Module 1 | 1,427 | 1,650 | **1,631** (v2 adds Do/Why/Done, the Breaker scaffold, two Predict reveals, Stranger Test routing, and the one-writer clarification) |
-| Module 2 | 1,802 | 1,100 | |
+| Module 2 | 1,802 | 1,100 | **1,579** (two core steps the 1,100 didn't foresee in full: the `debug agent` lock proof and the lead with a `task` allowlist, plus the crew table) |
 | Module 3 | 1,538 | 900 | |
 | Module 4 | 1,673 | 1,000 | |
 | Module 5 | 1,414 | 900 | |
@@ -570,6 +570,7 @@ Agents will edit the scoreboard if you let them.
 
   The payoff: M4's "coordination vs. control" becomes something they've already done, and the M1 card's `TOUCH` line is now enforced for this agent.
 - **New core line C5, "Who may hire whom":** give the reviewer `task: deny`, because a reviewer doesn't hand work to helpers. Add one table row on `permission.task` with the analogy "a subcontractor can't hire subcontractors without approval". This closes the coverage-map gap.
+  - **As built (Phase 3):** `task: deny` on the reviewer would teach nothing, because 1.18.33 already gives every subagent session `task: deny`. C5 became Ex2 Step 6: a `lead` primary agent with `edit: deny` and `task: {"*": deny, implementer: allow, reviewer: allow}`. The motivation is real: agent limits aren't inherited, so a no-edit lead could hand "write the importer" to `general`. Proof is `opencode debug agent lead --tool task …` (refused).
 - **⚡ Level ups:** L2.1 step cap and doom loop, L2.2 the `/review` command, L2.3 lethal-trifecta audit (§8).
 - **🔑** *A role is a permission, not a name.*
 
@@ -747,8 +748,8 @@ A transfer exercise that gathers every advanced idea on a **new ticket with a re
 | C1 | Spot the bad split | Split by file | — | M1 | 2 |
 | C2 | Keep or delegate? | When delegation pays | — | M1 | 1 |
 | C3 | The Stranger Test | Context gaps you can see | Plan agent, `/new` | M1 | 4 |
-| C4 | Scope as a lock | Coordination → control | Path patterns under `permission.edit` | M2 | 3 |
-| C5 | Reviewer can't delegate | Delegation control | `permission.task` | M2 | 1 |
+| C4 | Scope as a lock (as built: Steps 1 + 3, proved with `opencode debug agent`) | Coordination → control | Path patterns under `permission.edit` | M2 | 3 |
+| C5 | Who may hire whom (as built: Step 6, a `lead` primary with a `task` allowlist) | Delegation control | `permission.task` | M2 | 1→5 |
 | C6 | Headless A/B | Fair comparison, headless mode | `opencode run -m` | M3 | saves time |
 
 ### ⚡ Level ups (optional, collapsed, elastic)
@@ -875,7 +876,7 @@ Debrief: *prompts ask, permissions block, plugins enforce your own logic.* Bash 
 - Breaks = 15. Buffer = 8. Close = 5.
 - Total = 183 + 29 + 15 + 8 + 5 = **240** ✔
 
-**Interim schedule (shipped with Phase 2):** ML1 = 4, Ex1 = 20, buffer = 12, everything else unchanged. Hands-on = 173, total = 240. Ex1 grew from the planned 15 to 20 because three independent timed cold reads put it at 21–24 minutes. The final schedule (Phases 3–4) must absorb those 5 minutes, for example Ex3 32 → 30 and Ex4 42 → 40 with an 8-minute buffer. The rest of this table lands with Phases 3–4.
+**Interim schedule (shipped with Phase 3):** ML1 = 4, Ex1 = 20, Ex2 = 36, buffer = 8, everything else unchanged. Hands-on = 177, total = 240. Ex1 grew from the planned 15 to 20 because three independent timed cold reads put it at 21–24 minutes. Phase 4 must absorb those 5 minutes. A version that adds up: lectures as in the table (29), Ex3 32 → 30, Ex4 42 → 40, capstone 33 → 32, buffer 8. Hands-on = 25 + 20 + 36 + 30 + 40 + 32 = 183; total = 183 + 29 + 15 + 8 + 5 = 240. (The Phase 2 note's example, without the capstone trim, came to 241.)
 
 **Why an 8-minute buffer is enough:** ⚡ Level ups are optional and collapsed. Fast tables take them and slow tables skip them, so nobody waits and the room stays in sync.
 
@@ -937,17 +938,18 @@ Every objective is still covered on the **core** path. Level ups deepen coverage
 - [ ] The policy sentence is identical everywhere: "above 20% requires approval; exactly 20% is active."
 - [ ] The starter suite still reports `23 tests, OK (skipped=9)`.
 - [ ] Every OpenCode command or config is verified on **1.18.33** and dated. Anything that can't be verified is labeled "recorded demo". Items to verify:
-  - [ ] Path patterns under `permission.edit`: relative or absolute paths?
-  - [ ] `permission.task` shorthand (`task: deny`) in markdown frontmatter
-  - [ ] `steps` (vs. the deprecated `maxSteps`)
-  - [ ] The `doom_loop` default
-  - [ ] Command `subtask: true` and `` !`cmd` `` injection
-  - [ ] `opencode run -m / --agent / --auto` (with a subagent-mode agent)
+  - [x] Path patterns under `permission.edit`: relative to the **git worktree root**; `*` crosses `/`; last match wins. Outside a git checkout the path allow never matches, so `"*": deny` refuses everything. (Binary, 2026-10-03.)
+  - [x] `permission.task` shorthand (`task: deny`) is valid and hides the task tool; the object form lists only allowed agents. Subagent sessions already get `task: deny`.
+  - [x] `steps` is valid but soft (an injected "summarize" message only); `maxSteps` is deprecated.
+  - [x] The `doom_loop` default is `ask`; it fires on 3 identical tool calls within one response.
+  - [x] Command `subtask: true` and `` !`cmd` `` injection. A command whose `agent` is a subagent runs as a subtask anyway. Injection runs in cwd with **no** bash permission check, after argument substitution. A project `review.md` replaces the built-in `/review`.
+  - [x] `opencode run -m / --agent / --auto`: `--agent` **can't select a subagent** (falls back to Build), so L4.1's breaker must be `mode: primary` or `all`. Asks are auto-rejected without `--auto`. It waits on stdin unless stdin is `/dev/null`.
   - [ ] Two concurrent `opencode run` processes in one checkout
-  - [ ] Plugin directory (`.opencode/plugins/`) and `tool.execute.before` argument shape; tool names `edit` / `write` / `apply_patch`
+  - [x] Plugin directory: `.opencode/plugin/` or `.opencode/plugins/`, top level only. `tool.execute.before(input{tool,sessionID,callID}, output{args})`: mutate `args` in place; throwing blocks the call.
   - [ ] `opencode stats --models`
   - [ ] `/undo` keybind
-  - [ ] **The built-in subagent list.** The current docs (fetched from the `sst/opencode` dev branch, Oct 2026) list **General, Explore and Scout**. The course says 1.18.33 has two (explore, general). Recheck.
+  - [x] **The built-in subagent list.** 1.18.33 has **explore** and **general** only; Scout is in the docs, not the binary.
+  - [x] Also found (Phase 3, binary): `edit: deny` removes the edit tools (no denial message); an unquoted `*` key makes the agent load with **every permission allowed**; a tab gives `Configuration is invalid` and OpenCode won't start; a missing `description` still loads; "always" on an edit prompt approves edit `"*"` instance-wide until restart; `explore` is read-only by prompt only (bash allowed); the Plan agent can't edit (except its plan files) but runs bash freely.
 - [ ] Cold-read test: a developer new to orchestration completes each core exercise within its timebox without a clarifying question.
 
 ---
@@ -1004,6 +1006,30 @@ Every objective is still covered on the **core** path. Level ups deepen coverage
 **Open, for later phases**
 
 - **Timing.** Three timed cold reads put Ex1 at 21–24 minutes against the 15 planned, so Ex1 is now 20 (Step 4 = 8, Step 5 = 7). The overrun came from Step 4 and the Stranger Test's OpenCode mechanics. The final fixes target both: inline hints, a one-line prompt plus `@` to attach the card. Re-time Ex1 at the Phase 7 dry run with real learners.
-- **Phase 3 (Module 2):** C4 path-scoped `edit` (verify the pattern semantics on 1.18.33 first) and C5 `permission.task`.
 - **Phase 4:** Module 5's micro-lecture title still reads "a green check is evidence, not a handoff"; align it with the spine rule then.
 
+### Phase 3 — shipped 2026-10-03
+
+**README and Module 0 (part 1, commit 921e652)**
+
+- README cut to one screen (691 prose words): story, the rule, the spine, the shop's code in 60 seconds, setup check, Figure 0. The schedule moved to the instructor guide; the glossary and Git primer moved to Appendices E and F.
+- Module 0 rewritten (1,161): measure-first Why, METR 🌍, the chef at the pass, the cockpit table, the intervention count, Exercise 0 scored by `score.sh`, L0.1 "grade itself".
+
+**Module 2 and sync (part 2)**
+
+- Every OpenCode behavior Module 2 relies on was run on the 1.18.33 binary with `opencode debug agent` (a real tool call under an agent's permissions, no model) in a git copy of the sandbox. §14 lists the results.
+- Module 2 rewritten (1,579):
+  - A crew table (implementer, reviewer, lead: one lock per job).
+  - "A role is a permission, not a name": only `permission:` is enforced. Replit 🌍, the hotel key card, `explore` as the read-only-by-prompt example, and the "never click always" warning.
+  - "A helper starts empty": Context Rot and Anthropic numbers.
+  - Exercise 2 (36 min, six steps): path-locked implementer (C4), reviewer, **Prove the locks** (a Predict reveal that there's no red denial, then two `debug agent` checks), the pre-code review card, the child session, and **Who may hire whom** (C5 as a lead with a `task` allowlist).
+  - Level ups: cap the effort (`steps`, `doom_loop`), `/review-ticket`, the lethal trifecta.
+  - A debrief question on the escape that permissions can't close (code the implementer writes runs under the tests it may run).
+- The wrong Plan-agent description ("asks before any edit or command") was fixed in Module 0, Module 1 and the glossary.
+- Instructor: `ex2-agent-crew.md` rewritten around a "what 1.18.33 actually does" table with captured outputs; `reviewer-agent.md` pass bar changed from "a visible denial" to the `debug agent` output; README cues, a pre-class lock check, the offline line, schedule (Ex2 36, buffer 8, 177 hands-on); Injection C debrief "who else could have?".
+- `WRITABLE_FILES.md` Ex2 row; Appendix A (C4/C5 coverage), B (debug command, path lock, `task` allowlist, `hidden`), E (explore, general, Task tool).
+
+**Open, for later phases**
+
+- **Phase 4:** L4.1's breaker agent must be `mode: primary` (or `all`), because `opencode run --agent` can't select a subagent. Module 4 routes the Breaker card through Build (usually to `general`); the lead has no agent allowed to write `tests/test_promo_import.py`. Decide whether Module 4 adds a Breaker agent or keeps Build routing.
+- **Budgets:** README, M0 and M2 are over their §2 targets by 141, 161 and 479 words. Module 1 set the precedent (1,650). Phase 7 should re-baseline the total, or M3–M5 must come in under target.

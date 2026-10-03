@@ -19,7 +19,7 @@ config differ across major versions.
 | [solutions/ex0-vague-ticket.md](solutions/ex0-vague-ticket.md) | Answer key: Ex0 expected discoveries, baseline scorecard, common near-misses |
 | [solutions/ex1-task-surgery.md](solutions/ex1-task-surgery.md) | Answer key: model plan.md, Builder and Breaker cards, Stranger Test guesses, grading criteria |
 | [tools/breaker-mutants/](tools/breaker-mutants/README.md) | 8 realistic importer bugs + a checker that shows which test files catch them (backs Module 1's "the exam catches only 4 of 8") |
-| [solutions/ex2-agent-crew.md](solutions/ex2-agent-crew.md) | Answer key: implementer agent, expected denial behavior, model reviewer report |
+| [solutions/ex2-agent-crew.md](solutions/ex2-agent-crew.md) | Answer key: what 1.18.33 really does with each permission, implementer and lead files, `debug agent` outputs, model reviewer report, Level ups |
 | [solutions/ex3-model-routing.md](solutions/ex3-model-routing.md) | Answer key: recorded comparison example, Task A scoring keys |
 | [solutions/ex4-orchestrated-run.md](solutions/ex4-orchestrated-run.md) | Answer key: integration checklist, expected worktree states, honest comparison |
 | [solutions/capstone-injections.md](solutions/capstone-injections.md) | The four capstone injection steps, diagnoses, and model release note |
@@ -27,7 +27,7 @@ config differ across major versions.
 | [solutions/importer_solution.py](solutions/importer_solution.py) | Known-good importer; drop into `src/panic_pantry/importer.py` to make the full suite pass |
 | [solutions/fallback-traces.md](solutions/fallback-traces.md) | Recorded transcripts: Ex0 "bad plan," Ex3 model comparison, background-delegation demo; simulated Ex1 Stranger Test (Trace 4) |
 
-## Schedule (240 minutes total, 173 hands-on)
+## Schedule (240 minutes total, 177 hands-on)
 
 The student README no longer carries the schedule; each module states its own exercise time. This table is the room's clock.
 
@@ -38,19 +38,19 @@ The student README no longer carries the schedule; each module states its own ex
 | 0:32–0:36 | 4 | Lecture | Micro-lecture 1 — split by file, not by function |
 | 0:36–0:56 | 20 | **Hands-on** | Exercise 1 — split the job: plan + Builder and Breaker cards |
 | 0:56–1:06 | 10 | Break | |
-| 1:06–1:12 | 6 | Lecture | Micro-lecture 2 — a role is a boundary |
-| 1:12–1:44 | 32 | **Hands-on** | Exercise 2 — build a small agent crew |
-| 1:44–1:50 | 6 | Lecture | Micro-lecture 3 — model choice is a budget decision |
-| 1:50–2:22 | 32 | **Hands-on** | Exercise 3 — model routing |
-| 2:22–2:27 | 5 | Break | |
-| 2:27–2:33 | 6 | Lecture | Micro-lecture 4 — parallelism is a dependency claim |
-| 2:33–3:10 | 37 | **Hands-on** | Exercise 4 — orchestrated run + matched comparison |
-| 3:10–3:22 | 12 | Buffer | Catch-up / overflow (not yet allocated) |
+| 1:06–1:12 | 6 | Lecture | Micro-lecture 2 — a role is a permission, not a name |
+| 1:12–1:48 | 36 | **Hands-on** | Exercise 2 — build the crew: implementer, reviewer, lead |
+| 1:48–1:54 | 6 | Lecture | Micro-lecture 3 — model choice is a budget decision |
+| 1:54–2:26 | 32 | **Hands-on** | Exercise 3 — model routing |
+| 2:26–2:31 | 5 | Break | |
+| 2:31–2:37 | 6 | Lecture | Micro-lecture 4 — parallelism is a dependency claim |
+| 2:37–3:14 | 37 | **Hands-on** | Exercise 4 — orchestrated run + matched comparison |
+| 3:14–3:22 | 8 | Buffer | Catch-up / overflow (not yet allocated) |
 | 3:22–3:28 | 6 | Lecture | Micro-lecture 5 — a green check is evidence, not a handoff |
 | 3:28–3:55 | 27 | **Hands-on** | Capstone — midnight launch |
 | 3:55–4:00 | 5 | Close | Exit ticket |
 
-**Arithmetic check:** hands-on = 25 + 20 + 32 + 32 + 37 + 27 = **173 min**. Lecture = 7 + 4 + 6 + 6 + 6 + 6 = 35. Breaks = 10 + 5 = 15. Buffer = 12. Close = 5. Total = 173 + 35 + 15 + 12 + 5 = **240 min**. ✔
+**Arithmetic check:** hands-on = 25 + 20 + 36 + 32 + 37 + 27 = **177 min**. Lecture = 7 + 4 + 6 + 6 + 6 + 6 = 35. Breaks = 10 + 5 = 15. Buffer = 8. Close = 5. Total = 177 + 35 + 15 + 8 + 5 = **240 min**. ✔
 
 ## Pre-class setup (day before + morning of)
 
@@ -75,6 +75,14 @@ The student README no longer carries the schedule; each module states its own ex
 6. Do one full timed dry run of Ex4 in a scratch worktree, then re-run
    `bash sandbox/setup.sh` to restore. **Warn learners (and yourself): re-running
    setup.sh discards all worktree changes.**
+7. Check the Ex2 locks on the classroom image (no model needed): clone the
+   sandbox to a scratch folder (`git clone sandbox/panic-pantry /tmp/ex2-check`),
+   save the implementer, reviewer and lead files from
+   [solutions/ex2-agent-crew.md](solutions/ex2-agent-crew.md) and
+   [solutions/reviewer-agent.md](solutions/reviewer-agent.md) into its
+   `.opencode/agents/`, and run the three `opencode debug agent` commands from
+   the key there. Outputs must match the key and `git status --short` must
+   show only `?? .opencode/`.
 
 ## Room-running rules
 
@@ -134,18 +142,30 @@ The student README no longer carries the schedule; each module states its own ex
   `python3 instructor/tools/breaker-mutants/check_tests.py sandbox/panic-pantry tests.test_importer_contract`
   from the pack root (takes about a second).
 
-### Exercise 2 — agent crew (32 min)
-- **Cue @ 12 min:** reviewer.md exists and loads (no YAML errors).
-- **Cue @ 18 min:** everyone has run the denial test. The pass bar is a
-  **configuration** denial, visible in the UI — walk the room and eyeball it.
-- **Common failures:** file in the wrong directory (must be
-  `sandbox/panic-pantry/.opencode/agents/`, i.e., the project OpenCode was
-  launched from); missing required `description`; unquoted glob keys in the
-  bash map; deprecated `tools:` block fighting `permission`.
-- **Recovery:** learner hopelessly stuck at 20 min → give them
-  [solutions/reviewer-agent.md](solutions/reviewer-agent.md) to transcribe, and
-  have them do the denial test + delegation anyway; the observable boundary is
-  the point.
+### Exercise 2 — build the crew (36 min)
+Read the "What 1.18.33 actually does" table in
+[solutions/ex2-agent-crew.md](solutions/ex2-agent-crew.md) before class. Two
+things surprise people: `edit: deny` produces **no red denial** (the tools are
+removed), and an unquoted `*` key makes the agent load with **every permission
+allowed**.
+- **Cue @ 5 min:** implementer saved; `@` shows it.
+- **Cue @ 15 min:** reviewer.md loads. Walk the room for unquoted `*` keys.
+- **Cue @ 20 min:** everyone has both Step 3 `debug agent` outputs. The pass
+  bar is that output, not the chat reply. Anyone whose `store.py` now reads
+  `# hi`: `git checkout -- src/panic_pantry/store.py`, then quote the keys.
+- **Cue @ 33 min:** the lead lists only two helpers and its `debug agent`
+  task check is refused; everyone **Tab**s back to Build.
+- **Common failures:** file outside `sandbox/panic-pantry/.opencode/agents/`;
+  an unquoted `*` key (silently all-allowed); a tab in the indentation
+  (OpenCode refuses to start and names the file); allow listed before
+  `"*": deny` (the implementer reports no edit tool); deprecated `tools:`
+  block; lead missing `mode: primary` (not on Tab).
+- **"Always" clicks:** if anyone approved an edit prompt with "always", the
+  running instance now allows every edit for every agent. Have them restart
+  OpenCode before Step 3's live request.
+- **Recovery:** stuck at 20 min → hand out
+  [solutions/reviewer-agent.md](solutions/reviewer-agent.md) to transcribe and
+  have them run the Step 3 checks anyway; the observable lock is the point.
 
 ### Exercise 3 — model routing (32 min: A ≈14, B ≈12, record ≈6)
 - **Cue @ 5 min:** everyone has picked two configurations and written down the
@@ -201,8 +221,9 @@ control/check to add. Collect them — they are your course feedback too.
 ## If the whole provider is down
 
 The orchestration labs need a working OpenCode + one model. If provider access
-dies mid-class: Ex1 Steps 1–4 are offline (Step 5 → Trace 4); Ex2 agent files
-can be written and syntax-checked offline (denial test deferred); Ex3 runs from
+dies mid-class: Ex1 Steps 1–4 are offline (Step 5 → Trace 4); Ex2 Steps 1–2
+and all three `opencode debug agent` lock checks run with no model (the live
+`@reviewer` request, Steps 4–5 and the lead's answer are deferred); Ex3 runs from
 recorded traces; Ex0/Ex4 comparison collapses to a walkthrough of the answer-key
 artifacts. Say plainly what is live and what is recorded — modeling honest
 evidence handling is itself course content.
