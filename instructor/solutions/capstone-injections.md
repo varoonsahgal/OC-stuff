@@ -105,35 +105,52 @@ EOF
 ```
 
 - **Symptom:** full suite stays **green**. The tell is `git status` /
-  `git diff`: `src/panic_pantry/store.py` modified, and no task card owns it.
+  `git diff starter` (or `bash scripts/score.sh`): `src/panic_pantry/store.py`
+  modified, and no task card owns it.
 - **Expected diagnosis:** boundary conflict — a writer left its scope. Green
   tests prove nothing here; the ownership map and diff are the evidence
   (the ML5 point: a green check is evidence, not a handoff — and only of what
   it covers).
-- **Expected fix:** `git checkout -- src/panic_pantry/store.py`; note in
+- **Expected fix:** `git checkout starter -- src/panic_pantry/store.py` (restores
+  the starter version even if the change was staged); note in
   integration-notes which control would have prevented it (permission scope or
   tighter card).
+- **Debrief twist (since Module 2 path-locks the implementer):** learners will
+  say "impossible, my implementer can't edit `store.py`". True, and Module 2's
+  `debug agent` check proved it. So ask: **who else could have?** Build (no
+  path lock), `general` (if Build routed the Breaker card to it), any agent
+  whose bash allows a write, the implementer through code it runs under
+  `python3 -m unittest`, or a person. A lock on one agent narrows the
+  suspects; only the diff names the culprit. (The injection is applied by
+  script, so the lock never had a chance to fire.)
 
 ### Injection D — test asserts a stale signature (task/context gap)
 
-Append a bad test to the learner's `tests/test_promo_import.py` (create the
-file with the header block below if the pair never produced one):
+Append a bad test to the learner's `tests/test_promo_import.py`. The block is
+self-contained, so it works whatever names the learner's Breaker file uses,
+and it creates the file if the pair never produced one:
 
 ```bash
 cat >> tests/test_promo_import.py <<'EOF'
 
 
-class StaleContractTests(unittest.TestCase):
+# --- stale test from an early draft ---
+import sys as _sys
+import unittest as _unittest
+from pathlib import Path as _Path
+
+_ROOT = _Path(__file__).resolve().parents[1]
+_sys.path.insert(0, str(_ROOT / "src"))
+from panic_pantry.importer import import_promotions as _stale_import  # noqa: E402
+
+
+class StaleContractTests(_unittest.TestCase):
     def test_import_uses_default_service(self):
         # stale assumption from an early draft: single-argument signature
-        report = import_promotions(CLEAN_CSV)
+        report = _stale_import(_ROOT / "fixtures" / "promos_clean.csv")
         self.assertEqual(len(report.created), 6)
 EOF
 ```
-
-(If creating the file from scratch, first copy the import/skip scaffold from the
-top of `tests/test_importer_contract.py`, keeping `CLEAN_CSV` defined, then
-append the class above.)
 
 - **Symptom:** `TypeError: import_promotions() missing 1 required positional
   argument: 'service'` — one failing test; everything else green.
@@ -150,7 +167,7 @@ append the class above.)
 1. Changed behavior: promo CSV import now reports exactly-20% codes as active,
    matching the shop policy (above 20% requires approval; exactly 20% is active).
 2. Tests run: python3 -m unittest discover -s tests -v — 33 tests, OK
-   (23 starter suite + 10 added by this example pair's Ex4 test author; your
+   (23 starter suite + 10 added by this example pair's Ex4 Breaker; your
    pairs' totals will vary).
 3. Review status: @reviewer flagged duplicated policy logic in the importer;
    fixed by classifying from the service-returned status; re-review clean.

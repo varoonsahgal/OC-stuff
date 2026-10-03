@@ -1,8 +1,7 @@
 # INSTRUCTOR ONLY — do not distribute
 
-Answer key for **Exercise 1 — Write the task cards**: model plan and task cards.
-Verified against the sandbox contract and OpenCode 1.18.33 conventions
-(2026-09-28).
+Answer key for **Exercise 1 — Split the job** (Module 1: Micro-lecture 1, 4 min,
+plus Exercise 1, 20 min). Checked against the sandbox on 2026-10-03.
 
 Policy statement to keep consistent everywhere: **discounts above 20% require
 manager approval (stored `pending_approval`, unusable at checkout); exactly 20%
@@ -10,110 +9,192 @@ is allowed and becomes `active`.**
 
 ---
 
-## Exercise 1 — Write the task cards: model artifacts
+## Micro-lecture 1 — the two Predicts
 
-### Model `workshop/plan.md`
+**Predict 1: four agents start at once. What goes wrong?** A, B and C all
+change `importer.py`. Depending on how each agent edits, one overwrites
+another's work, edits fail against a file that changed underneath them, or you
+get three halves of one loop nobody designed together. Parsing, validating and
+skipping duplicates live in the same loop, so they're one job: the **Builder**.
+D writes a different file: the **Breaker**.
 
-```markdown
-# Plan — TICKET-001 CSV promo importer (Midnight Crunch Drop)
+Accept any answer that names the shared file plus a concrete failure
+(overwritten work, failed or conflicting edits, tangled code). Push back on
+"they'd conflict" with no mechanism.
 
-## Frozen contract
-As written in tickets/TICKET-001.md (copied, not paraphrased):
-`import_promotions(csv_path, service) -> ImportReport` with fields
-created / pending_approval / skipped_duplicate / errors[(line, reason)];
-1-based lines, header = line 1; blank row → error "empty row"; missing/wrong
-header → (1, reason) and nothing imported; duplicates skipped, never
-overwritten; idempotent re-runs; all creation via
-PromotionService.create_promotion (policy: above 20% requires approval,
-exactly 20% is active); stdlib only.
+**Questions learners ask here** (the handout answers both under the rule):
 
-## Tasks
-| ID | Owner | Deliverable | Acceptance check |
-|---|---|---|---|
-| T0 contract-freeze | me (primary) | contract confirmed + pasted here | this file reviewed before launch |
-| T1 csv_parser | @implementer | src/panic_pantry/importer.py | python3 -m unittest tests.test_importer_contract -v |
-| T2 import_tests | @implementer (2nd delegation) | tests/test_promo_import.py | tests collect and express the contract's edge cases |
-| T3 integration | me (primary) | workshop/integration-notes.md + merged, reviewed diff | python3 -m unittest discover -s tests -v; @reviewer findings dispositioned |
+- *"Agents run one at a time in this class, so why does it matter?"* Because
+  taking turns doesn't remove the problem. C still edits a loop A and B
+  designed, guessing at their choices. Shared files also make the order matter
+  and blur who owns the diff. Overwrites are only the parallel version of the
+  problem.
+- *"A reviewer reads the same file. Doesn't that break the rule?"* No. The
+  rule is one **writer** per file; reading never collides (the Breaker's ban on
+  reading `importer.py` is about independence, not collisions). A checker reports and the
+  owner fixes. If a second agent must edit (say, to harden security), the
+  Builder finishes first and hands the file over: a new card, a new TOUCH line,
+  and someone else reviews the change. The debrief's security-agent question
+  checks this.
 
-## Dependencies / critical path
-T0 → (T1 ∥ T2) → T3. Critical path: T0 → T1 → T3 (T1 is the largest task and
-T3 cannot finish without it). T1 and T2 are parallel ONLY after T0: both read
-the contract; neither reads the other's file.
+**Predict 2: how many of 8 planted bugs do the 9 contract tests catch?** 4.
+Reproduce it live in about a second:
 
-## Keep vs delegate
-T0 and T3 stay with the primary: freezing the contract and owning integration
-are judgment calls with the whole-repo context; delegation cost exceeds benefit.
-T1/T2 are delegated: distinct outputs, standalone context, checkable results.
-
-## Context each child needs
-- T1: task card, tickets/TICKET-001.md, promotions.py + models.py signatures,
-  fixture paths, test command. NOT: store.py internals, workshop files.
-- T2: task card, ticket contract, fixtures/promos_messy.expected.md, test
-  command. NOT: the importer's implementation (tests target the contract).
+```bash
+python3 instructor/tools/breaker-mutants/check_tests.py sandbox/panic-pantry tests.test_importer_contract
 ```
 
-### Model card — `workshop/cards/csv_parser.md`
+The four misses: a wrong header that still imports every row (criterion 8), a
+3-column row (criterion 1), `20.9` accepted as `20` (criterion 4), and a blank
+row reported as `"blank line"` (criterion 4). None of them lets `FREE-ALL` go
+live: the service still blocks that. Say so if asked. That's why the Breaker
+attacks every criterion, not just the 20% rule.
 
-```markdown
-## T1 — csv_parser: implement the TICKET-001 importer
-Outcome: src/panic_pantry/importer.py defining ImportReport and
-import_promotions(csv_path, service) -> ImportReport, satisfying every
-acceptance criterion in tickets/TICKET-001.md.
-Why this task is separate: bounded, contract-checked implementation with a
-distinct output file; frees the primary for integration.
-Inputs and source paths: tickets/TICKET-001.md; src/panic_pantry/promotions.py
-(create_promotion, DuplicatePromotionError, InvalidPromotionError);
-src/panic_pantry/models.py (code format, discount range);
-fixtures/promos_clean.csv; fixtures/promos_messy.csv.
-Contract: report fields created/pending_approval/skipped_duplicate/errors in
-file order; 1-based line numbers with header = line 1; blank row → error
-"empty row"; missing/wrong header → (1, reason) and nothing imported; classify
-created vs pending from the status the service returns — never compare against
-20 locally; policy is service-owned: above 20% requires approval, exactly 20%
-is active.
-In scope: src/panic_pantry/importer.py (new file) only.
-Out of scope: tests/, fixtures/, data/, scripts/, all other src files,
-AGENTS.md; never write data/promotions.json directly; no new dependencies.
-Dependencies: T0 contract-freeze.
-Acceptance checks: python3 -m unittest tests.test_importer_contract -v (all 9
-pass, none skipped); python3 -m unittest discover -s tests -v (whole suite OK).
-Permissions/model: edit allowed for the in-scope file; bash for the test
-command; classroom-pinned model, default effort.
-Return format: summary; changed paths; exact commands run + pass/fail;
-assumptions made; open questions.
+## Step 1 — Keep or delegate? (answers)
+
+| Task | Answer | Why |
+|---|---|---|
+| Settle an unclear rule in the ticket | Keep | A judgment call; no command can check it |
+| Write `importer.py` | Delegate | Short brief; the contract tests and the Breaker's tests check it |
+| Rename one variable | Keep | Briefing it takes longer than doing it |
+| Write tests that attack the importer | Delegate | Short brief; the tests run against the finished importer |
+| Predict all 13 rows of the messy CSV | Delegate | Short brief; `fixtures/promos_messy.expected.md` checks every row (it's Module 3's Task A) |
+| GO / NO-GO at midnight | Keep | A judgment call, and the human's |
+
+The rule to repeat aloud: **delegate when the brief is shorter than the job,
+the result can be checked, and it's not a judgment call.**
+
+## Step 2 — `workshop/plan.md` (blanks)
+
+- breaker row, Writes: `tests/test_promo_import.py`
+- Kept by me: settling unclear rules, the GO/NO-GO call (plus freezing the
+  contract and combining the files, already on the line). "Rename one
+  variable" is a generic example, not part of this ticket's plan: fine to
+  leave out.
+
+## Step 3 — `workshop/cards/builder.md`
+
+Copied as-is from the handout.
+
+## Step 4 — model `workshop/cards/breaker.md`
+
+Show this after learners have written their own and run the Stranger Test.
+**Exception:** the 9-minute rescue in [../README.md](../README.md): a stuck
+learner gets this card and runs the Stranger Test on it.
+
+```text
+DO:     Create tests/test_promo_import.py: tests that attack the importer. First, every way FREE-ALL,100 could go live: the importer sets a status itself, writes data/promotions.json directly, or bypasses the threshold (for example, calls approve()). Then the ticket rules the exam never tests: a wrong header still imports rows, a 3-column row slips through, a 20.9 discount is accepted as 20, a blank row's reason isn't exactly "empty row".
+READ:   tickets/TICKET-001.md, fixtures/promos_messy.expected.md, data/promotions.json.seed, src/panic_pantry/promotions.py, src/panic_pantry/store.py, tests/test_importer_contract.py
+RULES:  Never open src/panic_pantry/importer.py. Exactly 20% → active. Above 20% → pending_approval, and rejected at checkout. Skip every test, don't fail, while importer.py is missing. Each test uses its own temp copy of the seed store. If a test fails against a real importer, report it; never weaken it.
+TOUCH:  tests/test_promo_import.py only.
+DONE:   python3 -m unittest tests.test_promo_import -v → OK, every test skipped until importer.py exists.
+REPORT: files changed · the exact command you ran + its last line · which ticket criterion each test covers · anything you guessed.
 ```
 
-### Model card — `workshop/cards/import_tests.md`
+**The three ways `FREE-ALL` could go live** (the DO blank; criterion 7, as
+the handout's hint names them):
 
-```markdown
-## T2 — import_tests: contract tests in the team's own words
-Outcome: tests/test_promo_import.py — unittest cases expressing TICKET-001's
-edge cases against the frozen interface (importable whether or not the importer
-exists yet: skip cleanly on ImportError like tests/test_importer_contract.py does).
-Why this task is separate: independent deliverable written from the contract,
-deliberately NOT from the implementation; parallel to T1 after the freeze.
-Inputs and source paths: tickets/TICKET-001.md;
-fixtures/promos_messy.expected.md; fixtures/promos_clean.csv;
-tests/test_importer_contract.py (READ ONLY, as a style/skip-pattern reference);
-data/promotions.json.seed.
-Contract: same as T1; must cover at minimum — exactly 20% → active; 21+ →
-pending_approval and rejected at checkout; in-file and pre-existing duplicates
-skipped without overwrite; error line numbers 1-based; blank row reason
-"empty row"; idempotent second run; missing header → (1, reason), nothing
-imported.
-In scope: tests/test_promo_import.py (new file) only.
-Out of scope: tests/test_importer_contract.py (frozen), tests/test_promotions.py,
-src/, fixtures/, data/, scripts/. Tests must be deterministic and offline.
-Dependencies: T0 contract-freeze. NOT T1 — do not read the importer's code.
-Acceptance checks: python3 -m unittest tests.test_promo_import -v collects and
-runs (skips cleanly if importer absent; passes against the known-good importer).
-Permissions/model: edit allowed for the in-scope file; bash for the test
-command; a faster/cheaper model is appropriate — the contract is written down.
-Return format: summary; changed paths; commands run + result; which contract
-clauses are covered by which test; uncertainties.
+1. The importer sets `status` itself, or builds a `Promotion` directly,
+   instead of calling `PromotionService.create_promotion`.
+2. It writes `data/promotions.json` directly.
+3. It bypasses the threshold, for example by calling `service.approve()` on
+   pending codes.
+
+**If a learner writes "reimplements the threshold":** accept it as a
+criterion-7 rule worth testing, but say what it does. Comparing to 20 locally
+(for example `>= 20`) only makes the *report* lie: MIDNIGHT20 is listed as
+pending. The service still stores FREE-ALL as pending and checkout still
+rejects it. The contract test `test_boundary_exactly_20_is_created_active`
+catches the `>= 20` version. A copy that uses the right operator is only caught
+by the test-technique answer in Step 5 below.
+
+## Step 5 — what the Stranger Test usually finds
+
+Expect many HIGH guesses (our one simulated run marked all five HIGH); don't
+let learners chase a count. What matters is where each answer goes:
+
+| Typical guess | Kind | Where the answer goes |
+|---|---|---|
+| How to catch an importer that copies the 20% check (it behaves the same as the real rule) | How to test | Breaker RULES (e.g. "patch `panic_pantry.promotions.APPROVAL_THRESHOLD_PCT` to 50 and check the report follows the service: VIP25 must land in `created`") |
+| How to detect a direct write to `data/promotions.json` or a status set by hand | How to test | Breaker RULES (e.g. "wrap `create_promotion` with `unittest.mock` and check it's called once for every created or pending code; reload the store through a fresh `PromotionService` and compare") |
+| What counts as a wrong header (reordered? extra column? different case? spaces?) | **About the rules** | **Both cards' RULES + `plan.md`** |
+| What counts as a blank row (empty line? spaces only? a bare comma?) | **About the rules** | **Both cards' RULES + `plan.md`** |
+| Whether the 20 / 21 boundaries need their own tests | Scope | Breaker DO |
+
+Suggested rule answers, which match the reference solution:
+
+- **Header:** wrong unless it is exactly `code,discount_pct` after trimming
+  spaces around each name. Reordered, extra columns and other letter cases
+  are wrong.
+- **Blank row:** a line with no characters, or only spaces and commas, is an
+  `"empty row"`.
+
+A recorded example is Trace 4 in [fallback-traces.md](fallback-traces.md).
+
+## Grading (pass/fail per line)
+
+- [ ] The two TOUCH lines name different files.
+- [ ] The Breaker card forbids opening `importer.py`.
+- [ ] RULES keeps "Skip every test, don't fail" and the temp-store line.
+- [ ] DO names at least two of the four rules the exam misses.
+- [ ] The learner changed a card after the Stranger Test, and rule-level answers
+      went on both cards.
+
+## Level up — critical path (answer)
+
+Chain: **you freeze the contract → Builder → Breaker → you combine and run
+every test → Reviewer → your GO/NO-GO.** In this classroom delegations run one
+after another, so the Builder and the Breaker are both on the critical path.
+If they truly ran in parallel (Level up L4.1, planned), only the longer of the
+two would be. Three steps on the path are the human's: freeze, combine,
+GO/NO-GO. No number of extra agents shortens those.
+
+---
+
+## Evidence: the cards were tested on real agents (2026-10-03)
+
+Each role was played by a fresh Claude subagent that received only the card
+text and an isolated copy of the sandbox (with its `AGENTS.md`). These are
+simulations of the OpenCode roles, not OpenCode runs. The Breaker's tests were
+then graded with `instructor/tools/breaker-mutants/check_tests.py`.
+
+| Card | What the agent produced | Planted bugs caught (of 8) |
+|---|---|---|
+| Builder card (earlier wording: "codes already in the store"; the handout now says "codes the shop already has (WELCOME10 is one)") | An 83-line importer; contract tests 9/9 OK, full suite green | — |
+| Vague first draft (below) | Tests that **failed** while `importer.py` was missing, instead of skipping. It never read the contract tests. | 6 (missed: 3 columns, `20.9`) |
+| A simulated learner's filled skeleton (below) | 9 tests, all skipped cleanly before the merge | 7: all four the exam misses. Missed only duplicates-as-errors, which the exam catches, so exam + Breaker = 8 of 8 |
+| Model card (above) | 8 tests, all skipped cleanly before the merge | 8 |
+| *Frozen contract tests, for comparison* | — | 4 |
+
+**Integration:** each Breaker's tests, combined with the Builder agent's
+importer (written independently, from its own card), pass the whole suite: 32
+tests OK (learner card) and 31 OK (model card). Two agents that never saw each
+other's work fit together. That's the Module 4 promise, rehearsed.
+
+**The vague first draft** (what a rushed learner writes without the skeleton):
+
+```text
+DO:     Write tests for the importer in tests/test_promo_import.py.
+READ:   tickets/TICKET-001.md, fixtures/
+RULES:  Test the 20% rule. Don't read importer.py.
+TOUCH:  tests/test_promo_import.py
+DONE:   python3 -m unittest tests.test_promo_import -v
+REPORT: what you changed and anything you guessed.
 ```
 
-Grading Ex1: pass if (a) policy stated as above-20%-requires-approval /
-exactly-20-active, (b) every task has owner+deliverable+executable check,
-(c) card scopes are disjoint, (d) out-of-scope lists the frozen files,
-(e) critical path named with a reason.
+A Stranger Test on this draft ranked "should the tests skip or fail while
+`importer.py` is missing?" as its #1 guess. The Breaker that ran it guessed
+"fail", which was the exact mistake the stranger predicted. Use that story when
+learners ask whether the Stranger Test is worth four minutes.
+
+**The simulated learner's filled skeleton** (7.5 minutes for Step 4, within
+the 8 now planned):
+
+```text
+DO:     Create tests/test_promo_import.py: tests that attack the importer. First, every way FREE-ALL,100 could go live: the importer writes data/promotions.json directly, sets the status to active itself, or reimplements/bypasses the 20% threshold (any of these would put FREE-ALL in created/active instead of pending_approval). Then the ticket rules the exam never tests: a wrong header imports nothing at all, a row with 3 columns is an error, a 20.9 discount is rejected (not accepted as 20), a blank row's reason is exactly "empty row".
+READ:   tickets/TICKET-001.md, fixtures/promos_messy.expected.md, data/promotions.json.seed, src/panic_pantry/promotions.py, src/panic_pantry/store.py, tests/test_importer_contract.py
+RULES:  Never open src/panic_pantry/importer.py. Exactly 20% → active. Above 20% → pending_approval, and rejected at checkout. Skip every test, don't fail, while importer.py is missing. Each test uses its own temp copy of the seed store. If a test fails against a real importer, report it; never weaken it.
+TOUCH:  tests/test_promo_import.py only.
+DONE:   python3 -m unittest tests.test_promo_import -v → OK, every test skipped until importer.py exists.
+REPORT: files changed · the exact command you ran + its last line · which ticket criterion each test covers · anything you guessed.
+```

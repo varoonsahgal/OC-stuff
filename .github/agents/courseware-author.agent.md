@@ -23,6 +23,8 @@ Read the exact assignment, current course plan, `COURSE_OUTLINE.md`, applicable 
 
 ## Teaching style
 
+For anything under `student/`, the **Student materials style guide** in `.github/copilot-instructions.md` takes precedence: the spine table, the 6-line task card, four callout types, and the vocabulary budget.
+
 - One memorable claim per slide/section, supported by a small story, concrete code example, visual, or failure.
 - Let learners inspect evidence before revealing the answer; then teach a compact, reusable framework.
 - Keep explanations short and exact. Use plain language for developers. Avoid repeated points and long walls of text.

@@ -1,184 +1,87 @@
 # Orchestration Fundamentals for Agentic Development — Student Guide
 
-**Tool:** OpenCode **1.18.33** (your instructor pinned this version; every command and config example in these materials was verified 2026-09-28 on OpenCode 1.18.33).
-**Sandbox:** the Panic Pantry snack shop in [../sandbox/panic-pantry](../sandbox/panic-pantry/README.md). Pure Python 3 standard library. Everything runs offline.
-**Promise:** you leave having decomposed, delegated, run, reviewed, and integrated a real feature with OpenCode — not having watched someone talk about agents.
+**Tool:** OpenCode **1.18.33** (pinned by your instructor; the commands here target that version).
+**Sandbox:** the Panic Pantry snack shop in [../sandbox/panic-pantry](../sandbox/panic-pantry/README.md). Pure Python 3, standard library only, fully offline.
+**Promise:** you leave having split, delegated, run, reviewed and integrated a real feature with a crew of agents.
 
 ---
 
-## The story you are walking into
+## The story
 
-Panic Pantry is a tiny late-night snack shop preparing the **Midnight Crunch Drop**. Marketing will hand over a CSV of promo codes minutes before launch. The shop already has one hard rule, enforced in code and written on the wall:
+Panic Pantry, a late-night snack shop, launches the **Midnight Crunch Drop** at midnight. Marketing hands over a CSV of promo codes minutes before launch. You build the importer.
 
-> **Discounts above 20% require manager approval.** A promo of exactly 20% is fine and becomes active. A promo of 21% or more is stored as `pending_approval` and cannot be applied at checkout until a human manager approves it.
+> **The rule that must never break:** discounts **above 20%** need a manager's approval. Exactly 20% is fine and goes live. 21% or more is stored as `pending_approval` and refused at checkout until a manager approves it.
 
-The nightmare scenario: someone imports `FREE-ALL,100`, the importer skips the approval rule, a customer pays nothing, and the shop ships a truckload of pretzels into bankruptcy. Your job all afternoon is to build the importer *without* letting any agent — fast, clever, or free — bypass that rule.
+The nightmare: someone imports `FREE-ALL,100`, the importer skips the rule, and the shop gives away its pretzels. All afternoon, no agent (fast, clever or free) gets to bypass that rule.
 
-One incident, four hours, every orchestration skill you need at work.
+---
 
-### The shop's code in 60 seconds
+## The course on one screen
 
-You will hear these names from the first exercise on. Here is what they are before you meet them in the code:
+If you read nothing else, read this.
 
-| Name | What it is | Where it lives |
+| Module | You learn to… | Orchestration step | The one rule |
+|---|---|---|---|
+| 0 | Watch one agent do the whole job alone | The baseline to beat | Measure before you multiply |
+| 1 | Split the job and write down each piece | Split | Split by file, not by function |
+| 2 | Build agents with hard limits on what they can touch | Staff | A role is a permission, not a name |
+| 3 | Pick the right model for each piece | Budget | Cheap model + hard check beats pricey model + blind trust |
+| 4 | Hand the cards to agents, run them, compare with Module 0 | Run | Parallel only when tasks share no files |
+| 5 | Handle a launch-night failure | Recover | Green tests are evidence, not a verdict |
+
+Start with [Module 0](module-0-baseline.md), then [1](module-1-decomposition.md), [2](module-2-agent-crew.md), [3](module-3-model-routing.md), [4](module-4-parallel-run.md), [5](module-5-capstone.md). The [appendices](appendices.md) hold the glossary, Git in 90 seconds, a command crib sheet and sources.
+
+---
+
+## The shop's code in 60 seconds
+
+| Name | What it is | Where |
 |---|---|---|
-| **Promotion** | One promo code (`CRUNCH10`) with a discount percentage and a **status** | `src/panic_pantry/models.py` |
-| **Status** | `active` (usable at checkout) or `pending_approval` (stored, but rejected at checkout until a manager approves it) | `models.py` |
-| **`PromotionService`** | The only door into the promotion store. Its `create_promotion` method **decides the status** — this is where the 20% rule is enforced | `src/panic_pantry/promotions.py` |
-| **The store / seed data** | The shop's existing promotions. Every reset copies `data/promotions.json.seed` → `data/promotions.json`. The seed already contains `WELCOME10` (10%, active), `STAFF-PICK` (15%, active), `MIDNIGHT-VIP` (20%, active), and `BIGSPENDER` (30%, pending) | `data/` |
-| **`import_promotions(csv_path, service)`** | The function you are building. It reads a CSV and creates promotions *through* the service | `src/panic_pantry/importer.py` (doesn't exist yet) |
-| **`ImportReport`** | What the importer returns: four lists — `created`, `pending_approval`, `skipped_duplicate`, `errors` — so a human can see what happened to every row | same file |
+| **`Promotion`** | One promo code with a discount and a **status**: `active` (usable at checkout) or `pending_approval` (refused until a manager approves) | `src/panic_pantry/models.py` |
+| **`PromotionService.create_promotion`** | The only door into the store. **It decides the status**: this is where the 20% rule lives | `src/panic_pantry/promotions.py` |
+| **`import_promotions(csv_path, service)`** | What you're building: reads a CSV and creates promotions *through* the service | `src/panic_pantry/importer.py` (doesn't exist yet) |
+| **`ImportReport`** | What the importer returns: four lists (`created`, `pending_approval`, `skipped_duplicate`, `errors`), so every row is accounted for | same file |
 
-Two consequences worth knowing now:
-
-- **"Duplicate" includes codes already in the store.** A CSV row for `WELCOME10` is a duplicate even if it appears only once in the file — the seed already has it. The course calls these **seeded collisions**.
-- **Every CSV row gets exactly one disposition** — the bucket it lands in: created-active, created-pending_approval, skipped_duplicate, or error. Line numbers count the header as line 1, so the first data row is line 2.
+- **The store already has codes.** Every reset copies `data/promotions.json.seed` into the store, including `WELCOME10`. A CSV row for `WELCOME10` is a duplicate even if it appears only once.
+- **Line numbers count the header as line 1.** The first data row is line 2.
 
 ---
 
-## Schedule (240 minutes total, 163 hands-on)
+## Check your setup
 
-| Time | Min | Type | Segment |
-|---|---:|---|---|
-| 0:00–0:07 | 7 | Lecture | Opening — more agents ≠ more progress |
-| 0:07–0:32 | 25 | **Hands-on** | Exercise 0 — warm-up + single-agent baseline |
-| 0:32–0:38 | 6 | Lecture | Micro-lecture 1 — the one rule: output + check |
-| 0:38–0:48 | 10 | **Hands-on** | Exercise 1 — write the task cards |
-| 0:48–0:58 | 10 | Break | |
-| 0:58–1:04 | 6 | Lecture | Micro-lecture 2 — a role is a boundary |
-| 1:04–1:36 | 32 | **Hands-on** | Exercise 2 — build a small agent crew |
-| 1:36–1:42 | 6 | Lecture | Micro-lecture 3 — model choice is a budget decision |
-| 1:42–2:14 | 32 | **Hands-on** | Exercise 3 — model routing |
-| 2:14–2:19 | 5 | Break | |
-| 2:19–2:25 | 6 | Lecture | Micro-lecture 4 — parallelism is a dependency claim |
-| 2:25–3:02 | 37 | **Hands-on** | Exercise 4 — orchestrated run + matched comparison |
-| 3:02–3:22 | 20 | Buffer | Catch-up / overflow (not yet allocated) |
-| 3:22–3:28 | 6 | Lecture | Micro-lecture 5 — a green check is evidence, not a handoff |
-| 3:28–3:55 | 27 | **Hands-on** | Capstone — midnight launch |
-| 3:55–4:00 | 5 | Close | Exit ticket |
-
-**Arithmetic check:** hands-on = 25 + 10 + 32 + 32 + 37 + 27 = **163 min**. Lecture = 7 + 6 + 6 + 6 + 6 + 6 = 37. Breaks = 10 + 5 = 15. Buffer = 20. Close = 5. Total = 163 + 37 + 15 + 20 + 5 = **240 min**. ✔
-
----
-
-## One-time setup (instructor runs this before class; you verify)
-
-From the pack root:
+Your instructor already ran `bash sandbox/setup.sh`. **Don't re-run it: it wipes both worktrees.**
 
 ```bash
-bash sandbox/setup.sh
+cd sandbox/panic-pantry
+bash scripts/check_env.sh        # python3, git, opencode 1.18.33, then the tests
+bash scripts/reset.sh            # anytime: back to a clean store
 ```
 
-This makes `sandbox/panic-pantry` a git repo, tags the starter commit `starter`, and creates two matched worktrees at the **same commit**:
-
-- `sandbox/worktrees/single-agent` — Exercise 0 baseline
-- `sandbox/worktrees/orchestrated` — Exercise 4 orchestrated run
-
-> ⚠️ **Re-running `bash sandbox/setup.sh` DISCARDS all changes inside both worktrees.** Only re-run it when you deliberately want a fresh comparison.
-
-> 📘 **Concept — tags, branches, and worktrees (the 90-second Git primer)**
->
-> - A **commit** is a saved snapshot of the whole project. A **tag** is a permanent name for one commit — `starter` always means "the shop before anyone touched it."
-> - A **branch** is a movable name for a line of work. It starts at a commit and moves forward as you commit on it.
-> - A **worktree** is an *extra working directory* attached to the same repository, each with its own branch checked out. One repo, several folders, each folder its own independent copy of the files. Editing a file in `worktrees/single-agent` cannot change the same file in `worktrees/orchestrated` — they are different files on disk.
-> - Files Git already knows about are **tracked**. New files you create (your agent configs, your workshop notes) are **untracked** until committed — and untracked files exist *only* in the folder where you created them. That's why Exercise 4 has you copy them across.
->
-> Why you care: the whole afternoon ends in a comparison — one agent vs. an orchestrated crew. Worktrees guarantee both runs start from the identical commit and can't contaminate each other. Module 4 covers this as a safety technique in its own right.
+`check_env.sh` should end with `OK (skipped=9)`: 23 tests, 9 skipped. The 9 skipped tests are the importer's acceptance tests, waiting for a file that doesn't exist yet. They're the finish line.
 
 ```mermaid
 flowchart LR
-    R[("panic-pantry repo<br/>tag: starter")] --> M["sandbox/panic-pantry<br/>main checkout — Ex1–3"]
-    R --> W1["sandbox/worktrees/single-agent<br/>branch single-agent — Ex0"]
-    R --> W2["sandbox/worktrees/orchestrated<br/>branch orchestrated — Ex4 + capstone"]
+    R[("panic-pantry repo<br/>tag: starter")] --> M["sandbox/panic-pantry<br/>main checkout — Modules 1–3"]
+    R --> W1["sandbox/worktrees/single-agent<br/>Module 0"]
+    R --> W2["sandbox/worktrees/orchestrated<br/>Modules 4–5"]
 ```
 
-*Figure 0 — Where each exercise runs. One repository, three working directories.*
-Text alternative: one repository tagged starter feeds three folders — the main checkout used in Exercises 1–3, the single-agent worktree used in Exercise 0, and the orchestrated worktree used in Exercise 4 and the capstone.
+*Figure 0 — Where each module runs: one repository, three folders. New to worktrees? Read [Git in 90 seconds](appendices.md#appendix-f--git-in-90-seconds).*
+Text alternative: one repository tagged starter feeds three folders: the main checkout for Modules 1–3, the single-agent worktree for Module 0, and the orchestrated worktree for Modules 4 and 5.
 
-Verify your environment (from `sandbox/panic-pantry`):
+Two files every agent obeys:
 
-```bash
-bash scripts/check_env.sh
-```
-
-Expected: python3 and git versions print, `opencode --version` prints `1.18.33`, and the test suite ends with `OK (skipped=9)` — 23 tests, 9 skipped. The 9 skips are the importer acceptance tests waiting for a file you have not written yet. They are the finish line, not a problem. (Mechanically: `tests/test_importer_contract.py` tries to import `panic_pantry.importer`; while that file is missing, the whole test class is marked `skipUnless` and skipped. The moment `importer.py` exists, all 9 switch on and become your acceptance gate.)
-
-Reset the sandbox anytime with:
-
-```bash
-bash scripts/reset.sh
-```
-
-**File ownership manifest:** [workshop/WRITABLE_FILES.md](../sandbox/panic-pantry/workshop/WRITABLE_FILES.md) lists exactly what you (and your agents) may edit per exercise. Treat it as law.
-
-**Project rules for agents:** [AGENTS.md](../sandbox/panic-pantry/AGENTS.md) at the repo root is read automatically by OpenCode as project rules — no prompt needed ([docs: rules](https://opencode.ai/docs/rules), verified 2026-09-28 on OpenCode 1.18.33). `/init` can generate one; ours already exists. (A **harness** is everything around the model that shapes what it does — rules files, tools, permissions, tests. The model is the engine; the harness is the steering, brakes, and guardrails.) OpenAI's harness-engineering write-up recommends keeping this file a ~100-line table of contents and enforcing the real rules mechanically with tests — which is exactly how this sandbox is built ([OpenAI: Harness Engineering](https://openai.com/index/harness-engineering/), Feb 2026).
+- [AGENTS.md](../sandbox/panic-pantry/AGENTS.md): project rules OpenCode loads into every session.
+- [workshop/WRITABLE_FILES.md](../sandbox/panic-pantry/workshop/WRITABLE_FILES.md): who may edit what, exercise by exercise.
 
 ---
 
-## How to use these files
+## How to read these files
 
-Work through the modules in order. Each module is a short lecture summary followed by the hands-on exercise it sets up — the course rhythm is always **claim → story/evidence → framework → exercise → debrief**.
+Read them rendered (on GitHub, or in VS Code's Markdown preview: Ctrl/Cmd+Shift+V) so answers stay folded until you open them.
 
-| Module | File | Segments covered |
-|---|---|---|
-| 0 | [module-0-baseline.md](module-0-baseline.md) | Opening lecture + Exercise 0 — warm-up + single-agent baseline |
-| 1 | [module-1-decomposition.md](module-1-decomposition.md) | Micro-lecture 1 + Exercise 1 — write the task cards |
-| 2 | [module-2-agent-crew.md](module-2-agent-crew.md) | Micro-lecture 2 + Exercise 2 — build a small agent crew |
-| 3 | [module-3-model-routing.md](module-3-model-routing.md) | Micro-lecture 3 + Exercise 3 — model routing |
-| 4 | [module-4-parallel-run.md](module-4-parallel-run.md) | Micro-lecture 4 + Exercise 4 — orchestrated run + matched comparison |
-| 5 | [module-5-capstone.md](module-5-capstone.md) | Micro-lecture 5 + Capstone — midnight launch + the 5-minute close |
-| — | [appendices.md](appendices.md) | Objective coverage map, command crib sheet + agent-file skeleton, sources, image credits |
+Callouts: 🎯 goal · 🌍 real-world story · ⚡ optional Level up · 🔑 the one thing to remember. (Modules 3–5 still use 📘 Concept and 💡 Field note boxes until they're rewritten.)
 
-Watch for three recurring callouts:
+Stuck on a word? The [glossary](appendices.md#appendix-e--glossary) lists every term and the module that teaches it.
 
-- 📘 **Concept** — a term or mechanism explained right where you first need it. If one says "quick version," the full treatment comes in a later module.
-- 🔑 **Key takeaway** — the one sentence to remember from that point in the module.
-- 💡 **Field note** — how the exercise maps to your daily engineering work.
-
----
-
-## Key terms at a glance
-
-Skim this now; come back whenever a word stops making sense. Each term links to where it's taught in depth.
-
-**Orchestration vocabulary**
-
-| Term | Plain-English meaning | Taught in |
-|---|---|---|
-| **Orchestration** | Splitting a feature into checkable tasks, handing them to agents, and integrating what comes back — you as the release lead | [Module 0](module-0-baseline.md) |
-| **Contract** | The agreed interface and rules every task builds against: function signature, return shape, edge-case behavior, policy | [Module 1](module-1-decomposition.md) |
-| **Freeze (a contract)** | Declare it final *before* work starts. Nobody changes it mid-run; if it must change, you stop, re-freeze, and re-brief everyone | [Module 1](module-1-decomposition.md) |
-| **Task card** | Your written spec for one delegated task: outcome, scope, contract, checks, return format | [Module 1](module-1-decomposition.md) |
-| **Task packet** | Everything you actually *send* in one delegation: the card, plus paths, the contract text, and the checks. The card is the recipe; the packet is the recipe handed to a cook | [Module 1](module-1-decomposition.md) |
-| **Acceptance check** | An executable way to decide "done" — a command or a concrete review question. "Looks good" isn't one | [Module 1](module-1-decomposition.md) |
-| **Idempotent** | Safe to run twice: the second run changes nothing | [Module 1](module-1-decomposition.md) |
-| **Disposition** | The decided outcome for an item. For a CSV row: which `ImportReport` bucket it lands in. For a review finding: fix, accept with reason, or defer with an owner | [Module 3](module-3-model-routing.md), [Module 5](module-5-capstone.md) |
-| **Intervention** | Any time you step into a run to steer it — a correction, clarification, or manual edit | [Module 0](module-0-baseline.md) |
-| **Matched comparison** | Two runs with the same commit, ticket, tests, model, and timebox, so the only difference is the approach | [Module 4](module-4-parallel-run.md) |
-
-**OpenCode vocabulary**
-
-| Term | Plain-English meaning | Taught in |
-|---|---|---|
-| **Primary agent** | The agent you talk to directly in the main conversation. Built-ins: **Build** (full tools) and **Plan** (edits and shell require your approval). Tab switches between them | [Module 0](module-0-baseline.md) |
-| **Subagent** | A helper agent the primary (or you) hands one task to. Built-ins in 1.18.33: **explore** (fast, read-only codebase search) and **general** (multi-step research and tasks). You'll build your own | [Module 2](module-2-agent-crew.md) |
-| **Session / child session** | A session is one conversation. A delegation creates a **child session** under it — a new conversation with fresh, empty context | [Module 2](module-2-agent-crew.md) |
-| **Session tree** | A parent session plus the child sessions its delegations created. You walk it with the child-navigation keys | [Module 2](module-2-agent-crew.md) |
-| **@-mention** | *You* choose the subagent: `@reviewer check the diff` | [Module 2](module-2-agent-crew.md) |
-| **Task tool** | The tool the *primary agent* calls to delegate on its own. It chooses the subagent by reading each subagent's `description` | [Module 2](module-2-agent-crew.md) |
-| **Permission** (`allow` / `ask` / `deny`) | Configured authority per action: `allow` runs, `ask` pauses for your approval, `deny` blocks — whatever the prompt says | [Module 2](module-2-agent-crew.md) |
-| **Frontmatter** | The YAML block between `---` fences at the top of an agent file — its settings. The body below is its system prompt | [Module 2](module-2-agent-crew.md) |
-| **Provider / model ID** | A provider is a model service (Anthropic, OpenAI, OpenCode Zen, …). Models are named `provider_id/model_id` | [Module 3](module-3-model-routing.md) |
-| **Variant (effort)** | A preset for the same model — e.g., a higher thinking budget or reasoning effort. `ctrl+t` cycles variants | [Module 3](module-3-model-routing.md) |
-| **Leader key** | A prefix key for many shortcuts; `ctrl+x` by default. `<Leader>+Down` means press `ctrl+x`, release, then press ↓ | [Module 0](module-0-baseline.md) |
-| **Foreground / background delegation** | Foreground: the primary waits for the child to finish. Background: the child runs while the primary keeps working (experimental in the V1 line; not used live today) | [Module 4](module-4-parallel-run.md) |
-
-**Git vocabulary** — tag, branch, worktree, tracked/untracked: see the primer in [One-time setup](#one-time-setup-instructor-runs-this-before-class-you-verify) above.
-
----
-
-## Classroom version note
-
-> **One-time version note:** OpenCode V2 exists and renames some vocabulary (`permissions`, `shell`, `subagent`). This class uses **V1 syntax only**, matching the pinned 1.18.33 binary. If a doc page or blog snippet looks different from these materials, check which major version it targets before trusting it.
-
-Start here: [module-0-baseline.md](module-0-baseline.md)
+Start here: [Module 0](module-0-baseline.md).

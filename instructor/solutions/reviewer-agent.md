@@ -8,7 +8,9 @@ Verified conventions: OpenCode 1.18.33, project-level Markdown agents under
 deprecated — do not accept it as the boundary), bash pattern maps where the
 **last matching rule wins** (so `"*": deny` goes first). Sources:
 https://opencode.ai/docs/agents · https://opencode.ai/docs/permissions
-(verified 2026-09-28).
+(verified 2026-09-28; tool-removal behavior of `edit: deny` checked on the
+1.18.33 binary 2026-10-03). The docs pages are written for the current release
+and differ from 1.18.33 in places; trust [ex2-agent-crew.md](ex2-agent-crew.md).
 
 File content for `.opencode/agents/reviewer.md`:
 
@@ -72,11 +74,13 @@ is stated as "no findings against checklist item N," not as approval.
 
 ## Expected observable behavior
 
-- `@reviewer` appears in the subagent picker after the file loads (requires
-  valid YAML frontmatter and the required `description`).
-- Asking it to edit any file results in a **permission-layer denial of the edit
-  tool**, visible in the session — this is the Exercise 2 pass bar, not a
-  polite prose refusal.
+- `@reviewer` appears in the subagent picker after the file loads.
+- `edit: deny` removes the reviewer's `edit`, `write` and `apply_patch` tools
+  entirely. Asked to edit, it says it has no edit tool (or tries a shell
+  redirection that bash `"*": deny` refuses). There is **no red permission
+  denial** to screenshot. The Exercise 2 pass bar is the config check:
+  `opencode debug agent reviewer --tool write --params '{"filePath":"src/panic_pantry/store.py","content":"# hi"}'`
+  prints `Tool write is disabled for agent reviewer`.
 - Asked to run an arbitrary shell command (e.g., `rm`), the bash pattern map
   denies it; `git diff` and the unittest command succeed.
 - Reports come back in the fixed return format with file:line citations.
@@ -86,7 +90,9 @@ is stated as "no findings against checklist item N," not as approval.
 Accept learner variants that: deny bash entirely instead of the pattern map
 (simpler, still passes); omit `temperature`; word the checklist differently but
 cover all four items; set `model:` to a classroom-available ID. Reject variants
-that: rely on prompt text alone with `edit` not denied; use deprecated `tools:`
+that: rely on prompt text alone with `edit` not denied; leave any `*` key
+unquoted (the YAML fails and 1.18.33 loads the file with **every permission
+allowed**; `debug agent` shows `"mode": "all"`); use deprecated `tools:`
 frontmatter as the control; put `"*": deny` **after** the allows in the bash map
 (last match wins — that ordering denies everything, which breaks the review
 commands and shows the rule was not understood).

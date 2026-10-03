@@ -1,6 +1,6 @@
 # INSTRUCTOR ONLY — do not distribute
 
-Answer key for **Exercise 0 — The single-agent baseline**. Verified against the sandbox
+Answer key for **Exercise 0 — The baseline** (Module 0, 25 min: warm-up 8, run 15, score 2). Verified against the sandbox
 contract and OpenCode 1.18.33 conventions (2026-09-28). The known-good importer
 is [importer_solution.py](importer_solution.py) — reference it; do not retype it.
 
@@ -14,10 +14,13 @@ is allowed and becomes `active`.** Enforced in
 
 ## Exercise 0 — The single-agent baseline
 
-### Step 1 (warm-up) — expected discoveries from the vague-prompt plan
+### Step 1 (warm-up) — what learners should write down
 
-A typical plan for "Add a CSV importer for promo codes" silently decides most of
-these. Learners should list at least three:
+The handout asks two questions: where the plan's rules came from (prompt,
+`AGENTS.md`, or the ticket) and where the 20% rule is enforced (answer below).
+At the debrief, push one step further with: "what did it decide that no file
+told it?" A typical plan for "Add a CSV importer for promo codes" silently
+decides several of these:
 
 | Silent decision | What the repo actually says |
 |---|---|
@@ -70,3 +73,27 @@ Most common near-misses to look for in learner diffs:
 
 Known-good result: with [importer_solution.py](importer_solution.py) in place,
 `python3 -m unittest discover -s tests -v` → **23 tests, OK, 0 skipped**.
+
+### Step 3 — reading `bash scripts/score.sh`
+
+Learners copy four rows from `score.sh` into the Module 0 column of
+`workshop/scorecard.md` and fill the rest by hand (model + variant,
+interventions, elapsed, tokens/cost or "unavailable").
+
+What the rows look like, so you can sanity-check a learner's sheet:
+
+| Situation | Contract tests | Policy source check |
+|---|---|---|
+| No importer | `0/9 (SKIPPED: …counts as 0)` | `n/a` |
+| `import_promotions` misnamed | `0/9 (SKIPPED: …counts as 0)` | still scanned |
+| Importer has a syntax error | `0/9 (ERROR: … in src/panic_pantry/importer.py line N)` | still scanned |
+| Known-good importer | `9/9 (OK)` | `nothing flagged` |
+| Near-miss 3 above (`discount_pct > 20` decides the report) | often 9/9 | `CHECK BY EYE` on that line: a criterion-7 violation even when every test passes |
+
+"Files changed" should list only `src/panic_pantry/importer.py` (Builder's
+file). If `tests/test_promo_import.py` shows up, it's labeled "reserved for the
+Ex4 Breaker": the agent added scope the ticket didn't ask for.
+
+**Level up L0.1 (agent grades itself):** there's no fixed answer. The point is
+the gap between the agent's self-rating and `score.sh`, whichever way it
+goes. Use it to open Module 2's "it grades its own homework".

@@ -1,126 +1,104 @@
-# Module 0 — Opening + Exercise 0: the single-agent baseline
+# Module 0 — Watch one agent do it alone
 
-**Where you are:** you have a verified sandbox (`OK (skipped=9)` — 23 tests, 9 skipped) and the Panic Pantry story from the [course index](README.md). This module sets the incident, shows the loop you will run all afternoon, and produces the single-agent baseline that Exercise 4 will be measured against.
+> 🎯 **Goal:** give one agent the whole ticket, measure what it does in 15 minutes, and keep the numbers. In Module 4 a crew of agents has to beat them.
+>
+> **You'll leave with:** the Module 0 column of `workshop/scorecard.md` filled in, and `/tmp/baseline.diff`.
+
+| Module | You learn to… | Orchestration step | The one rule |
+|---|---|---|---|
+| **0 ← you are here** | **Watch one agent do the whole job alone** | **The baseline to beat** | **Measure before you multiply** |
+| 1 | Split the job and write down each piece | Split | Split by file, not by function |
+| 2 | Build agents with hard limits on what they can touch | Staff | A role is a permission, not a name |
+| 3 | Pick the right model for each piece | Budget | Cheap model + hard check beats pricey model + blind trust |
+| 4 | Hand the cards to agents, run them, compare with Module 0 | Run | Parallel only when tasks share no files |
+| 5 | Handle a launch-night failure | Recover | Green tests are evidence, not a verdict |
 
 ---
 
-## Opening — More agents do not automatically mean more progress
+## Why measure first?
 
-The release is at midnight. The discount code is `FREE-ALL`. The shop is out of pretzels and, somehow, in debt.
+- **Agents multiply whatever plan you give them, including a bad one.** One vague agent guesses; five guess five different ways at once.
+- **More agents cost more.** Anthropic's multi-agent research system used about 15× the tokens of a plain chat ([Anthropic, Jun 2025](https://www.anthropic.com/engineering/multi-agent-research-system)).
+- **Feelings aren't data.** So you'll keep a scorecard.
 
-**Claim: agents multiply the quality of your plan — including a bad one.** One agent given a vague request makes vague guesses. Five agents given a vague request make five *different* vague guesses, concurrently, in your codebase. Anthropic's multi-agent research system showed real wins on parallelizable research tasks, but at roughly 15× the tokens of a chat session, and they note that coding has fewer truly parallelizable tasks than research does ([Anthropic: How We Built Our Multi-Agent Research System](https://www.anthropic.com/engineering/multi-agent-research-system), Jun 2025 — their system, not a universal constant).
+> 🌍 **Real world:** in a 2025 randomized trial, 16 experienced open-source developers did 246 real tasks. With AI tools they were **19% slower**, while believing they were **20% faster** ([METR, Jul 2025](https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/)). A 2026 follow-up says the picture is shifting ([METR, Feb 2026](https://metr.org/blog/2026-02-24-uplift-update/)). That's the point: measure your own runs.
 
-Your role today is **release lead**: the person who turns "add an importer" into commissioned, checkable work — and who owns the integrated result. Think of a restaurant pass: many stations, one ticket, one person who decides what actually goes out the door.
+---
+
+## You're the chef at the pass
 
 ![Two cooks at the expo station of a restaurant kitchen, facing the pass with stacks of plates above](images/kitchen-pass.jpg)
 
-*The pass (or "expo station"): the counter where every plate is checked against the ticket before it leaves the kitchen. The cooks at the stations are your agents; the person at the pass is you. Photo: MarkBuckawicki, [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Restaurant_Kitchen_expo_station.jpg), CC0.*
+*The pass: the counter where every plate is checked against the ticket before it leaves the kitchen. Photo: MarkBuckawicki, [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Restaurant_Kitchen_expo_station.jpg), CC0.*
 
-```mermaid
-flowchart LR
-    A[Request] --> B[Inspect repo]
-    B --> C[Plan & decompose]
-    C --> D[Freeze contract]
-    D --> E[Delegate with task cards]
-    E --> F[Review child results]
-    F --> G[Run tests]
-    G --> H[Integrate & decide]
-    F -- findings --> C
-    G -- failures --> E
-```
+Today your role is **release lead**. Many stations cook; one person at the pass checks every plate and decides what goes out. The stations are your agents. The pass is you.
 
-*Figure 1 — The orchestration loop you will run all afternoon.*
-Text alternative: a cycle — request, inspect the repo, plan and decompose, freeze the contract, delegate with task cards, review child results, run tests, integrate and decide; review findings loop back to planning, test failures loop back to delegation.
-
-> 📘 **Concept — three words from Figure 1 (quick version)**
->
-> - **Contract** — the agreed shape of the work: the function signature, what it returns, how every edge case behaves, which policy it must respect. **Freezing** it means declaring it final *before* anyone builds against it. (Full treatment: [Module 1](module-1-decomposition.md).)
-> - **Delegate** — hand one task to a helper agent (a **subagent**) that works in its own separate conversation. (Full treatment: [Module 2](module-2-agent-crew.md).)
-> - **Child results** — what a subagent hands back when it finishes: its summary, the files it changed, the checks it ran. A claim to verify, not a fact. (Full treatment: [Module 5](module-5-capstone.md).)
-
-> 🔑 **Key takeaway:** Agents multiply whatever plan you give them — so before you add agents, measure what one agent does with a good plan.
-
----
-
-## Exercise 0 — The single-agent baseline (25 min) 🔨
-
-**Goal:** give one agent the full ticket, measure what it does in 15 minutes, and save the result. In Exercise 4 you'll run the *same* ticket with a crew of agents — this baseline is what they have to beat. A short warm-up first shows you where an agent's rules come from.
-
-| Step | Time | You do | Why |
-|---|---|---|---|
-| 1 — Warm-up | ~8 min | Vague prompt in Plan mode; trace where its plan came from | See what a prompt alone gives an agent — and what the repo gives it |
-| 2 — Baseline run | 15 min, hard stop | Full ticket in Build mode; fill the scorecard | Create the measured result Exercise 4 is compared against |
-
-**Starting checkpoint:**
-
-```bash
-cd sandbox/worktrees/single-agent
-git status                                   # clean, branch single-agent
-python3 -m unittest discover -s tests -v     # ends OK (skipped=9)
-opencode                                     # start OpenCode in this directory
-```
-
-*Why a separate worktree:* the baseline gets its own clean copy of the repo, so nothing you do later in the main checkout can leak into it.
-
-### Your cockpit — a 60-second tour of the OpenCode TUI
+## Read the cockpit before every run
 
 ![The OpenCode terminal UI: a conversation in the middle, and a status bar at the bottom reading "Build · Claude Opus 4.5 · OpenCode Zen" with hints for esc interrupt, ctrl+t variants, tab agents, and ctrl+p commands](images/opencode-tui.png)
 
-*The OpenCode TUI. Your models and version will differ; the layout won't. Screenshot: [OpenCode project](https://github.com/sst/opencode), MIT License.*
+*The OpenCode TUI. Your model will differ; the layout won't. Screenshot: [OpenCode project](https://github.com/sst/opencode), MIT License.*
 
-Read the bottom of the screen like a dashboard — it answers "who am I talking to, running on what?":
-
-| On screen | What it tells you | Key |
+| On screen | Tells you | Key |
 |---|---|---|
-| **Build** / **Plan** (left of the input box) | Which **primary agent** you're talking to | **Tab** switches |
-| Model name (e.g., *Claude Opus 4.5*) | The model this agent is using right now | `/models` to change |
-| Provider (e.g., *OpenCode Zen*) | The service the model comes from | `/connect` adds one |
-| `ctrl+t variants` | Cycles **variants** of the model — e.g., more or less reasoning effort | **ctrl+t** |
-| `ctrl+p commands` | Command palette — every action, searchable | **ctrl+p** |
-| `esc interrupt` | Stop the agent mid-run | **esc** |
+| **Build** / **Plan** | Which **primary agent** you're talking to. Build edits files and runs commands; Plan can't edit your files but can still run commands | **Tab** switches |
+| Model name | The model this agent uses right now | `/models` changes it |
+| `variants` | The model's effort setting (e.g. more reasoning) | **ctrl+t** cycles |
+| `commands` / `interrupt` | Every action, searchable / stop the agent | **ctrl+p** / **esc** |
 
-> 📘 **Concept — Build vs. Plan, and the leader key (quick version)**
->
-> A **primary agent** is the one you talk to directly. OpenCode ships two: **Build** (the default — reads, edits files, runs commands) and **Plan** (for analysis — it must ask your approval before every edit or command). Later you'll meet **subagents**, helpers a primary hands a single task to ([Module 2](module-2-agent-crew.md)); today uses none.
->
-> Many shortcuts start with the **leader key**, `ctrl+x`. `<Leader>+n` means press `ctrl+x`, release, then `n`. You'll use two all day: **`<Leader>+n`** (or `/new`) for a fresh session and **`<Leader>+m`** (or `/models`) for the model picker.
+Many shortcuts start with the **leader key**, `ctrl+x`: `<Leader>+n` means press `ctrl+x`, release, then `n`. If you can't name the agent, model and variant, you can't compare runs.
 
-> 🔑 **Key takeaway:** Before every run, read the status bar — which agent, which model, which variant. If you can't name all three, you can't compare the result.
+## Count every time you grab the wheel
 
-### Step 1 — Warm-up: a vague prompt (~8 min)
+An **intervention** is any time you step in: a correction, an answer to its question, a "keep going", a hand edit.
 
-**Why:** your real requests at work often look like this one-liner. You're finding out what the agent does with it — and whether its rules came from *you* or from the repo.
+A self-driving car that needs you six times a trip isn't self-driving. You can watch one agent; you can't watch five. So this count predicts whether a crew could run without you.
 
-1. Press **Tab** to switch to **Plan**, then paste exactly:
+---
 
-   ```text
-   Add a CSV importer for promo codes. Show me your plan first. Do not edit any files.
-   ```
+## Exercise 0 — The baseline (25 min) 🔨
 
-2. **Don't answer its questions.** If it asks anything (e.g., "Should I add my own tests?"), press **Esc** and reply: `Don't resolve these — list them as open questions in the plan.` *Why:* every answer you give is context the agent didn't find itself, and that's what you're measuring.
+```bash
+cd sandbox/worktrees/single-agent        # from the course root: this run gets its own copy of the repo
+git branch --show-current                # must print single-agent
+python3 -m unittest discover -s tests    # ends OK (skipped=9)
+opencode
+```
 
-3. In your notes, record three things:
-   - **Source** — where did its rules come from: your prompt, `AGENTS.md`, or `tickets/TICKET-001.md`? Did it find the ticket without being told?
-   - **Decisions** — ≥3 things it decided that no file told it to (open questions it raised count).
-   - **One claim, checked** — pick something it says it "verified" and confirm it in the code. While you're there, find where the approval rule is **enforced**: `cat AGENTS.md`, then `sed -n '1,30p' src/panic_pantry/promotions.py`. *Why:* an agent's summary is a claim; the code that raises the error is the fact.
+New to worktrees? See [Git in 90 seconds](appendices.md#appendix-f--git-in-90-seconds).
 
-The rule you should find: **above 20% requires approval; exactly 20% is active.**
+### Step 1 — Warm-up: a vague prompt (8 min)
 
-*If the plan looks good, that's the lesson, not a failed exercise: the repo supplied the context your prompt didn't. Most real repos don't have a TICKET-001 waiting. (Your instructor may show a recorded plan from a session that didn't find it.)*
+- **Do:** press **Tab** to switch to **Plan**, then paste the prompt below. If it asks you anything, press **Esc** and reply `Don't resolve these: list them as open questions in the plan.`
+- **Why:** real requests often look like this one-liner. You're finding out where the agent's rules come from.
+- **Done when:** your notes answer both questions below.
 
-> 🔑 **Key takeaway:** A vague prompt only works when the repo carries the context — here the ticket and `AGENTS.md` did the deciding, not your prompt. In [Module 1](module-1-decomposition.md) you'll learn to write that context yourself.
+```text
+Add a CSV importer for promo codes. Show me your plan first. Do not edit any files.
+```
 
-### Step 2 — The baseline run (15 min, hard stop — the instructor calls start/stop)
+1. **Where did its rules come from?** Your prompt, `AGENTS.md`, or `tickets/TICKET-001.md`? Did it find the ticket on its own?
+2. **Where is the 20% rule enforced?** Find the actual line. `AGENTS.md` names the file.
 
-**Why:** this is the number Exercise 4 is measured against. A comparison is only honest if both runs get identical conditions — so you'll record those conditions as carefully as the result.
+<details><summary>Answer</summary>
 
-**Before you paste:**
-- [ ] `/new` — a fresh session, so nothing from Step 1 leaks in.
-- [ ] **Tab** back to **Build**.
-- [ ] Write down the exact **model and variant** from the status bar. Exercise 4 must use the same one.
-- [ ] One agent only: don't @-mention anyone or ask it to delegate. (If it delegates on its own, let it and note it — that's data too.)
+`PromotionService.create_promotion` in `src/panic_pantry/promotions.py` decides the status: above 20% → `pending_approval`; exactly 20% → `active`.
 
-Then paste exactly:
+If the plan looked good, the *repo* did the deciding (the ticket and `AGENTS.md`), not your prompt. Most real repos don't have a TICKET-001 waiting. Module 1 teaches you to write one.
+</details>
+
+### Step 2 — The baseline run (15 min, hard stop)
+
+- **Do:** give one agent the full ticket. Your instructor calls start and stop.
+- **Why:** Module 4 runs the same ticket with a crew under the same conditions. This is the number to beat.
+- **Done when:** the instructor calls stop, finished or not. Unfinished is valid data.
+
+Before you paste:
+
+- [ ] `/new`: a fresh session, so nothing from Step 1 leaks in
+- [ ] **Tab** back to **Build**
+- [ ] Write down the model and variant from the status bar. Module 4 must use the same ones.
+- [ ] One agent only: don't @-mention anyone. (If it delegates on its own, note it.)
 
 ```text
 Implement tickets/TICKET-001.md exactly as written. Create src/panic_pantry/importer.py
@@ -129,71 +107,67 @@ python3 -m unittest discover -s tests -v
 and show me the output.
 ```
 
-**During the run:**
-- Step in when you need to, and **count every intervention** — a correction, an answer to its question, a "keep going" nudge, a hand edit. Don't count the starting prompt or a plain permission approval. *Why:* see the note below; Exercise 4 counts them the same way.
-- If it asks whether to write its own tests, answer `No — contract test only.` (That counts as an intervention.) *Why:* `tests/test_promo_import.py` is reserved for Exercise 4's test author, and extra scope here would unbalance the comparison.
-- At 15:00, stop — finished or not. "Unfinished" is valid data.
+During the run:
 
-> 📘 **Concept — why interventions are the hidden cost of a run**
->
-> Tests passed, time taken and tokens used all leave out one thing: how much of *your* attention the run needed. A run that passes 9 of 9 tests in 12 minutes looks identical on paper whether you left it alone or stepped in six times to correct it — but each of those six meant someone watching, reading, diagnosing and typing. The intervention count is the only scorecard row that captures that human effort.
->
-> It matters more as you add agents. One agent that needs babysitting is annoying; five that each need it are impossible, because you can't watch five screens. So the count is your best measure of *"could this run without me?"* — exactly what Exercise 4 tests.
+- Step in only when you must, and tally every intervention. The starting prompt and plain permission approvals don't count.
+- If it asks whether to write its own tests, answer `No — contract test only.` That counts as an intervention. `tests/test_promo_import.py` is reserved for Module 4's Breaker.
 
-**After the stop**, fill in the scorecard (you can finish it during the transition into Micro-lecture 1) and save the diff:
+### Step 3 — Score it (2 min)
 
-| Metric | Your value |
-|---|---|
-| Model + variant (exactly as the status bar shows) | |
-| Elapsed time (of 15 min) | |
-| Contract tests passing (`python3 -m unittest tests.test_importer_contract -v`) | |
-| Whole suite (`python3 -m unittest discover -s tests -v`) | |
-| Policy handled correctly? (>20% → pending, exactly 20 → active) | |
-| Human interventions (count) | |
-| Files changed (`git status`) | |
-| Token/cost data (`opencode stats`, if visible) | |
-
-**How to fill in each row.** First make sure you're in the baseline worktree — every command below grades whatever folder you're in, so running them in the main checkout or the `orchestrated` worktree scores the wrong code:
+- **Do:** run the scorer, then fill the **Module 0** column of `workshop/scorecard.md`.
+- **Why:** a script reads the results the same way every time, here and in Module 4.
+- **Done when:** the column is full and the diff is saved.
 
 ```bash
-cd sandbox/worktrees/single-agent     # from the course repo root, if you've moved
-git branch --show-current             # must print: single-agent
+bash scripts/score.sh                                   # prints four rows of the scorecard
+git add -A && git diff --cached > /tmp/baseline.diff    # stage first: new files don't show in a plain diff
 ```
 
-| Row | How to measure it |
-|---|---|
-| **Contract tests passing** | Run `python3 -m unittest tests.test_importer_contract -v`. Record passing out of 9 (e.g., `Ran 9 tests … FAILED (failures=2)` → **7/9**). ⚠️ `OK (skipped=9)` means **0/9**: the contract tests skip themselves when `import_promotions` can't be imported — a missing file or misnamed function looks green. |
-| **Whole suite** | Run `python3 -m unittest discover -s tests -v`. Record the last line, e.g., `23 run, OK` or `23 run, FAILED (failures=1, errors=1)`. Failures outside the 9 contract tests mean the agent broke something it shouldn't have touched. |
-| **Policy handled correctly?** | Two checks. **(1) Behavior:** in the contract output, both `test_boundary_exactly_20_is_created_active` and `test_above_20_is_pending_and_unusable_at_checkout` say `ok`. **(2) Source:** in `git diff`, the importer reads `promo.status` from what `create_promotion` returns — it does *not* compare against 20 itself or import `APPROVAL_THRESHOLD_PCT`. Record **Yes** (both), **Yes, but reimplemented** (tests pass, importer checks 20 itself — violates ticket criterion 7), or **No** (a test fails). |
-| **Files changed** | `git status --short`. Ideally one line: `?? src/panic_pantry/importer.py`. List anything else. |
+Copy `score.sh`'s four rows, then fill the rest yourself: model and variant, interventions, elapsed time, and tokens/cost from `opencode stats` (or "unavailable").
 
-Then save the diff. `importer.py` is a new, untracked file, so plain `git diff` would miss it — stage everything first:
+Watch two rows. **Contract tests** counts skipped tests as 0: a missing or misnamed importer would otherwise look green. **Policy source check** flags any line where the importer seems to decide approval itself; ticket criterion 7 forbids that. Read every flagged line.
 
-```bash
-git add -A && git diff --cached > /tmp/baseline.diff    # keep notes and the diff outside the worktree
+<details><summary>⚡ <b>Level up — ask it to grade itself (2 min)</b></summary>
+
+In the same session, after the stop, ask:
+
+```text
+Rate your implementation from 1 to 10 and list its three biggest risks.
 ```
 
-> 💡 **Field note:** This scorecard is how you should evaluate *any* AI-tooling claim at work: timeboxed run, matched conditions, counted interventions, saved artifacts. "It felt faster" is not a metric; a filled scorecard is.
+Compare its answer with `score.sh`. Write down the gap. Module 2 is about why the agent that built the code shouldn't be the one to grade it; this is your first evidence.
+</details>
 
 ### Done when
 
-- [ ] You have a filled scorecard and `/tmp/baseline.diff` from a run stopped at 15 minutes.
-- [ ] Your Step 1 notes say where the plan's rules came from, list ≥3 decisions it made on its own, and record one claim you checked.
-- [ ] You can name where the approval policy is enforced (file + function).
+- [ ] The Module 0 column of `workshop/scorecard.md` is full, and `/tmp/baseline.diff` exists
+- [ ] Your notes say where the plan's rules came from
+- [ ] You can name the file and function that enforce the 20% rule
 
-**Hints:**
-1. Can't find the approval rule? `AGENTS.md` names the file that enforces it — read that file's docstring.
-2. Baseline agent guessing at fields or line numbers? It needs the ticket, not your memory of it — the Step 2 prompt points at `tickets/TICKET-001.md` for exactly that reason.
-
-**Troubleshooting:**
-- Tests won't run → you must be in the worktree root (`sandbox/worktrees/single-agent`), not `tests/`.
-- OpenCode opens the wrong project → quit, `cd` into the worktree, relaunch.
-- Worktree dirty before starting → ask the instructor before resetting; `bash sandbox/setup.sh` rebuilds worktrees but **discards all worktree work**.
-
-**Debrief:** Which of your interventions was really a missing piece of context you could have supplied up front? In your real codebase, where do the house rules live — and would an agent find them?
-
-> 🔑 **Key takeaway:** Every intervention you counted was a piece of context you could have shipped up front.
+| Problem | Fix |
+|---|---|
+| Tests won't run | Run them from the worktree root (`sandbox/worktrees/single-agent`), not from `tests/` |
+| OpenCode opened the wrong project | Quit it, `cd` into the worktree, start it again |
+| The worktree was already dirty | Ask your instructor. Re-running `setup.sh` rebuilds the worktrees but wipes them |
 
 ---
 
-**Next:** [module-1-decomposition.md](module-1-decomposition.md) — learn to write the kind of ticket your agent found for you, with a frozen contract.
+## Debrief
+
+<details>
+<summary><b>Which of your interventions was really a missing piece of context?</b></summary>
+
+Usually most of them. Every intervention you counted is context you could have written down before the run. Module 1 is how.
+</details>
+
+<details>
+<summary><b>In your own codebase, where do the house rules live? Would an agent find them?</b></summary>
+
+Look for an `AGENTS.md` (or `CLAUDE.md`), a ticket with acceptance criteria, and tests that enforce the rules. If the rules live only in people's heads, an agent will guess, and so will a new teammate.
+</details>
+
+> 🔑 **Measure before you multiply.**
+
+---
+
+**Next:** [Module 1](module-1-decomposition.md): split TICKET-001 into a plan and two cards, one per agent, against a frozen contract.

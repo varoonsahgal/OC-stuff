@@ -12,7 +12,7 @@ The receipts, in order — and the specific failure each one exists to catch:
 
 1. **Child summary + changed paths** — does every path map to a task card? *Catches boundary violations:* a file changed that no card owns is invisible to a green suite but obvious against the ownership map.
 2. **Deterministic tests** — `python3 -m unittest discover -s tests -v`, run by *you*, output captured. *Catches claimed-but-never-run:* an agent reporting "all tests pass" from a stale or partial run is a claim; your own captured output is evidence.
-3. **The diff** — `git diff`, read with your own eyes. *Catches plausible-but-wrong:* agents write code that looks finished; the diff is where reimplemented policy and quiet scope creep hide. Plausible is not the bar.
+3. **The diff** — `git diff starter` (everything since the starting line; Module 4's `git add -A` made the new files visible to it), read with your own eyes. *Catches plausible-but-wrong:* agents write code that looks finished; the diff is where reimplemented policy and quiet scope creep hide. Plausible is not the bar.
 4. **Independent review** — `@reviewer`, whose incentives are findings, not completion. *Catches author blindness:* the implementer cannot flag the assumption it didn't know it made; a reviewer with a checklist can.
 5. **The human decision** — findings get dispositioned: fix, accept with reason, or defer with an owner. *Catches silent deferral:* a finding nobody answered is a decision nobody made. Silence is not a disposition.
 
@@ -25,7 +25,7 @@ flowchart LR
     R4 --> H{"Receipt 5:<br/>human decision —<br/>GO / NO-GO"}
 ```
 
-*Figure 7 — Integration receipts: an agent's "done" passes four evidence receipts before the fifth, a human GO/NO-GO decision.*
+*Figure 5 — Integration receipts: an agent's "done" passes four evidence receipts before the fifth, a human GO/NO-GO decision.*
 Text alternative: an agent's "done, all tests pass" claim flows left to right through four evidence receipts — child summary with changed paths, tests run by the human with captured output, the diff read directly, and independent reviewer findings — ending at receipt five, the human GO/NO-GO decision.
 
 Why five receipts and not just "the tests pass"? Safety engineers call it the **Swiss cheese model**:
@@ -50,12 +50,12 @@ When something is wrong, resist the urge to re-roll the whole task. Classify fir
 >
 > | Class | What went wrong | Panic Pantry example | Smallest corrective task |
 > |---|---|---|---|
-> | **Task/context gap** | The agent worked from missing or wrong information — something the packet never said, or an outdated assumption it was given | The card said "report malformed rows" but never quoted the exact reason string, so blank rows come back as `"blank line"` instead of `"empty row"` | Fix the **card/packet**, then re-delegate just that behavior |
+> | **Task/context gap** | The agent worked from missing or wrong information — something the card never said, or an outdated assumption it was given | The card said "report malformed rows" but never quoted the exact reason string, so blank rows come back as `"blank line"` instead of `"empty row"` | Fix the **card**, then re-delegate just that behavior |
 > | **Dependency error** | Right pieces, wrong order: a step ran before the thing it needed was ready | `@reviewer` was launched while the implementer was still mid-edit, reviewed a half-written file, and reported "no findings" | Re-run the dependent step **after** its input is final |
-> | **Boundary conflict** | Work landed outside its owner's scope, or two owners touched the same file | The test author also "helpfully" added `fixtures/promos_extra.csv` — a frozen directory no card owns | Revert the out-of-scope file; tighten scope or permissions |
+> | **Boundary conflict** | Work landed outside its owner's scope, or two owners touched the same file | The Breaker also "helpfully" added `fixtures/promos_extra.csv` — a frozen directory no card owns | Revert the out-of-scope file; tighten scope or permissions |
 > | **Implementation defect** | The spec was clear and complete; the code just gets it wrong | Line numbers are off by one: the first data row is reported as line 1 instead of line 2 | A targeted fix citing the **one failing check** |
 >
-> Diagnostic order: check the **packet** before the **code**. Did the agent have the right information (else: gap), at the right time (else: dependency), within the right files (else: boundary)? Only when all three are yes is it an implementation defect.
+> Diagnostic order: check the **card** before the **code**. Did the agent have the right information (else: gap), at the right time (else: dependency), within the right files (else: boundary)? Only when all three are yes is it an implementation defect.
 
 The capstone injects a real integration issue. Your finish line is not a fix; it's a fix **with evidence** and an honest five-line release note. That note is the artifact your future teammates (and future you, at 11:58 PM) actually read.
 
@@ -69,7 +69,7 @@ The capstone injects a real integration issue. Your finish line is not a fix; it
 
 ```bash
 python3 -m unittest discover -s tests -v     # something is now wrong — or is it?
-git status && git diff
+git status && git diff starter
 ```
 
 You may edit your Exercise 4 files plus `workshop/release-note.md`.
@@ -84,7 +84,7 @@ You may edit your Exercise 4 files plus `workshop/release-note.md`.
 3. **Inspect the resulting diff** and get reviewer findings:
 
 ```text
-@reviewer Review the latest change in this worktree against tickets/TICKET-001.md.
+@reviewer Review everything that changed since the starter tag (git diff starter) against tickets/TICKET-001.md.
 Policy: discounts above 20% require approval; exactly 20% is active.
 Findings by severity with file:line citations, plus anything still missing tests.
 ```
@@ -100,7 +100,7 @@ python3 -m unittest discover -s tests -v
 
 ```markdown
 1. Changed behavior: <what the shop can now do, one sentence>
-2. Tests run: <exact command + result, e.g. "python3 -m unittest discover -s tests -v — OK: 23 from the starter suite + however many your test author added">
+2. Tests run: <exact command + result, e.g. "python3 -m unittest discover -s tests -v — OK: 23 from the starter suite + however many your Breaker added">
 3. Review status: <reviewer findings and their dispositions>
 4. Unresolved concern: <the honest one — "none" needs justification>
 5. Decision: GO / NO-GO for midnight, and why you're the one saying so.

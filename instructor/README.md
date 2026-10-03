@@ -17,14 +17,40 @@ config differ across major versions.
 | File | Purpose |
 |---|---|
 | [solutions/ex0-vague-ticket.md](solutions/ex0-vague-ticket.md) | Answer key: Ex0 expected discoveries, baseline scorecard, common near-misses |
-| [solutions/ex1-task-surgery.md](solutions/ex1-task-surgery.md) | Answer key: model plan.md and both task cards, grading criteria |
-| [solutions/ex2-agent-crew.md](solutions/ex2-agent-crew.md) | Answer key: implementer agent, expected denial behavior, model reviewer report |
+| [solutions/ex1-task-surgery.md](solutions/ex1-task-surgery.md) | Answer key: model plan.md, Builder and Breaker cards, Stranger Test guesses, grading criteria |
+| [tools/breaker-mutants/](tools/breaker-mutants/README.md) | 8 realistic importer bugs + a checker that shows which test files catch them (backs Module 1's "the exam catches only 4 of 8") |
+| [solutions/ex2-agent-crew.md](solutions/ex2-agent-crew.md) | Answer key: what 1.18.33 really does with each permission, implementer and lead files, `debug agent` outputs, model reviewer report, Level ups |
 | [solutions/ex3-model-routing.md](solutions/ex3-model-routing.md) | Answer key: recorded comparison example, Task A scoring keys |
 | [solutions/ex4-orchestrated-run.md](solutions/ex4-orchestrated-run.md) | Answer key: integration checklist, expected worktree states, honest comparison |
 | [solutions/capstone-injections.md](solutions/capstone-injections.md) | The four capstone injection steps, diagnoses, and model release note |
 | [solutions/reviewer-agent.md](solutions/reviewer-agent.md) | Known-good `.opencode/agents/reviewer.md` learners build in Ex2 |
 | [solutions/importer_solution.py](solutions/importer_solution.py) | Known-good importer; drop into `src/panic_pantry/importer.py` to make the full suite pass |
-| [solutions/fallback-traces.md](solutions/fallback-traces.md) | Recorded transcripts: Ex0 "bad plan," Ex3 model comparison, background-delegation demo |
+| [solutions/fallback-traces.md](solutions/fallback-traces.md) | Recorded transcripts: Ex0 "bad plan," Ex3 model comparison, background-delegation demo; simulated Ex1 Stranger Test (Trace 4) |
+
+## Schedule (240 minutes total, 177 hands-on)
+
+The student README no longer carries the schedule; each module states its own exercise time. This table is the room's clock.
+
+| Time | Min | Type | Segment |
+|---|---:|---|---|
+| 0:00–0:07 | 7 | Lecture | Opening — more agents ≠ more progress |
+| 0:07–0:32 | 25 | **Hands-on** | Exercise 0 — warm-up + single-agent baseline |
+| 0:32–0:36 | 4 | Lecture | Micro-lecture 1 — split by file, not by function |
+| 0:36–0:56 | 20 | **Hands-on** | Exercise 1 — split the job: plan + Builder and Breaker cards |
+| 0:56–1:06 | 10 | Break | |
+| 1:06–1:12 | 6 | Lecture | Micro-lecture 2 — a role is a permission, not a name |
+| 1:12–1:48 | 36 | **Hands-on** | Exercise 2 — build the crew: implementer, reviewer, lead |
+| 1:48–1:54 | 6 | Lecture | Micro-lecture 3 — model choice is a budget decision |
+| 1:54–2:26 | 32 | **Hands-on** | Exercise 3 — model routing |
+| 2:26–2:31 | 5 | Break | |
+| 2:31–2:37 | 6 | Lecture | Micro-lecture 4 — parallelism is a dependency claim |
+| 2:37–3:14 | 37 | **Hands-on** | Exercise 4 — orchestrated run + matched comparison |
+| 3:14–3:22 | 8 | Buffer | Catch-up / overflow (not yet allocated) |
+| 3:22–3:28 | 6 | Lecture | Micro-lecture 5 — a green check is evidence, not a handoff |
+| 3:28–3:55 | 27 | **Hands-on** | Capstone — midnight launch |
+| 3:55–4:00 | 5 | Close | Exit ticket |
+
+**Arithmetic check:** hands-on = 25 + 20 + 36 + 32 + 37 + 27 = **177 min**. Lecture = 7 + 4 + 6 + 6 + 6 + 6 = 35. Breaks = 10 + 5 = 15. Buffer = 8. Close = 5. Total = 177 + 35 + 15 + 8 + 5 = **240 min**. ✔
 
 ## Pre-class setup (day before + morning of)
 
@@ -49,6 +75,14 @@ config differ across major versions.
 6. Do one full timed dry run of Ex4 in a scratch worktree, then re-run
    `bash sandbox/setup.sh` to restore. **Warn learners (and yourself): re-running
    setup.sh discards all worktree changes.**
+7. Check the Ex2 locks on the classroom image (no model needed): clone the
+   sandbox to a scratch folder (`git clone sandbox/panic-pantry /tmp/ex2-check`),
+   save the implementer, reviewer and lead files from
+   [solutions/ex2-agent-crew.md](solutions/ex2-agent-crew.md) and
+   [solutions/reviewer-agent.md](solutions/reviewer-agent.md) into its
+   `.opencode/agents/`, and run the three `opencode debug agent` commands from
+   the key there. Outputs must match the key and `git status --short` must
+   show only `?? .opencode/`.
 
 ## Room-running rules
 
@@ -79,30 +113,59 @@ config differ across major versions.
 - **Reset if needed:** worktree contaminated before Step 2 → `bash sandbox/setup.sh`
   rebuilds both worktrees (announce that it wipes them).
 
-### Exercise 1 — write the task cards (10 min: plan ≈1, first card ≈1, second card ≈8)
-- **Cue @ 2 min:** `plan.md` and `cards/csv_parser.md` saved, copied as is.
-- **Cue @ 8 min:** `cards/import_tests.md` drafted. Check the five changed
-  lines: In scope = `tests/test_promo_import.py` only; check =
-  `python3 -m unittest tests.test_promo_import -v`; Inputs exclude `importer.py`.
-- **Watch for:** "In scope" lists that overlap between the two cards — flag
-  immediately; this is the Ex4 collision seed. Also a check like "looks good" —
-  demand a command.
-- **Recovery:** anyone stuck past 8 min → hand them the model
-  `import_tests.md` from the answer key and move on. The debrief answers are
-  in the handout under collapsed sections.
+### Exercise 1 — split the job (20 min: keep/delegate ≈2, plan ≈2, Builder card ≈1, Breaker card ≈8, Stranger Test ≈7)
+- **In Micro-lecture 1:** run both Predicts aloud as a room ("all four start at
+  once: what goes wrong?" and "how many of the 8 planted bugs does the exam
+  catch?"). Take a show of hands *before* anyone opens an answer.
+- **Cue @ 4 min:** Step 1 marked; `workshop/plan.md` saved with both `___`
+  filled (breaker row = `tests/test_promo_import.py`).
+- **Cue @ 13 min:** `workshop/cards/breaker.md` has no `___` left and passes
+  the self-check. Everyone starts the Stranger Test now: **quit any OpenCode
+  still open in the single-agent worktree** and run `opencode` in
+  `sandbox/panic-pantry`. Otherwise the stranger can read the baseline
+  `importer.py`.
+- **Cue @ 20 min:** ask one pair to read a guess that was about the *rules*
+  (for example, header strictness). Check they put the answer on **both** cards
+  and in `plan.md`: no agent reads `plan.md`, so a fix there alone reaches
+  nobody. Expect many HIGH guesses (our one simulated run marked all five HIGH);
+  learners fix the top two and stop.
+- **Watch for:** a breaker row or TOUCH line that names `importer.py`; a
+  Breaker card that drops "Skip every test, don't fail" (that agent writes
+  tests that fail while `importer.py` is missing: the weak-card result in the
+  answer key); DONE lines like "looks good".
+- **Recovery:** stuck past 11 min → hand them the model `breaker.md` from the
+  answer key; they still run the Stranger Test on it. No model access → skip
+  Step 5 live and walk through Trace 4 in
+  [solutions/fallback-traces.md](solutions/fallback-traces.md). The debrief
+  answers are in the handout under collapsed sections.
+- **Backing the "4 of 8" claim:** if anyone asks, run
+  `python3 instructor/tools/breaker-mutants/check_tests.py sandbox/panic-pantry tests.test_importer_contract`
+  from the pack root (takes about a second).
 
-### Exercise 2 — agent crew (32 min)
-- **Cue @ 12 min:** reviewer.md exists and loads (no YAML errors).
-- **Cue @ 18 min:** everyone has run the denial test. The pass bar is a
-  **configuration** denial, visible in the UI — walk the room and eyeball it.
-- **Common failures:** file in the wrong directory (must be
-  `sandbox/panic-pantry/.opencode/agents/`, i.e., the project OpenCode was
-  launched from); missing required `description`; unquoted glob keys in the
-  bash map; deprecated `tools:` block fighting `permission`.
-- **Recovery:** learner hopelessly stuck at 20 min → give them
-  [solutions/reviewer-agent.md](solutions/reviewer-agent.md) to transcribe, and
-  have them do the denial test + delegation anyway; the observable boundary is
-  the point.
+### Exercise 2 — build the crew (36 min)
+Read the "What 1.18.33 actually does" table in
+[solutions/ex2-agent-crew.md](solutions/ex2-agent-crew.md) before class. Two
+things surprise people: `edit: deny` produces **no red denial** (the tools are
+removed), and an unquoted `*` key makes the agent load with **every permission
+allowed**.
+- **Cue @ 5 min:** implementer saved; `@` shows it.
+- **Cue @ 15 min:** reviewer.md loads. Walk the room for unquoted `*` keys.
+- **Cue @ 20 min:** everyone has both Step 3 `debug agent` outputs. The pass
+  bar is that output, not the chat reply. Anyone whose `store.py` now reads
+  `# hi`: `git checkout -- src/panic_pantry/store.py`, then quote the keys.
+- **Cue @ 33 min:** the lead lists only two helpers and its `debug agent`
+  task check is refused; everyone **Tab**s back to Build.
+- **Common failures:** file outside `sandbox/panic-pantry/.opencode/agents/`;
+  an unquoted `*` key (silently all-allowed); a tab in the indentation
+  (OpenCode refuses to start and names the file); allow listed before
+  `"*": deny` (the implementer reports no edit tool); deprecated `tools:`
+  block; lead missing `mode: primary` (not on Tab).
+- **"Always" clicks:** if anyone approved an edit prompt with "always", the
+  running instance now allows every edit for every agent. Have them restart
+  OpenCode before Step 3's live request.
+- **Recovery:** stuck at 20 min → hand out
+  [solutions/reviewer-agent.md](solutions/reviewer-agent.md) to transcribe and
+  have them run the Step 3 checks anyway; the observable lock is the point.
 
 ### Exercise 3 — model routing (32 min: A ≈14, B ≈12, record ≈6)
 - **Cue @ 5 min:** everyone has picked two configurations and written down the
@@ -120,7 +183,7 @@ config differ across major versions.
 - **Before start:** confirm every learner copied `.opencode/agents/` and cards
   into the orchestrated worktree and set the **same model as Ex0**.
 - **Cue @ launch:** contract confirmed frozen; ownership map read aloud once:
-  importer → `src/panic_pantry/importer.py`; tests → `tests/test_promo_import.py`;
+  importer → `src/panic_pantry/importer.py`; Breaker → `tests/test_promo_import.py`;
   primary → `workshop/integration-notes.md`.
 - **Hard stop @ 15:00** of the window. Then integration checks even if unfinished.
 - **Watch for:** agents editing `tests/test_importer_contract.py` (frozen — this
@@ -158,8 +221,9 @@ control/check to add. Collect them — they are your course feedback too.
 ## If the whole provider is down
 
 The orchestration labs need a working OpenCode + one model. If provider access
-dies mid-class: Ex1 proceeds fully offline (planning artifacts); Ex2 agent files
-can be written and syntax-checked offline (denial test deferred); Ex3 runs from
+dies mid-class: Ex1 Steps 1–4 are offline (Step 5 → Trace 4); Ex2 Steps 1–2
+and all three `opencode debug agent` lock checks run with no model (the live
+`@reviewer` request, Steps 4–5 and the lead's answer are deferred); Ex3 runs from
 recorded traces; Ex0/Ex4 comparison collapses to a walkthrough of the answer-key
 artifacts. Say plainly what is live and what is recorded — modeling honest
 evidence handling is itself course content.

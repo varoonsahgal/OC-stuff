@@ -16,9 +16,9 @@ is allowed and becomes `active`.**
 - [ ] Contract confirmed frozen (plan.md/ticket re-read) before first delegation.
 - [ ] Same model/effort as Ex0 set via `/models` before the window.
 - [ ] Delegations carried the full card text (fresh child context).
-- [ ] The tests-card child session was created by the **primary via the Task
+- [ ] The Breaker's child session was created by the **primary via the Task
       tool** (governed by `permission.task`) — the learner instructed
-      "Delegate the import_tests task card to the appropriate subagent"
+      "Delegate this task card to the appropriate subagent" + the breaker card
       rather than @-mentioning; verify in the session tree.
 - [ ] `.opencode/agents/implementer.md` carries an explicit `model:` line with
       a `/models` catalog ID (the learner's Ex3 routing choice — equal to the
@@ -26,12 +26,12 @@ is allowed and becomes `active`.**
       run record.
 - [ ] `git status` shows exactly: `src/panic_pantry/importer.py` (new),
       `tests/test_promo_import.py` (new), `workshop/integration-notes.md` (new),
-      plus copied `.opencode/agents/*` — nothing else. Any other change =
+      plus copied `.opencode/agents/*` and `workshop/cards/*` — nothing else. Any other change =
       boundary violation to disposition.
 - [ ] No two writers on one file (compare status output to the ownership map).
 - [ ] `python3 -m unittest discover -s tests -v` run by the learner post-merge;
       with a correct importer and valid new tests: **23+ tests** (23 from the
-      starter suite + however many your test author added), OK.
+      starter suite + however many your Breaker added), OK.
 - [ ] `@reviewer` findings collected; each fixed / accepted / deferred in
       `workshop/integration-notes.md`.
 - [ ] Scorecard includes integration/rework minutes and a modest interpretation.

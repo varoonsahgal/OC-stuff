@@ -8,11 +8,11 @@
 
 **Claim: when you run two agents in parallel, you are claiming their tasks don't depend on each other. Parallel-safe work needs a stable interface, independent outputs, and clear ownership.** If the claim is false, you'll pay it back in merge conflicts.
 
-The kitchen version: **three chefs, one cutting board.** Three agents editing `importer.py` isn't parallelism, it's a queue with extra steps and knife injuries. The importer feature *is* genuinely decomposable — but only after Exercise 1's gate: freeze `import_promotions(csv_path, service) -> ImportReport`, then the implementation, the contract tests, and the integration notes have independent outputs and disjoint files.
+The kitchen version: **three chefs, one cutting board.** Three agents editing `importer.py` isn't parallelism, it's a queue with extra steps and knife injuries. The importer feature *is* genuinely decomposable — but only after Exercise 1's gate: freeze `import_promotions(csv_path, service) -> ImportReport`, then the implementation, the Breaker's attack tests, and the integration notes have independent outputs and disjoint files.
 
 Three levels of protection — and they are not the same thing:
 
-- **Coordination** — a file-ownership list in each task card ("in scope / out of scope"). Guidance: agents usually honor it, nothing enforces it.
+- **Coordination** — the card's TOUCH line ("`tests/test_promo_import.py` only"). Guidance: agents usually honor it, nothing enforces it.
 - **Isolation** — Git worktrees and branches. Enforced by the filesystem: two runs that share no working files *cannot* contaminate each other, no matter how badly a prompt goes. Our two worktrees exist precisely so the baseline and orchestrated runs stay clean of each other.
 - **Control** — `permission` rules in agent config. Enforced by OpenCode: an agent with `edit: deny` cannot write, whatever it was asked.
 
@@ -26,15 +26,15 @@ flowchart TB
     W1 <-. "no shared working files —<br/>neither run can contaminate the other" .-> W2
 ```
 
-*Figure 6 — Worktree isolation: one starter commit, two working directories that cannot touch each other's files.*
+*Figure 4 — Worktree isolation: one starter commit, two working directories that cannot touch each other's files.*
 Text alternative: a single starter commit branches into two Git worktrees — single-agent for the Exercise 0 baseline and orchestrated for the Exercise 4 run — with an annotation that they share no working files, so neither run can contaminate the other.
 
 > 🔑 **Key takeaway:** A file list in a prompt is coordination; a permission rule is control.
 
 > 📘 **Concept — foreground vs. background delegation**
 >
-> - **Foreground:** the primary sends a packet, then *waits*. Nothing else happens in the parent session until the child reports back. It's like handing a ticket to one station and standing at the pass until the plate arrives.
-> - **Background:** the primary sends the packet and *keeps working*: it drafts notes, launches another child, answers you. Results arrive when they're ready. That's the pass calling three tickets at once while plating a fourth.
+> - **Foreground:** the primary sends a card, then *waits*. Nothing else happens in the parent session until the child reports back. It's like handing a ticket to one station and standing at the pass until the plate arrives.
+> - **Background:** the primary sends the card and *keeps working*: it drafts notes, launches another child, answers you. Results arrive when they're ready. That's the pass calling three tickets at once while plating a fourth.
 >
 > "**Keeping the primary free**" is the goal background delegation serves: the primary (and you) stay available for coordination and judgment instead of blocking on one worker.
 
@@ -58,7 +58,7 @@ python3 -m unittest discover -s tests -v     # ends OK (skipped=9)
 mkdir -p .opencode/agents workshop/cards
 ```
 
-Copy your crew and cards into this worktree. Your agent files and cards were never committed, so they're **untracked**, and untracked files exist only in the folder where you created them (see the [Git primer](README.md#one-time-setup-instructor-runs-this-before-class-you-verify)). This worktree has never seen them:
+Copy your crew and cards into this worktree. Your agent files and cards were never committed, so they're **untracked**, and untracked files exist only in the folder where you created them (see [Git in 90 seconds](appendices.md#appendix-f--git-in-90-seconds)). This worktree has never seen them:
 
 ```bash
 cp ../../panic-pantry/.opencode/agents/*.md .opencode/agents/ 2>/dev/null || true
@@ -79,11 +79,11 @@ If the first copy found nothing, you skipped Exercise 2 — build the crew there
 
 | Owner | Deliverable | Writable scope |
 |---|---|---|
-| `@implementer` | importer per card | `src/panic_pantry/importer.py` only |
-| test author: a subagent the **primary** chooses (Task tool) | tests per card | `tests/test_promo_import.py` only |
+| `@implementer` | importer, per the builder card | `src/panic_pantry/importer.py` only |
+| **Breaker**: a subagent the **primary** chooses (Task tool) | tests, per the breaker card | `tests/test_promo_import.py` only |
 | **You**, typing yourself or directing the primary agent | integration notes | `workshop/integration-notes.md` only |
 
-**Who will the primary pick as test author?** It reads each subagent's `description` and chooses. Your crew has a reviewer (can't edit) and an implementer (scoped to `importer.py`), so the likeliest pick is the built-in **general** subagent. That's fine, as long as the packet states the scope. If it picks `@implementer`, it has handed a test task to an agent whose standing instructions say "importer only." Stop and note it as a routing finding, then re-delegate with a clearer instruction.
+**Who will the primary pick as the Breaker?** It reads each subagent's `description` and chooses. Your crew has a reviewer (can't edit) and an implementer (scoped to `importer.py`), so the likeliest pick is the built-in **general** subagent. That's fine, as long as the message it writes keeps your TOUCH line. If it picks `@implementer`, it has handed a test task to an agent whose standing instructions say "importer only." Stop and note it as a routing finding, then re-delegate with a clearer instruction.
 
 3. Set the implementer's model explicitly: add a `model:` line to `.opencode/agents/implementer.md` frontmatter with the exact catalog ID from `/models` — the model your Exercise 3 routing decision assigns to contract-backed implementation work. For the matched comparison this must be the same model/effort as your Exercise 0 run: the model ID *and* the variant you recorded on the Exercise 0 scorecard. Set the session's variant with `ctrl+t` to match. Note the ID and variant in your run record. If you can't confirm a child ran with that exact variant, say so in the record.
 
@@ -92,22 +92,18 @@ If the first copy found nothing, you skipped Exercise 2 — build the crew there
 Delegate using your Exercise 1 cards — **paste the full card into each delegation** (fresh context!). For example:
 
 ```text
-@implementer Execute this task card exactly. [paste workshop/cards/csv_parser.md,
-updated with the full contract from tickets/TICKET-001.md]
-Return: changed paths, the exact test command you ran, pass/fail, assumptions,
-open questions. Touch only src/panic_pantry/importer.py.
+@implementer Do exactly what this card says.
+[paste workshop/cards/builder.md, full text]
 ```
 
-For the tests card, do **not** @-mention anyone. Instead, instruct the primary agent to route it:
+For the breaker card, do **not** @-mention anyone. Instead, instruct the primary agent to route it:
 
 ```text
-Delegate the import_tests task card to the appropriate subagent.
-[paste workshop/cards/import_tests.md, full text]
-Scope: tests/test_promo_import.py only; tests/test_importer_contract.py is frozen.
-Return: changed paths, commands run, pass/fail.
+Delegate this task card to the appropriate subagent.
+[paste workshop/cards/breaker.md, full text]
 ```
 
-This goes through the **Task tool** (governed by `permission.task`): the primary picks the subagent and spawns the child session itself. Afterwards, walk the session tree (`<Leader>+Down`, Left/Right) and open both children. The implementer's first message is *your* text, word for word. The test author's first message is a packet *the primary wrote*, so check whether it kept your scope line and the contract. The new tests express the same contract in the test author's own words. Between delegations, you draft `workshop/integration-notes.md` yourself or have the primary draft it: what arrived, what was checked, what's still open. Delegations run in the foreground — sequence them; independence of deliverables is what makes the order not matter.
+This goes through the **Task tool** (governed by `permission.task`): the primary picks the subagent and spawns the child session itself. Afterwards, walk the session tree (`<Leader>+Down`, Left/Right) and open both children. The implementer's first message is *your* text, word for word. The Breaker's first message is one *the primary wrote*, so check whether it kept your TOUCH and RULES lines. The Breaker's tests attack gaps the frozen contract tests miss; any that fail after integration are findings, not tests to weaken. Between delegations, you draft `workshop/integration-notes.md` yourself or have the primary draft it: what arrived, what was checked, what's still open. Delegations run in the foreground — sequence them; independence of deliverables is what makes the order not matter.
 
 > 🔑 **Key takeaway:** Three chefs, one cutting board is not parallelism — disjoint files are what make the order not matter.
 
@@ -115,14 +111,14 @@ This goes through the **Task tool** (governed by `permission.task`): the primary
 
 ```bash
 git status                                   # every changed file maps to a card?
-git diff                                     # read it — you own this merge
+git add -A && git diff starter               # stage so new files count, then compare with the starting line
 python3 -m unittest discover -s tests -v
 ```
 
 Then ask your reviewer:
 
 ```text
-@reviewer Review the current diff of this worktree against tickets/TICKET-001.md.
+@reviewer Review everything that changed since the starter tag (git diff starter) against tickets/TICKET-001.md.
 Policy reminder: discounts above 20% require approval; exactly 20% is active.
 Run your checklist: approval bypass, duplicate handling, row reporting, missing tests.
 Return findings by severity with file:line citations.
@@ -137,14 +133,14 @@ Elapsed time, contract tests passing, whole suite, policy handled, interventions
 **Acceptance checks:**
 - [ ] Contract confirmed frozen before any delegation started.
 - [ ] Every changed file maps to exactly one task card; no two writers shared a file (`git status` is the referee).
-- [ ] The child session for the test task was created by the primary (Task tool), not by an @-mention — check the session tree.
+- [ ] The Breaker's child session was created by the primary (Task tool), not by an @-mention — check the session tree.
 - [ ] Full suite run after integration; output captured.
 - [ ] Reviewer findings collected and each one dispositioned: **fix** (changed now), **accept** (you judge it's not a problem, with the reason written down), or **defer** (real, not tonight: with a reason and a named owner).
 - [ ] Comparison scorecard includes integration/rework time and interprets modestly — one classroom run is a demonstration, not a benchmark.
 
 **Hints (use in order):**
 1. Child result off-contract? Don't patch it silently in the parent — send *one* targeted repair delegation citing the exact acceptance check that failed.
-2. Tests card stalls? The test author needs only the contract + `fixtures/promos_messy.expected.md` — it never needs to read the importer's code. Trim its context.
+2. Breaker stalls? Check its READ line: the ticket, the fixtures, and the shop code its tests call (`promotions.py`, `store.py`). It must never open `importer.py`.
 3. Timebox expiring mid-delegation? Stop anyway. "Unfinished at the same limit" is valid comparison data — that's the point of matched conditions.
 
 **Troubleshooting:**
