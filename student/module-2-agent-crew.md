@@ -90,7 +90,7 @@ flowchart LR
     P["Permissions:<br/>edit: deny"] -.enforced on.- C
 ```
 
-*Figure 3 — The card is everything the child knows. The permissions are enforced no matter what it's told.*
+*Figure 2 — The card is everything the child knows. The permissions are enforced no matter what it's told.*
 Text alternative: you send a card to the reviewer's child session, which starts empty. It sends back a short report. Its permissions (edit denied) are enforced on it regardless.
 
 ### The card is the message

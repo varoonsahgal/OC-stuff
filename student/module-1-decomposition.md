@@ -89,7 +89,7 @@ flowchart LR
     K --> M
 ```
 
-*Figure 2 — Freeze first. Builder and Breaker work alone, in either order. Check last.*
+*Figure 1 — Freeze first. Builder and Breaker work alone, in either order. Check last.*
 Text alternative: you freeze the contract; Builder and Breaker work independently; you combine both files and run every test.
 
 ---

@@ -25,7 +25,7 @@ flowchart LR
     R4 --> H{"Receipt 5:<br/>human decision —<br/>GO / NO-GO"}
 ```
 
-*Figure 6 — Integration receipts: an agent's "done" passes four evidence receipts before the fifth, a human GO/NO-GO decision.*
+*Figure 5 — Integration receipts: an agent's "done" passes four evidence receipts before the fifth, a human GO/NO-GO decision.*
 Text alternative: an agent's "done, all tests pass" claim flows left to right through four evidence receipts — child summary with changed paths, tests run by the human with captured output, the diff read directly, and independent reviewer findings — ending at receipt five, the human GO/NO-GO decision.
 
 Why five receipts and not just "the tests pass"? Safety engineers call it the **Swiss cheese model**:

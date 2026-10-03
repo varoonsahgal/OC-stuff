@@ -26,7 +26,7 @@ flowchart TB
     W1 <-. "no shared working files —<br/>neither run can contaminate the other" .-> W2
 ```
 
-*Figure 5 — Worktree isolation: one starter commit, two working directories that cannot touch each other's files.*
+*Figure 4 — Worktree isolation: one starter commit, two working directories that cannot touch each other's files.*
 Text alternative: a single starter commit branches into two Git worktrees — single-agent for the Exercise 0 baseline and orchestrated for the Exercise 4 run — with an annotation that they share no working files, so neither run can contaminate the other.
 
 > 🔑 **Key takeaway:** A file list in a prompt is coordination; a permission rule is control.
@@ -58,7 +58,7 @@ python3 -m unittest discover -s tests -v     # ends OK (skipped=9)
 mkdir -p .opencode/agents workshop/cards
 ```
 
-Copy your crew and cards into this worktree. Your agent files and cards were never committed, so they're **untracked**, and untracked files exist only in the folder where you created them (see the [Git primer](README.md#one-time-setup-instructor-runs-this-before-class-you-verify)). This worktree has never seen them:
+Copy your crew and cards into this worktree. Your agent files and cards were never committed, so they're **untracked**, and untracked files exist only in the folder where you created them (see [Git in 90 seconds](appendices.md#appendix-f--git-in-90-seconds)). This worktree has never seen them:
 
 ```bash
 cp ../../panic-pantry/.opencode/agents/*.md .opencode/agents/ 2>/dev/null || true

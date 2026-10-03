@@ -27,6 +27,31 @@ config differ across major versions.
 | [solutions/importer_solution.py](solutions/importer_solution.py) | Known-good importer; drop into `src/panic_pantry/importer.py` to make the full suite pass |
 | [solutions/fallback-traces.md](solutions/fallback-traces.md) | Recorded transcripts: Ex0 "bad plan," Ex3 model comparison, background-delegation demo; simulated Ex1 Stranger Test (Trace 4) |
 
+## Schedule (240 minutes total, 173 hands-on)
+
+The student README no longer carries the schedule; each module states its own exercise time. This table is the room's clock.
+
+| Time | Min | Type | Segment |
+|---|---:|---|---|
+| 0:00–0:07 | 7 | Lecture | Opening — more agents ≠ more progress |
+| 0:07–0:32 | 25 | **Hands-on** | Exercise 0 — warm-up + single-agent baseline |
+| 0:32–0:36 | 4 | Lecture | Micro-lecture 1 — split by file, not by function |
+| 0:36–0:56 | 20 | **Hands-on** | Exercise 1 — split the job: plan + Builder and Breaker cards |
+| 0:56–1:06 | 10 | Break | |
+| 1:06–1:12 | 6 | Lecture | Micro-lecture 2 — a role is a boundary |
+| 1:12–1:44 | 32 | **Hands-on** | Exercise 2 — build a small agent crew |
+| 1:44–1:50 | 6 | Lecture | Micro-lecture 3 — model choice is a budget decision |
+| 1:50–2:22 | 32 | **Hands-on** | Exercise 3 — model routing |
+| 2:22–2:27 | 5 | Break | |
+| 2:27–2:33 | 6 | Lecture | Micro-lecture 4 — parallelism is a dependency claim |
+| 2:33–3:10 | 37 | **Hands-on** | Exercise 4 — orchestrated run + matched comparison |
+| 3:10–3:22 | 12 | Buffer | Catch-up / overflow (not yet allocated) |
+| 3:22–3:28 | 6 | Lecture | Micro-lecture 5 — a green check is evidence, not a handoff |
+| 3:28–3:55 | 27 | **Hands-on** | Capstone — midnight launch |
+| 3:55–4:00 | 5 | Close | Exit ticket |
+
+**Arithmetic check:** hands-on = 25 + 20 + 32 + 32 + 37 + 27 = **173 min**. Lecture = 7 + 4 + 6 + 6 + 6 + 6 = 35. Breaks = 10 + 5 = 15. Buffer = 12. Close = 5. Total = 173 + 35 + 15 + 12 + 5 = **240 min**. ✔
+
 ## Pre-class setup (day before + morning of)
 
 1. From the pack root: `bash sandbox/setup.sh`. Confirm output shows tag
